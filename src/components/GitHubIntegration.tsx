@@ -31,10 +31,14 @@ export function GitHubIntegration() {
   };
 
   const handleConnectToGithub = async () => {
+    console.log("GitHub connect button clicked");
     setIsConnecting(true);
     try {
+      console.log("Starting GitHub device flow...");
       await IpcClient.getInstance().startGithubDeviceFlow(null);
+      console.log("GitHub device flow started successfully");
     } catch (err: any) {
+      console.error("GitHub connection error:", err);
       showError(
         err.message || "Failed to start GitHub connection",
       );

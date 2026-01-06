@@ -214,7 +214,8 @@ function handleStartGithubFlow(
   event: IpcMainInvokeEvent,
   args: { appId: number | null },
 ) {
-  logger.debug(`Received github:start-flow for appId: ${args.appId}`);
+  logger.info(`Received github:start-flow for appId: ${args.appId}`);
+  console.log(`GitHub flow started for appId: ${args.appId}`);
 
   // If a flow is already in progress, maybe cancel it or send an error
   if (currentFlowState && currentFlowState.isPolling) {
