@@ -12,3 +12,7 @@ export const MadeWithCodiner = () => {
     </div>
   );
 };
+
+// Legacy alias for backwards compatibility - DO NOT USE
+export const MadeWithDyad = MadeWithCodiner;
+
