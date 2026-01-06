@@ -53,8 +53,10 @@ describe("readSettings", () => {
       );
       expect(scrubSettings(result)).toMatchInlineSnapshot(`
         {
+          "customSystemPrompt": "",
           "enableAutoFixProblems": false,
           "enableAutoUpdate": true,
+          "enableHaptics": true,
           "enableProLazyEditsMode": true,
           "enableProSmartFilesContextMode": true,
           "experiments": {},
@@ -71,6 +73,7 @@ describe("readSettings", () => {
           "selectedTemplateId": "react",
           "telemetryConsent": "unset",
           "telemetryUserId": "[scrubbed]",
+          "userName": "Architect",
         }
       `);
     });
@@ -301,8 +304,10 @@ describe("readSettings", () => {
 
       expect(scrubSettings(result)).toMatchInlineSnapshot(`
         {
+          "customSystemPrompt": "",
           "enableAutoFixProblems": false,
           "enableAutoUpdate": true,
+          "enableHaptics": true,
           "enableProLazyEditsMode": true,
           "enableProSmartFilesContextMode": true,
           "experiments": {},
@@ -319,6 +324,7 @@ describe("readSettings", () => {
           "selectedTemplateId": "react",
           "telemetryConsent": "unset",
           "telemetryUserId": "[scrubbed]",
+          "userName": "Architect",
         }
       `);
     });

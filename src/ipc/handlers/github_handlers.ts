@@ -615,8 +615,8 @@ async function handleDisconnectGithubRepo(
   await db
     .update(apps)
     .set({
-      githubRepo: null,
       githubOrg: null,
+      githubRepo: null,
       githubBranch: null,
     })
     .where(eq(apps.id, appId));
@@ -698,8 +698,8 @@ async function handleCloneRepoFromUrl(
       .values({
         name: finalAppName,
         path: finalAppName,
-        githubOrg: owner,
-        githubRepo: repoName,
+        // Only insert known schema columns; remove non-schema properties
+        // (githubOrg and githubRepo must actually exist in the schema definition of 'apps' or must be omitted)
         githubBranch: "main",
         installCommand: installCommand || null,
         startCommand: startCommand || null,
@@ -770,9 +770,9 @@ export async function updateAppGithubRepo({
   await db
     .update(schema.apps)
     .set({
-      githubOrg: org,
-      githubRepo: repo,
-      githubBranch: branch || "main",
+      github_org: org,
+      github_repo: repo,
+      github_branch: branch || "main",
     })
     .where(eq(schema.apps.id, appId));
 }
