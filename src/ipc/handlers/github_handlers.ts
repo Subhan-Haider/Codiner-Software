@@ -18,7 +18,7 @@ const logger = log.scope("github_handlers");
 
 // --- GitHub Device Flow Constants ---
 // TODO: Fetch this securely, e.g., from environment variables or a config file
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23li7iYZp0kbD0EiIe";
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23liWV2HdC0RBLecWx";
 
 // Use test server URLs when in test mode
 
@@ -216,10 +216,12 @@ function handleStartGithubFlow(
 ) {
   logger.info(`Received github:start-flow for appId: ${args.appId}`);
   console.log(`GitHub flow started for appId: ${args.appId}`);
+  console.log(`Using GitHub client ID: ${GITHUB_CLIENT_ID}`);
 
   // If a flow is already in progress, maybe cancel it or send an error
   if (currentFlowState && currentFlowState.isPolling) {
     logger.warn("Another GitHub flow is already in progress.");
+    console.log("Another GitHub flow is already in progress");
     event.sender.send("github:flow-error", {
       error: "Another connection process is already active.",
     });
