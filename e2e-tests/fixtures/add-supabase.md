@@ -1,2 +1,2 @@
 Adding supabase...
-<dyad-add-integration provider="supabase"></dyad-add-integration>
+<codiner-add-integration provider="supabase"></codiner-add-integration>

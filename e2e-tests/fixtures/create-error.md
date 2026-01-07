@@ -1,9 +1,9 @@
 I will intentionally add an error
 
-<dyad-write path="src/pages/Index.tsx" description="intentionally add an error">
+<codiner-write path="src/pages/Index.tsx" description="intentionally add an error">
 // Update this page (the content is just a fallback if you fail to update the page)
 
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { MadeWithCodiner } from "@/components/made-with-codiner";
 
 const Index = () => {
 throw new Error("Line 6 error");
@@ -16,10 +16,10 @@ return (
 Start building your amazing project here!
 </p>
 </div>
-<MadeWithDyad />
+<MadeWithCodiner />
 </div>
 );
 };
 
 export default Index;
-</dyad-write>
+</codiner-write>

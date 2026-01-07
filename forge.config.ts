@@ -12,7 +12,7 @@ import path from "path";
 
 // Path to signtool.exe bundled with electron-winstaller
 // On GitHub Actions, this is the full path:
-// D:\a\dyad\dyad\node_modules\electron-winstaller\vendor\signtool.exe
+// D:\a\codiner\codiner\node_modules\electron-winstaller\vendor\signtool.exe
 const SIGNTOOL_PATH = path.join(
   __dirname,
   "node_modules",
@@ -95,8 +95,8 @@ const config: ForgeConfig = {
   packagerConfig: {
     protocols: [
       {
-        name: "Dyad",
-        schemes: ["dyad"],
+        name: "Codiner",
+        schemes: ["codiner"],
       },
     ],
     icon: "./assets/icon/logo",
@@ -150,7 +150,7 @@ const config: ForgeConfig = {
     new MakerRpm({}),
     new MakerDeb({
       options: {
-        mimeType: ["x-scheme-handler/dyad"],
+        mimeType: ["x-scheme-handler/codiner"],
       },
     }),
   ],
@@ -159,8 +159,8 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "dyad-sh",
-          name: "dyad",
+          owner: "Subhan-Haider",
+          name: "Codiner_Windows",
         },
         draft: true,
         force: true,

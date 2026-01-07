@@ -1,10 +1,10 @@
 Deleting a file
 
-<dyad-delete path="to-be-deleted.txt"></dyad-delete>
-<dyad-write path="new-file.js" description="new file">
+<codiner-delete path="to-be-deleted.txt"></codiner-delete>
+<codiner-write path="new-file.js" description="new file">
 new-file
 end of new-file
-</dyad-write>
-<dyad-write path="to-be-edited.txt" description="editing file">
+</codiner-write>
+<codiner-write path="to-be-edited.txt" description="editing file">
 after-edit
-</dyad-write>
+</codiner-write>

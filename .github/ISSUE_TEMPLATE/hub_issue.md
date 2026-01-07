@@ -1,6 +1,6 @@
 ---
-name: Dyad Hub Issue
-about: Found an issue with dyad.sh/hub?
+name: Codiner Hub Issue
+about: Found an issue with codiner.online/hub?
 title: "[hub]"
 labels: "hub"
 assignees: ""

@@ -1,17 +1,17 @@
 # Contributing
 
-Before opening a pull request, please open an issue and discuss whether the change makes sense in Dyad. Ensuring a cohesive user experience sometimes means we can't include every possible feature or we need to consider the long-term design of how we want to support a feature area.
+Before opening a pull request, please open an issue and discuss whether the change makes sense in Codiner. Ensuring a cohesive user experience sometimes means we can't include every possible feature or we need to consider the long-term design of how we want to support a feature area.
 
-- For a high-level overview of how Dyad works, please see the [Architecture Guide](./docs/architecture.md). Understanding the architecture will help ensure your contributions align with the overall design of the project.
+- For a high-level overview of how Codiner works, please see the [Architecture Guide](./docs/architecture.md). Understanding the architecture will help ensure your contributions align with the overall design of the project.
 - For a detailed architecture on how the new local agent mode (aka Agent v2) works, please read the [Agent Architecture Guide](./docs/agent_architecture.md)
 
 ## More than code contributions
 
-Something that I really appreciate are all the non-code contributions, such as reporting bugs, writing feature requests and participating on [Dyad's sub-reddit](https://www.reddit.com/r/dyadbuilders).
+Something that I really appreciate are all the non-code contributions, such as reporting bugs, writing feature requests and participating on [Codiner's sub-reddit](https://www.reddit.com/r/codinerbuilders).
 
 ## Development
 
-Dyad is an Electron app.
+Codiner is an Electron app.
 
 **Install dependencies:**
 
@@ -96,7 +96,7 @@ npm run e2e e2e-tests/context_manage.spec.ts -- --update-snapshots
 
 ## Code reviews
 
-Dyad relies on several AI code reviewers to catch issues. If a comment is irrelevant please leave a brief comment and mark the comment as resolved.
+Codiner relies on several AI code reviewers to catch issues. If a comment is irrelevant please leave a brief comment and mark the comment as resolved.
 
 You can also do local code reviews with the following tools:
 

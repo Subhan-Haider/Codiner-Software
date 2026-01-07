@@ -1,5 +1,5 @@
 (() => {
-  const OVERLAY_CLASS = "__dyad_overlay__";
+  const OVERLAY_CLASS = "__codiner_overlay__";
   let overlays = [];
   let hoverOverlay = null;
   let hoverLabel = null;
@@ -109,8 +109,8 @@
     });
     css(hoverLabel, { background: "#7f22fe" });
     while (hoverLabel.firstChild) hoverLabel.removeChild(hoverLabel.firstChild);
-    const name = el.dataset.dyadName || "<unknown>";
-    const file = (el.dataset.dyadId || "").split(":")[0];
+    const name = el.dataset.codinerName || "<unknown>";
+    const file = (el.dataset.codinerId || "").split(":")[0];
     const nameEl = document.createElement("div");
     nameEl.textContent = name;
     hoverLabel.appendChild(nameEl);
@@ -163,7 +163,7 @@
         const rect = highlightedItem.el.getBoundingClientRect();
         window.parent.postMessage(
           {
-            type: "dyad-component-coordinates-updated",
+            type: "codiner-component-coordinates-updated",
             coordinates: {
               top: rect.top,
               left: rect.left,
@@ -195,7 +195,7 @@
     // Remove all overlays with the same componentId
     const indicesToRemove = [];
     overlays.forEach((item, index) => {
-      if (item.el.dataset.dyadId === componentId) {
+      if (item.el.dataset.codinerId === componentId) {
         indicesToRemove.push(index);
       }
     });
@@ -209,7 +209,7 @@
 
     if (
       highlightedElement &&
-      highlightedElement.dataset.dyadId === componentId
+      highlightedElement.dataset.codinerId === componentId
     ) {
       highlightedElement = null;
     }
@@ -294,8 +294,8 @@
     label.appendChild(editLine);
 
     // Add component name and file
-    const name = el.dataset.dyadName || "<unknown>";
-    const file = (el.dataset.dyadId || "").split(":")[0];
+    const name = el.dataset.codinerName || "<unknown>";
+    const file = (el.dataset.codinerId || "").split(":")[0];
     const nameEl = document.createElement("div");
     nameEl.textContent = name;
     label.appendChild(nameEl);
@@ -327,7 +327,7 @@
     }
 
     let el = e.target;
-    while (el && !el.dataset.dyadId) el = el.parentElement;
+    while (el && !el.dataset.codinerId) el = el.parentElement;
 
     const hoveredItem = overlays.find((item) => item.el === el);
 
@@ -397,7 +397,7 @@
     e.preventDefault();
     e.stopPropagation();
 
-    const clickedComponentId = state.element.dataset.dyadId;
+    const clickedComponentId = state.element.dataset.codinerId;
     const selectedItem = overlays.find((item) => item.el === state.element);
 
     // If clicking on the currently highlighted component, deselect it
@@ -413,7 +413,7 @@
       // Only post message once for all elements with the same ID
       window.parent.postMessage(
         {
-          type: "dyad-component-deselected",
+          type: "codiner-component-deselected",
           componentId: clickedComponentId,
         },
         "*",
@@ -449,18 +449,18 @@
     }
 
     // Assign a unique runtime ID to this element if it doesn't have one
-    if (!state.element.dataset.dyadRuntimeId) {
-      state.element.dataset.dyadRuntimeId = `dyad-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    if (!state.element.dataset.codinerRuntimeId) {
+      state.element.dataset.codinerRuntimeId = `codiner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 
     const rect = state.element.getBoundingClientRect();
     window.parent.postMessage(
       {
-        type: "dyad-component-selected",
+        type: "codiner-component-selected",
         component: {
           id: clickedComponentId,
-          name: state.element.dataset.dyadName,
-          runtimeId: state.element.dataset.dyadRuntimeId,
+          name: state.element.dataset.codinerName,
+          runtimeId: state.element.dataset.codinerRuntimeId,
         },
         coordinates: {
           top: rect.top,
@@ -491,7 +491,7 @@
       e.preventDefault();
       window.parent.postMessage(
         {
-          type: "dyad-select-component-shortcut",
+          type: "codiner-select-component-shortcut",
         },
         "*",
       );
@@ -526,20 +526,20 @@
   /* ---------- message bridge -------------------------------------------- */
   window.addEventListener("message", (e) => {
     if (e.source !== window.parent) return;
-    if (e.data.type === "dyad-pro-mode") {
+    if (e.data.type === "codiner-pro-mode") {
       isProMode = e.data.enabled;
     }
-    if (e.data.type === "activate-dyad-component-selector") activate();
-    if (e.data.type === "deactivate-dyad-component-selector") deactivate();
-    if (e.data.type === "activate-dyad-visual-editing") {
+    if (e.data.type === "activate-codiner-component-selector") activate();
+    if (e.data.type === "deactivate-codiner-component-selector") deactivate();
+    if (e.data.type === "activate-codiner-visual-editing") {
       activate();
     }
-    if (e.data.type === "deactivate-dyad-visual-editing") {
+    if (e.data.type === "deactivate-codiner-visual-editing") {
       deactivate();
       clearOverlays();
     }
-    if (e.data.type === "clear-dyad-component-overlays") clearOverlays();
-    if (e.data.type === "update-dyad-overlay-positions") {
+    if (e.data.type === "clear-codiner-component-overlays") clearOverlays();
+    if (e.data.type === "update-codiner-overlay-positions") {
       updateAllOverlayPositions();
     }
     if (e.data.type === "update-component-coordinates") {
@@ -547,8 +547,8 @@
       componentCoordinates = e.data.coordinates;
     }
     if (
-      e.data.type === "remove-dyad-component-overlay" ||
-      e.data.type === "deselect-dyad-component"
+      e.data.type === "remove-codiner-component-overlay" ||
+      e.data.type === "deselect-codiner-component"
     ) {
       if (e.data.componentId) {
         removeOverlayById(e.data.componentId);
@@ -571,22 +571,22 @@
   function initializeComponentSelector() {
     if (!document.body) {
       console.error(
-        "Dyad component selector initialization failed: document.body not found.",
+        "Codiner component selector initialization failed: document.body not found.",
       );
       return;
     }
     setTimeout(() => {
-      if (document.body.querySelector("[data-dyad-id]")) {
+      if (document.body.querySelector("[data-codiner-id]")) {
         window.parent.postMessage(
           {
-            type: "dyad-component-selector-initialized",
+            type: "codiner-component-selector-initialized",
           },
           "*",
         );
-        console.debug("Dyad component selector initialized");
+        console.debug("Codiner component selector initialized");
       } else {
         console.warn(
-          "Dyad component selector not initialized because no DOM elements were tagged",
+          "Codiner component selector not initialized because no DOM elements were tagged",
         );
       }
     }, 0);

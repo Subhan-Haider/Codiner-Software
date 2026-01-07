@@ -1,9 +1,9 @@
 Tests delete-rename-write order
-<dyad-delete path="src/main.tsx">
-</dyad-delete>
-<dyad-rename from="src/App.tsx" to="src/main.tsx">
-</dyad-rename>
-<dyad-write path="src/main.tsx" description="final main.tsx file.">
+<codiner-delete path="src/main.tsx">
+</codiner-delete>
+<codiner-rename from="src/App.tsx" to="src/main.tsx">
+</codiner-rename>
+<codiner-write path="src/main.tsx" description="final main.tsx file.">
 finalMainTsxFileWithError();
-</dyad-write>
+</codiner-write>
 EOM

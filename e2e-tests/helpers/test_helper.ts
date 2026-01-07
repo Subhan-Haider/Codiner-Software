@@ -258,7 +258,7 @@ export class PageObject {
     await this.selectTestModel();
   }
 
-  async setUpDyadPro({
+  async setUpCodinerPro({
     autoApprove = false,
     localAgent = false,
   }: { autoApprove?: boolean; localAgent?: boolean } = {}) {
@@ -270,7 +270,7 @@ export class PageObject {
     if (localAgent) {
       await this.toggleLocalAgentMode();
     }
-    await this.setUpDyadProvider();
+    await this.setUpCodinerProvider();
     await this.goToAppsTab();
   }
 
@@ -323,16 +323,16 @@ export class PageObject {
     );
   }
 
-  async setUpDyadProvider() {
+  async setUpCodinerProvider() {
     await this.page
       .locator("div")
-      .filter({ hasText: /^DyadNeeds Setup$/ })
+      .filter({ hasText: /^CodinerNeeds Setup$/ })
       .nth(1)
       .click();
-    await this.page.getByRole("textbox", { name: "Set Dyad API Key" }).click();
+    await this.page.getByRole("textbox", { name: "Set Codiner API Key" }).click();
     await this.page
-      .getByRole("textbox", { name: "Set Dyad API Key" })
-      .fill("testdyadkey");
+      .getByRole("textbox", { name: "Set Codiner API Key" })
+      .fill("testcodinerkey");
     await this.page.getByRole("button", { name: "Save Key" }).click();
   }
 
@@ -457,7 +457,7 @@ export class PageObject {
     timeout,
   }: { replaceDumpPath?: boolean; timeout?: number } = {}) {
     if (replaceDumpPath) {
-      // Update page so that "[[dyad-dump-path=*]]" is replaced with a placeholder path
+      // Update page so that "[[codiner-dump-path=*]]" is replaced with a placeholder path
       // which is stable across runs.
       await this.page.evaluate(() => {
         const messagesList = document.querySelector(
@@ -467,8 +467,8 @@ export class PageObject {
           throw new Error("Messages list not found");
         }
         messagesList.innerHTML = messagesList.innerHTML.replace(
-          /\[\[dyad-dump-path=([^\]]+)\]\]/g,
-          "[[dyad-dump-path=*]]",
+          /\[\[codiner-dump-path=([^\]]+)\]\]/g,
+          "[[codiner-dump-path=*]]",
         );
       });
     }
@@ -687,7 +687,7 @@ export class PageObject {
 
     // Find ALL dump paths using global regex
     const dumpPathMatches = messagesListText?.match(
-      /\[\[dyad-dump-path=([^\]]+)\]\]/g,
+      /\[\[codiner-dump-path=([^\]]+)\]\]/g,
     );
 
     if (!dumpPathMatches || dumpPathMatches.length === 0) {
@@ -697,7 +697,7 @@ export class PageObject {
     // Extract the actual paths from the matches
     const dumpPaths = dumpPathMatches
       .map((match) => {
-        const pathMatch = match.match(/\[\[dyad-dump-path=([^\]]+)\]\]/);
+        const pathMatch = match.match(/\[\[codiner-dump-path=([^\]]+)\]\]/);
         return pathMatch ? pathMatch[1] : null;
       })
       .filter(Boolean);
@@ -722,7 +722,7 @@ export class PageObject {
     // Read the JSON file
     const dumpContent: string = (
       fs.readFileSync(dumpFilePath, "utf-8") as any
-    ).replaceAll(/\[\[dyad-dump-path=([^\]]+)\]\]/g, "[[dyad-dump-path=*]]");
+    ).replaceAll(/\[\[codiner-dump-path=([^\]]+)\]\]/g, "[[codiner-dump-path=*]]");
     // Perform snapshot comparison
     const parsedDump = JSON.parse(dumpContent);
     if (type === "request") {
@@ -778,7 +778,7 @@ export class PageObject {
 
   getChatInput() {
     return this.page.locator(
-      '[data-lexical-editor="true"][aria-placeholder^="Ask Dyad to build"]',
+      '[data-lexical-editor="true"][aria-placeholder^="Ask Codiner to build"]',
     );
   }
 
@@ -850,7 +850,7 @@ export class PageObject {
       await this.toggleAutoApprove();
     }
     // Azure should already be configured via environment variables
-    // so we don't need additional setup steps like setUpDyadProvider
+    // so we don't need additional setup steps like setUpCodinerProvider
     await this.goToAppsTab();
   }
 
@@ -948,7 +948,7 @@ export class PageObject {
   }
 
   getAppPath({ appName }: { appName: string }) {
-    return path.join(this.userDataDir, "dyad-apps", appName);
+    return path.join(this.userDataDir, "codiner-apps", appName);
   }
 
   async clickAppListItem({ appName }: { appName: string }) {
@@ -1192,7 +1192,7 @@ export const test = base.extend<{
       const page = await electronApp.firstWindow();
 
       const po = new PageObject(electronApp, page, {
-        userDataDir: (electronApp as any).$dyadUserDataDir,
+        userDataDir: (electronApp as any).$codinerUserDataDir,
       });
       await use(po);
     },
@@ -1227,15 +1227,15 @@ export const test = base.extend<{
       process.env.OLLAMA_HOST = "http://localhost:3500/ollama";
       process.env.LM_STUDIO_BASE_URL_FOR_TESTING =
         "http://localhost:3500/lmstudio";
-      process.env.DYAD_ENGINE_URL = "http://localhost:3500/engine/v1";
-      process.env.DYAD_GATEWAY_URL = "http://localhost:3500/gateway/v1";
+      process.env.CODINER_ENGINE_URL = "http://localhost:3500/engine/v1";
+      process.env.CODINER_GATEWAY_URL = "http://localhost:3500/gateway/v1";
       process.env.E2E_TEST_BUILD = "true";
       if (!electronConfig.showSetupScreen) {
         // This is just a hack to avoid the AI setup screen.
         process.env.OPENAI_API_KEY = "sk-test";
       }
       const baseTmpDir = os.tmpdir();
-      const userDataDir = path.join(baseTmpDir, `dyad-e2e-tests-${Date.now()}`);
+      const userDataDir = path.join(baseTmpDir, `codiner-e2e-tests-${Date.now()}`);
       if (electronConfig.preLaunchHook) {
         await electronConfig.preLaunchHook({ userDataDir });
       }
@@ -1252,7 +1252,7 @@ export const test = base.extend<{
         //   dir: "test-results",
         // },
       });
-      (electronApp as any).$dyadUserDataDir = userDataDir;
+      (electronApp as any).$codinerUserDataDir = userDataDir;
 
       console.log("electronApp launched!");
       if (showDebugLogs) {
@@ -1290,14 +1290,14 @@ export const test = base.extend<{
       // Windows' strict resource locking (e.g. file locking).
       if (os.platform() === "win32") {
         try {
-          console.log("[cleanup:start] Killing dyad.exe");
+          console.log("[cleanup:start] Killing codiner.exe");
           console.time("taskkill");
-          execSync("taskkill /f /t /im dyad.exe");
+          execSync("taskkill /f /t /im codiner.exe");
           console.timeEnd("taskkill");
-          console.log("[cleanup:end] Killed dyad.exe");
+          console.log("[cleanup:end] Killed codiner.exe");
         } catch (error) {
           console.warn(
-            "Failed to kill dyad.exe: (continuing with test cleanup)",
+            "Failed to kill codiner.exe: (continuing with test cleanup)",
             error,
           );
         }
@@ -1353,7 +1353,7 @@ function prettifyDump(
             // Depending on whether pnpm install is run, it will be modified,
             // and the contents and timestamp (thus affecting order) will be affected.
             .replace(
-              /\n<dyad-file path="package\.json">[\s\S]*?<\/dyad-file>\n/g,
+              /\n<codiner-file path="package\.json">[\s\S]*?<\/codiner-file>\n/g,
               "",
             );
       return `===\nrole: ${message.role}\nmessage: ${content}`;

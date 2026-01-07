@@ -1,12 +1,12 @@
 ---
 name: Add Template
-about: Request to add a template to Dyad Hub
+about: Request to add a template to Codiner Hub
 title: "Add Template: [Template Name]"
 labels: "add-template"
 assignees: ""
 ---
 
-If you'd like to add a template to Dyad Hub, follow the [Add Template guide](https://dyad.sh/docs/templates/add-template).
+If you'd like to add a template to Codiner Hub, follow the [Add Template guide](https://codiner.online/docs/templates/add-template).
 
 **Template name:**
 

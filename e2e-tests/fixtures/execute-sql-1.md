@@ -1,7 +1,7 @@
 Example SQL
 
-<dyad-execute-sql description="create_users_table">
+<codiner-execute-sql description="create_users_table">
 CREATE TABLE users (id serial primary key);
-</dyad-execute-sql>
+</codiner-execute-sql>
 
 Done.
