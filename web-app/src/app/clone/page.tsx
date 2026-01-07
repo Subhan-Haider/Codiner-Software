@@ -326,7 +326,7 @@ window.addEventListener('load', function() {
         assets: [
           "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
           "/images/hero-background.jpg",
-          "/icons/favicon.ico"
+          "/favicon.svg"
         ],
         metadata: {
           title: `${url} - Cloned by Codiner AI`,
