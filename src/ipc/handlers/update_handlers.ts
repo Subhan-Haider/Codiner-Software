@@ -1,4 +1,4 @@
-import { app, net, BrowserWindow } from "electron";
+import { app, net, BrowserWindow, IpcMainInvokeEvent } from "electron";
 import fs from "node:fs";
 import path from "node:path";
 import { createLoggedHandler } from "./safe_handle";
@@ -48,7 +48,7 @@ export function registerUpdateHandlers() {
         });
     });
 
-    handle("download-update", async (event, release: any) => {
+    handle("download-update", async (event: IpcMainInvokeEvent, release: any) => {
         const win = BrowserWindow.fromWebContents(event.sender);
         if (!win) return;
 

@@ -1448,9 +1448,9 @@ namespace MyApi
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
+use IlluminateDatabaseEloquentModel;
+use IlluminateDatabaseEloquentRelationsHasMany;
+use CarbonCarbon;
 
 class User extends Model
 {
@@ -1544,16 +1544,16 @@ class Comment extends Model
 
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Models\User;
-use App\Models\Post;
-use App\Models\Comment;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use AppModelsUser;
+use AppModelsPost;
+use AppModelsComment;
+use IlluminateHttpRequest;
+use IlluminateHttpJsonResponse;
+use IlluminateSupportFacadesHash;
+use IlluminateSupportFacadesValidator;
+use IlluminateValidationRule;
 
 class APIController extends Controller
 {
@@ -1726,9 +1726,9 @@ class APIController extends Controller
 
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\APIController;
+use IlluminateHttpRequest;
+use IlluminateSupportFacadesRoute;
+use AppHttpControllersAPIController;
 
 /*
 |--------------------------------------------------------------------------

@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, Settings, Workflow, Cpu, Trash2, AlertTriangle,
   Github, Globe, Monitor, HelpCircle, Activity,
-  User, Fingerprint, Sparkles, Languages, Zap, Palette, Sun, Moon,
-  Box, Binary, Command, ShieldCheck, Bug
+  User, Fingerprint, Sparkles, Languages, Zap, Palette, Sun,
+  Box, ShieldCheck, Bug, Command
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GitHubIntegration } from "@/components/GitHubIntegration";

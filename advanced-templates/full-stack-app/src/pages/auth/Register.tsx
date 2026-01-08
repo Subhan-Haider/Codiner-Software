@@ -39,7 +39,7 @@ export default function Register() {
            req.text === "One uppercase letter" ? /[A-Z]/.test(password) :
            req.text === "One lowercase letter" ? /[a-z]/.test(password) :
            req.text === "One number" ? /\d/.test(password) :
-           req.text === "One special character" ? /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) : false
+           req.text === "One special character" ? /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) : false
     }));
   };
 
