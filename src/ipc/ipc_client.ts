@@ -83,6 +83,8 @@ import type {
   AgentToolConsentRequestPayload,
   AgentToolConsentResponseParams,
   TelemetryEventPayload,
+  EnhancePromptParams,
+  EnhancePromptResult,
 } from "./ipc_types";
 import type { ConsoleEntry } from "../atoms/appAtoms";
 import type { Template } from "../shared/templates";
@@ -1495,5 +1497,13 @@ export class IpcClient {
     params: AnalyseComponentParams,
   ): Promise<{ isDynamic: boolean; hasStaticText: boolean }> {
     return this.ipcRenderer.invoke("analyze-component", params);
+  }
+
+  public async enhancePrompt(prompt: string): Promise<string> {
+    const result: EnhancePromptResult = await this.ipcRenderer.invoke(
+      "enhance-prompt",
+      { prompt } as EnhancePromptParams,
+    );
+    return result.enhancedPrompt;
   }
 }

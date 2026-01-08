@@ -8,7 +8,7 @@ import { useLoadApps } from "@/hooks/useLoadApps";
 import { useSettings } from "@/hooks/useSettings";
 import { SetupBanner } from "@/components/SetupBanner";
 import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useStreamChat } from "@/hooks/useStreamChat";
 import { HomeChatInput } from "@/components/chat/HomeChatInput";
 import { usePostHog } from "posthog-js/react";
@@ -25,6 +25,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { ImportAppButton } from "@/components/ImportAppButton";
+import { RecentProjects } from "@/components/home/RecentProjects";
 import { showError } from "@/lib/toast";
 import { invalidateAppQuery } from "@/hooks/useLoadApp";
 import { useQueryClient } from "@tanstack/react-query";
@@ -46,7 +47,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });
   const setSelectedAppId = useSetAtom(selectedAppIdAtom);
-  const { refreshApps } = useLoadApps();
+  const { apps: rawApps, refreshApps } = useLoadApps();
+  const allApps = useMemo(() => rawApps || [], [rawApps]);
   const { settings, updateSettings } = useSettings();
   const setIsPreviewOpen = useSetAtom(isPreviewOpenAtom);
   const [isLoading, setIsLoading] = useState(false);
@@ -143,6 +145,7 @@ export default function HomePage() {
       // Create the chat and navigate
       const result = await IpcClient.getInstance().createApp({
         name: generateCuteAppName(),
+        prompt: inputValue,
       });
       if (
         settings?.selectedTemplateId &&
@@ -167,19 +170,17 @@ export default function HomePage() {
       setInputValue("");
       setSelectedAppId(result.app.id);
       setIsPreviewOpen(false);
-      await refreshApps(); // Ensure refreshApps is awaited if it's async
+      await refreshApps();
       await invalidateAppQuery(queryClient, { appId: result.app.id });
       posthog.capture("home:chat-submit");
       navigate({ to: "/chat", search: { id: result.chatId } });
     } catch (error) {
       console.error("Failed to create chat:", error);
       showError("Failed to create app. " + (error as any).toString());
-      setIsLoading(false); // Ensure loading state is reset on error
+      setIsLoading(false);
     }
-    // No finally block needed for setIsLoading(false) here if navigation happens on success
   };
 
-  // Loading overlay for app creation
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md z-[9999]">
@@ -199,9 +200,8 @@ export default function HomePage() {
     );
   }
 
-  // Main Home Page Content
   return (
-    <div className="flex flex-col items-center max-w-4xl w-full mx-auto p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+    <div className="flex flex-col items-center justify-center min-h-full pb-16 max-w-4xl w-full mx-auto p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <ForceCloseDialog
         isOpen={forceCloseDialogOpen}
         onClose={() => setForceCloseDialogOpen(false)}
@@ -277,10 +277,11 @@ export default function HomePage() {
             </span>
           </button>
         </div>
+
+        <RecentProjects apps={allApps} />
       </div>
       <PrivacyBanner />
 
-      {/* Release Notes Dialog */}
       <Dialog open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen}>
         <DialogContent className="max-w-4xl bg-(--docs-bg) pr-0 pt-4 pl-4 gap-1">
           <DialogHeader>

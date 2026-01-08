@@ -261,7 +261,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="min-h-screen space-y-8 animate-fade-in">
+    <div className="w-full max-w-7xl mx-auto min-h-screen space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

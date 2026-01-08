@@ -280,6 +280,7 @@ export const UserSettingsSchema = z.object({
   zoomLevel: ZoomLevelSchema.optional(),
   userName: z.string().optional(),
   customSystemPrompt: z.string().optional(),
+  accentColor: z.string().optional(),
 
   enableAutoFixProblems: z.boolean().optional(),
   enableNativeGit: z.boolean().optional(),

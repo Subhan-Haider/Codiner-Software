@@ -414,61 +414,61 @@ export default function GeneratedApp() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in">
+    <div className="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 md:p-12 mb-8 mx-auto max-w-7xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-6 sm:p-8 md:p-12 mb-6 sm:mb-8 w-full">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
 
         <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-            <div className="flex-1">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
-                  <Sparkles className="w-6 h-6 text-white" />
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 sm:gap-8">
+            <div className="flex-1 w-full lg:w-auto">
+              <div className="flex items-center mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <Badge className="bg-white/20 text-white border-white/30">
+                <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm">
                   ✨ 1000+ Features Available
                 </Badge>
               </div>
 
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
                 AI App Generator
-                <span className="block text-2xl md:text-3xl font-light text-white/80 mt-2">
+                <span className="block text-xl sm:text-2xl md:text-3xl font-light text-white/80 mt-1 sm:mt-2">
                   Build Anything with Natural Language
                 </span>
               </h1>
 
-              <p className="text-xl text-white/90 mb-8 max-w-2xl leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl leading-relaxed">
                 Transform your ideas into production-ready applications in seconds.
                 No coding experience required - just describe what you want to build.
               </p>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Zap className="w-4 h-4 text-yellow-300 mr-2" />
-                  <span className="text-white text-sm">Instant Generation</span>
+              <div className="flex flex-wrap gap-2 sm:gap-4">
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-300 mr-2" />
+                  <span className="text-white text-xs sm:text-sm">Instant Generation</span>
                 </div>
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Shield className="w-4 h-4 text-green-300 mr-2" />
-                  <span className="text-white text-sm">Enterprise Ready</span>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-green-300 mr-2" />
+                  <span className="text-white text-xs sm:text-sm">Enterprise Ready</span>
                 </div>
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Cpu className="w-4 h-4 text-blue-300 mr-2" />
-                  <span className="text-white text-sm">250+ AI Models</span>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
+                  <Cpu className="w-3 h-3 sm:w-4 sm:h-4 text-blue-300 mr-2" />
+                  <span className="text-white text-xs sm:text-sm">250+ AI Models</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 lg:flex justify-end hidden lg:block">
-              <div className="relative">
-                <div className="w-80 h-80 bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20">
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-2xl flex items-center justify-center">
+            <div className="flex-1 lg:flex justify-end hidden sm:block mt-8 lg:mt-0">
+              <div className="relative max-w-sm mx-auto lg:mx-0">
+                <div className="w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 bg-white/10 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20">
+                  <div className="w-full h-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-xl sm:rounded-2xl flex items-center justify-center">
                     <div className="text-center">
-                      <Wand2 className="w-16 h-16 text-white mx-auto mb-4" />
-                      <h3 className="text-white font-semibold text-lg mb-2">Your App Here</h3>
-                      <p className="text-white/70 text-sm">AI-generated in seconds</p>
+                      <Wand2 className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 text-white mx-auto mb-3 sm:mb-4" />
+                      <h3 className="text-white font-semibold text-base sm:text-lg mb-2">Your App Here</h3>
+                      <p className="text-white/70 text-xs sm:text-sm">AI-generated in seconds</p>
                     </div>
                   </div>
                 </div>
@@ -479,7 +479,7 @@ export default function GeneratedApp() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 max-w-4xl mx-auto">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full max-w-4xl mx-auto">
         <Card className="card-hover glass text-center">
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-blue-600 mb-2">1,247</div>
@@ -509,8 +509,8 @@ export default function GeneratedApp() {
         </Card>
       </div>
 
-      <Tabs defaultValue="generate" className="space-y-8">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 h-12 bg-white/50 backdrop-blur-sm border border-white/20">
+      <Tabs defaultValue="generate" className="space-y-6 sm:space-y-8 w-full flex flex-col items-center">
+        <TabsList className="grid w-full max-w-md grid-cols-3 h-10 sm:h-12 bg-white/50 backdrop-blur-sm border border-white/20">
           <TabsTrigger value="generate" className="text-sm font-medium">🎨 Generate App</TabsTrigger>
           <TabsTrigger value="templates" className="text-sm font-medium">📚 Templates</TabsTrigger>
           <TabsTrigger value="projects" className="text-sm font-medium">🚀 My Projects</TabsTrigger>
@@ -527,26 +527,26 @@ export default function GeneratedApp() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {appTypes.map((type) => (
                   <div
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
-                    className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 border-2 card-hover ${
+                    className={`group p-4 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 border-2 card-hover min-h-[120px] sm:min-h-[140px] ${
                       selectedType === type.id
                         ? `bg-gradient-to-br ${type.gradient} text-white border-transparent shadow-lg scale-105`
                         : `${type.bgColor} border-slate-200 dark:border-slate-700 hover:border-slate-300 group-hover:scale-105`
                     }`}
                   >
-                    <type.icon className={`h-10 w-10 mb-4 transition-colors ${
+                    <type.icon className={`h-8 w-8 sm:h-10 sm:w-10 mb-3 sm:mb-4 transition-colors ${
                       selectedType === type.id ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800'
                     }`} />
-                    <h3 className={`font-bold text-lg mb-2 ${
+                    <h3 className={`font-bold text-base sm:text-lg mb-1 sm:mb-2 ${
                       selectedType === type.id ? 'text-white' : 'text-slate-900 dark:text-slate-100'
                     }`}>
                       {type.name}
                     </h3>
-                    <p className={`text-sm leading-relaxed ${
+                    <p className={`text-xs sm:text-sm leading-relaxed ${
                       selectedType === type.id ? 'text-white/80' : 'text-slate-600 dark:text-slate-400'
                     }`}>
                       {type.description}
@@ -576,7 +576,7 @@ export default function GeneratedApp() {
                 className="min-h-[140px] text-base resize-none input-focus border-2"
               />
 
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <Select>
                     <SelectTrigger className="w-[200px] h-12 border-2 input-focus">
@@ -686,7 +686,7 @@ export default function GeneratedApp() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full">
             {templates.map((template, index) => (
               <Card key={index} className="card-hover glass border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 overflow-hidden group">
                 <CardHeader className="pb-4">

@@ -367,40 +367,43 @@ export function CodeEditor({
   return (
     <div className={`flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-        <div className="flex items-center space-x-4">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Code Editor</h3>
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Code Editor</h3>
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs hidden sm:inline-flex">
             Live Preview
           </Badge>
         </div>
 
-        <div className="flex items-center space-x-2">
-          {/* Preview Mode Selector */}
-          <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded-lg p-1">
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          {/* Preview Mode Selector - Hide on very small screens */}
+          <div className="hidden xs:flex items-center space-x-1 bg-white dark:bg-slate-700 rounded-lg p-1">
             <Button
               variant={previewMode === 'desktop' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setPreviewMode('desktop')}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              title="Desktop Preview"
             >
-              <Monitor className="h-4 w-4" />
+              <Monitor className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant={previewMode === 'tablet' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setPreviewMode('tablet')}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              title="Tablet Preview"
             >
-              <Tablet className="h-4 w-4" />
+              <Tablet className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant={previewMode === 'mobile' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setPreviewMode('mobile')}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              title="Mobile Preview"
             >
-              <Smartphone className="h-4 w-4" />
+              <Smartphone className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
 
@@ -408,99 +411,104 @@ export function CodeEditor({
             variant="ghost"
             size="sm"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? <Minimize2 className="h-3 w-3 sm:h-4 sm:w-4" /> : <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />}
           </Button>
         </div>
       </div>
 
-      <div className={`flex ${isFullscreen ? 'h-screen' : ''}`}>
+      <div className={`flex flex-col lg:flex-row ${isFullscreen ? 'h-screen' : ''}`}>
         {/* Editor Panel */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0 lg:min-h-[400px]">
           {/* Editor Toolbar */}
-          <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'html' | 'css' | 'js' | 'debug' | 'git' | 'explain' | 'format' | 'refactor')}>
-              <TabsList className="grid w-full grid-cols-8 h-9">
-                <TabsTrigger value="html" className="text-xs">
-                  <Code className="w-3 h-3 mr-1" />
-                  HTML
-                </TabsTrigger>
-                <TabsTrigger value="css" className="text-xs">
-                  <Palette className="w-3 h-3 mr-1" />
-                  CSS
-                </TabsTrigger>
-                <TabsTrigger value="js" className="text-xs">
-                  <Zap className="w-3 h-3 mr-1" />
-                  JavaScript
-                </TabsTrigger>
-                <TabsTrigger value="debug" className="text-xs">
-                  <Bug className="w-3 h-3 mr-1" />
-                  Debug
-                </TabsTrigger>
-                <TabsTrigger value="git" className="text-xs">
-                  <GitBranch className="w-3 h-3 mr-1" />
-                  Git
-                </TabsTrigger>
-                <TabsTrigger value="explain" className="text-xs">
-                  <Lightbulb className="w-3 h-3 mr-1" />
-                  Explain
-                </TabsTrigger>
-                <TabsTrigger value="format" className="text-xs">
-                  <Scissors className="w-3 h-3 mr-1" />
-                  Format
-                </TabsTrigger>
-                <TabsTrigger value="refactor" className="text-xs">
-                  <Shuffle className="w-3 h-3 mr-1" />
-                  Refactor
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'html' | 'css' | 'js')}>
-              <TabsList className="grid w-full grid-cols-3 h-9">
-                <TabsTrigger value="html" className="text-xs">
-                  <Code className="w-3 h-3 mr-1" />
-                  HTML
-                </TabsTrigger>
-                <TabsTrigger value="css" className="text-xs">
-                  <Palette className="w-3 h-3 mr-1" />
-                  CSS
-                </TabsTrigger>
-                <TabsTrigger value="js" className="text-xs">
-                  <Zap className="w-3 h-3 mr-1" />
-                  JavaScript
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="flex items-center justify-between p-2 sm:p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <div className="flex-1 overflow-x-auto">
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'html' | 'css' | 'js' | 'debug' | 'git' | 'explain' | 'format' | 'refactor')}>
+                {/* Mobile: Show only 3 main tabs */}
+                <TabsList className="grid w-full grid-cols-3 h-8 lg:hidden">
+                  <TabsTrigger value="html" className="text-xs px-1">
+                    <Code className="w-3 h-3 lg:mr-1" />
+                    <span className="hidden sm:inline">HTML</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="css" className="text-xs px-1">
+                    <Palette className="w-3 h-3 lg:mr-1" />
+                    <span className="hidden sm:inline">CSS</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="js" className="text-xs px-1">
+                    <Zap className="w-3 h-3 lg:mr-1" />
+                    <span className="hidden sm:inline">JS</span>
+                  </TabsTrigger>
+                </TabsList>
+                {/* Desktop: Show all tabs */}
+                <TabsList className="hidden lg:grid w-full grid-cols-8 h-9">
+                  <TabsTrigger value="html" className="text-xs">
+                    <Code className="w-3 h-3 mr-1" />
+                    HTML
+                  </TabsTrigger>
+                  <TabsTrigger value="css" className="text-xs">
+                    <Palette className="w-3 h-3 mr-1" />
+                    CSS
+                  </TabsTrigger>
+                  <TabsTrigger value="js" className="text-xs">
+                    <Zap className="w-3 h-3 mr-1" />
+                    JavaScript
+                  </TabsTrigger>
+                  <TabsTrigger value="debug" className="text-xs">
+                    <Bug className="w-3 h-3 mr-1" />
+                    Debug
+                  </TabsTrigger>
+                  <TabsTrigger value="git" className="text-xs">
+                    <GitBranch className="w-3 h-3 mr-1" />
+                    Git
+                  </TabsTrigger>
+                  <TabsTrigger value="explain" className="text-xs">
+                    <Lightbulb className="w-3 h-3 mr-1" />
+                    Explain
+                  </TabsTrigger>
+                  <TabsTrigger value="format" className="text-xs">
+                    <Scissors className="w-3 h-3 mr-1" />
+                    Format
+                  </TabsTrigger>
+                  <TabsTrigger value="refactor" className="text-xs">
+                    <Shuffle className="w-3 h-3 mr-1" />
+                    Refactor
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <Button
                 variant={aiSuggestionsEnabled ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setAiSuggestionsEnabled(!aiSuggestionsEnabled)}
-                className={`h-8 px-3 ${aiSuggestionsEnabled ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}`}
+                className={`h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm ${aiSuggestionsEnabled ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}`}
               >
                 <Sparkles className="w-3 h-3 mr-1" />
-                AI {aiSuggestionsEnabled ? 'On' : 'Off'}
+                <span className="hidden xs:inline">AI {aiSuggestionsEnabled ? 'On' : 'Off'}</span>
+                <span className="xs:hidden">{aiSuggestionsEnabled ? 'On' : 'Off'}</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={copyCode} className="h-8 px-3">
-                Copy
+              <Button variant="ghost" size="sm" onClick={copyCode} className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm">
+                <span className="hidden xs:inline">Copy</span>
+                <Copy className="w-3 h-3 xs:hidden" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={resetCode} className="h-8 px-3">
+              <Button variant="ghost" size="sm" onClick={resetCode} className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm">
                 <RotateCcw className="w-3 h-3 mr-1" />
-                Reset
+                <span className="hidden xs:inline">Reset</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={runCode} disabled={isRunning} className="h-8 px-3">
+              <Button variant="ghost" size="sm" onClick={runCode} disabled={isRunning} className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm">
                 {isRunning ? (
                   <div className="animate-spin rounded-full h-3 w-3 border-b border-current mr-1"></div>
                 ) : (
                   <Play className="w-3 h-3 mr-1" />
                 )}
-                Run
+                <span className="hidden xs:inline">Run</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={downloadCode} className="h-8 px-3">
+              <Button variant="ghost" size="sm" onClick={downloadCode} className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm">
                 <Download className="w-3 h-3 mr-1" />
-                Export
+                <span className="hidden xs:inline">Export</span>
               </Button>
             </div>
           </div>
@@ -678,18 +686,18 @@ export function CodeEditor({
         </div>
 
         {/* Preview Panel */}
-        <div className="w-96 border-l border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex flex-col">
+        <div className="w-full lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex flex-col">
           <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center space-x-2">
               <Eye className="w-4 h-4 text-slate-600 dark:text-slate-400" />
               <span className="text-sm font-medium text-slate-900 dark:text-white">Live Preview</span>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs hidden sm:inline-flex">
               {previewMode}
             </Badge>
           </div>
 
-          <div className="flex-1 p-4 bg-white dark:bg-slate-900 rounded-b-xl">
+          <div className="flex-1 p-3 sm:p-4 bg-white dark:bg-slate-900 rounded-b-xl">
             <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-2 mb-4 flex items-center space-x-1">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
@@ -701,7 +709,7 @@ export function CodeEditor({
                 ref={iframeRef}
                 className="w-full border-0"
                 style={{
-                  height: previewMode === 'mobile' ? '667px' : previewMode === 'tablet' ? '1024px' : '600px',
+                  height: previewMode === 'mobile' ? '400px' : previewMode === 'tablet' ? '600px' : '500px',
                   maxWidth: getPreviewWidth(),
                   margin: '0 auto',
                   display: 'block',

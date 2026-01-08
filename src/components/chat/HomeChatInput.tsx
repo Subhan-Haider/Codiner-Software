@@ -1,4 +1,6 @@
-import { SendIcon, StopCircleIcon } from "lucide-react";
+import { useState } from "react";
+import { SendIcon, StopCircleIcon, Mic, MicOff, Sparkles } from "lucide-react";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 import { useSettings } from "@/hooks/useSettings";
 import { homeChatInputValueAtom } from "@/atoms/chatAtoms"; // Use a different atom for home input
@@ -12,8 +14,11 @@ import { usePostHog } from "posthog-js/react";
 import { HomeSubmitOptions } from "@/pages/home";
 import { ChatInputControls } from "../ChatInputControls";
 import { LexicalChatInput } from "./LexicalChatInput";
+import { cn } from "@/lib/utils";
 import { useChatModeToggle } from "@/hooks/useChatModeToggle";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
+import { IpcClient } from "@/ipc/ipc_client";
+import { toast } from "sonner";
 export function HomeChatInput({
   onSubmit,
 }: {
@@ -25,6 +30,7 @@ export function HomeChatInput({
   const { isStreaming } = useStreamChat({
     hasChatId: false,
   }); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [isEnhancing, setIsEnhancing] = useState(false);
   useChatModeToggle();
 
   const typingText = useTypingPlaceholder([
@@ -61,9 +67,32 @@ export function HomeChatInput({
     posthog.capture("chat:home_submit");
   };
 
+  const { isListening, toggleListening } = useVoiceInput();
+
   if (!settings) {
     return null; // Or loading state
   }
+
+  const handleVoiceResult = (text: string) => {
+    setInputValue((prev) => (prev ? `${prev} ${text}` : text));
+  };
+
+  const handleEnhance = async () => {
+    if (!inputValue.trim() || isEnhancing) return;
+
+    try {
+      setIsEnhancing(true);
+      const enhanced = await IpcClient.getInstance().enhancePrompt(inputValue);
+      setInputValue(enhanced);
+      toast.success("Prompt enhanced with AI ✨");
+      posthog.capture("chat:prompt_enhanced");
+    } catch (error) {
+      console.error("Failed to enhance prompt:", error);
+      toast.error("Failed to enhance prompt");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   return (
     <>
@@ -95,6 +124,32 @@ export function HomeChatInput({
               excludeCurrentApp={false}
               disableSendButton={false}
             />
+
+            <button
+              onClick={handleEnhance}
+              disabled={isStreaming || isEnhancing || !inputValue.trim()}
+              className={cn(
+                "px-3 py-2 mt-1 mr-1 rounded-xl transition-all",
+                isEnhancing
+                  ? "bg-primary text-primary-foreground animate-pulse"
+                  : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              )}
+              title="Enhance prompt with AI"
+            >
+              <Sparkles size={20} className={isEnhancing ? "animate-spin-slow" : ""} />
+            </button>
+
+            <button
+              onClick={() => toggleListening(handleVoiceResult)}
+              disabled={isStreaming}
+              className={`px-3 py-2 mt-1 mr-1 rounded-xl transition-all ${isListening
+                ? "bg-red-500 text-white animate-pulse"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              title={isListening ? "Stop listening" : "Voice input"}
+            >
+              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
 
             {/* File attachment dropdown */}
             <FileAttachmentDropdown

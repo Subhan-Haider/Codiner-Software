@@ -54,9 +54,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         electronApi.webFrame?.setZoomFactor(Number(DEFAULT_ZOOM_LEVEL) / 100);
       };
     }
-
-    return () => { };
   }, [settings?.zoomLevel]);
+
+  useEffect(() => {
+    if (settings?.accentColor) {
+      document.documentElement.style.setProperty("--primary", settings.accentColor);
+      document.documentElement.style.setProperty("--ring", settings.accentColor);
+      document.documentElement.style.setProperty("--sidebar-primary", settings.accentColor);
+    } else {
+      document.documentElement.style.removeProperty("--primary");
+      document.documentElement.style.removeProperty("--ring");
+      document.documentElement.style.removeProperty("--sidebar-primary");
+    }
+  }, [settings?.accentColor]);
+
   // Global keyboard listener for refresh events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -96,12 +107,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <DeepLinkProvider>
           <SidebarProvider>
             <TitleBar />
-            <div className="-mt-20">
+            <div className="-mt-16 lg:-mt-32">
               <AppSidebar />
             </div>
             <div
               id="layout-main-content-container"
-              className="flex h-275 w-full overflow-x-hidden overflow-y-auto mt-40 mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
+              className="flex h-180 lg:h-275 w-full overflow-x-hidden overflow-y-auto mt-16 lg:mt-40 mb-4 lg:mb-10 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
             >
               {children}
             </div>

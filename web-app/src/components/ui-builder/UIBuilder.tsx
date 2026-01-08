@@ -186,121 +186,132 @@ export function UIBuilder() {
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-        <div className="flex items-center space-x-4">
-          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-            <Palette className="w-5 h-5 text-purple-600" />
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+            <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">UI Builder</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">UI Builder</h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">
               Drag & drop components to build your interface
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          {/* Undo/Redo */}
+        <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto">
+          {/* Undo/Redo - Always visible */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => engine.undo()}
             disabled={!engine.canUndo()}
+            className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 flex-shrink-0"
           >
-            <Undo className="w-4 h-4" />
+            <Undo className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden lg:inline ml-2">Undo</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => engine.redo()}
             disabled={!engine.canRedo()}
+            className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 flex-shrink-0"
           >
-            <Redo className="w-4 h-4" />
+            <Redo className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden lg:inline ml-2">Redo</span>
           </Button>
 
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
-          {/* Zoom Controls */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => engine.setZoom(canvasState.zoom * 1.2)}
-          >
-            <ZoomIn className="w-4 h-4" />
-          </Button>
-          <span className="text-sm text-slate-600 dark:text-slate-400 min-w-[3rem] text-center">
-            {Math.round(canvasState.zoom * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => engine.setZoom(canvasState.zoom * 0.8)}
-          >
-            <ZoomOut className="w-4 h-4" />
-          </Button>
+          {/* Zoom Controls - Hidden on small screens */}
+          <div className="hidden md:flex items-center space-x-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => engine.setZoom(canvasState.zoom * 1.2)}
+              className="h-8 w-8"
+            >
+              <ZoomIn className="w-3 h-3 sm:w-4 sm:h-4" />
+            </Button>
+            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 min-w-[2.5rem] sm:min-w-[3rem] text-center">
+              {Math.round(canvasState.zoom * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => engine.setZoom(canvasState.zoom * 0.8)}
+              className="h-8 w-8"
+            >
+              <ZoomOut className="w-3 h-3 sm:w-4 sm:h-4" />
+            </Button>
+          </div>
 
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
           {/* Preview Mode */}
           <Button
             variant={isPreviewMode ? "default" : "ghost"}
             size="sm"
             onClick={() => setIsPreviewMode(!isPreviewMode)}
+            className="h-8 px-2 sm:px-3 flex-shrink-0"
           >
-            <Eye className="w-4 h-4 mr-2" />
-            Preview
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Preview</span>
           </Button>
 
-          {/* Generate Code */}
-          <Button onClick={generateCode}>
-            <Code className="w-4 h-4 mr-2" />
-            Generate Code
+          {/* Generate Code - Primary action */}
+          <Button onClick={generateCode} className="h-8 px-2 sm:px-4 flex-shrink-0">
+            <Code className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Generate</span>
           </Button>
 
-          {/* Export/Import */}
-          <Button variant="outline" onClick={exportProject}>
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+          {/* Export/Import - Hidden on small screens */}
+          <div className="hidden md:flex items-center space-x-1 flex-shrink-0">
+            <Button variant="outline" onClick={exportProject} className="h-8 px-2 sm:px-3">
+              <Download className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden lg:inline">Export</span>
+            </Button>
 
-          <Button variant="outline" asChild>
-            <label>
-              <Upload className="w-4 h-4 mr-2" />
-              Import
-              <input
-                type="file"
-                accept=".json"
-                onChange={importProject}
-                className="hidden"
-              />
-            </label>
-          </Button>
+            <Button variant="outline" asChild className="h-8 px-2 sm:px-3">
+              <label>
+                <Upload className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden lg:inline">Import</span>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importProject}
+                  className="hidden"
+                />
+              </label>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Component Palette */}
-        <div className="w-80 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-            <h2 className="font-semibold text-slate-900 dark:text-white mb-2">Components</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+        <div className="w-full lg:w-72 xl:w-80 bg-white dark:bg-slate-800 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-700 flex flex-col max-h-64 lg:max-h-none">
+          <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
+            <h2 className="font-semibold text-slate-900 dark:text-white mb-2 text-sm sm:text-base">Components</h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">
               Drag components onto the canvas to build your UI
             </p>
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-4 space-y-6">
+            <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
               {categories.map(category => (
                 <div key={category}>
-                  <h3 className="font-medium text-slate-900 dark:text-white mb-3 flex items-center">
-                    {category === 'Layout' && <Layout className="w-4 h-4 mr-2" />}
-                    {category === 'Basic' && <Square className="w-4 h-4 mr-2" />}
-                    {category === 'Form' && <Type className="w-4 h-4 mr-2" />}
-                    {category === 'Media' && <Image className="w-4 h-4 mr-2" />}
+                  <h3 className="font-medium text-slate-900 dark:text-white mb-2 sm:mb-3 flex items-center text-sm sm:text-base">
+                    {category === 'Layout' && <Layout className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />}
+                    {category === 'Basic' && <Square className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />}
+                    {category === 'Form' && <Type className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />}
+                    {category === 'Media' && <Image className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />}
                     {category}
                   </h3>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 sm:gap-3">
                     {componentTemplates
                       .filter(template => template.category === category)
                       .map(template => (
@@ -310,17 +321,18 @@ export function UIBuilder() {
                           onDragStart={() => handleDragStart(template)}
                           onDragEnd={handleDragEnd}
                           className={`
-                            p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-move
+                            p-2 sm:p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-move
                             hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md
-                            transition-all bg-white dark:bg-slate-700
+                            transition-all bg-white dark:bg-slate-700 min-h-[60px] sm:min-h-[70px]
+                            touch-manipulation
                             ${isDragging && draggedTemplate?.id === template.id ? 'opacity-50' : ''}
                           `}
                         >
-                          <div className="text-2xl mb-2">{template.icon}</div>
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">
+                          <div className="text-xl sm:text-2xl mb-1 sm:mb-2 flex justify-center">{template.icon}</div>
+                          <div className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white text-center">
                             {template.name}
                           </div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                          <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 hidden sm:block text-center">
                             {template.description}
                           </div>
                         </div>
@@ -333,29 +345,30 @@ export function UIBuilder() {
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 flex flex-col">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Badge variant="outline">
+              <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
+                <Badge variant="outline" className="text-xs flex-shrink-0">
                   {canvasState.components.length} components
                 </Badge>
-                <Badge variant="outline">
+                <Badge variant="outline" className="text-xs hidden sm:inline-flex flex-shrink-0">
                   Zoom: {Math.round(canvasState.zoom * 100)}%
                 </Badge>
-                <Badge variant="outline">
+                <Badge variant="outline" className="text-xs hidden md:inline-flex flex-shrink-0">
                   Grid: {canvasState.gridSize}px
                 </Badge>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => engine.toggleSnapToGrid()}
-                  className={canvasState.snapToGrid ? 'bg-purple-100 dark:bg-purple-900' : ''}
+                  className={`h-8 w-8 sm:h-9 sm:w-auto sm:px-3 ${canvasState.snapToGrid ? 'bg-purple-100 dark:bg-purple-900' : ''}`}
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline ml-2">Snap</span>
                 </Button>
               </div>
             </div>

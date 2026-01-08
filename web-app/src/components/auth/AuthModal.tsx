@@ -158,27 +158,27 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md glass border-0 shadow-2xl">
+      <DialogContent className="sm:max-w-md w-[95vw] max-w-sm sm:max-w-md glass border-0 shadow-2xl mx-4">
         <DialogHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-3 sm:mb-4">
             {authStep === 'success' ? (
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
             ) : authStep === 'verify' ? (
-              <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
-                <Shield className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
             ) : (
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
             )}
           </div>
-          <DialogTitle className="text-2xl font-bold text-gradient">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-gradient">
             {getStepTitle()}
           </DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogDescription className="text-center text-sm sm:text-base px-2">
             {getStepDescription()}
           </DialogDescription>
         </DialogHeader>
@@ -186,7 +186,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
         {authStep === 'auth' && (
           <>
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-10 sm:h-11">
                 <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
                 <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
               </TabsList>
@@ -203,6 +203,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
                     value={formData.fullName}
                     onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                     required
+                    className="h-11 sm:h-10 text-base"
                   />
                 </div>
                 <div className="space-y-2">
@@ -214,6 +215,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
                     value={formData.username}
                     onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
                     required
+                    className="h-11 sm:h-10 text-base"
                   />
                 </div>
               </div>
@@ -227,7 +229,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
                   id="email"
                   type="email"
                   placeholder="john@example.com"
-                  className="pl-10"
+                  className="pl-10 h-11 sm:h-10 text-base"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
@@ -243,7 +245,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 h-11 sm:h-10 text-base"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
@@ -273,7 +275,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="pl-10"
+                    className="pl-10 h-11 sm:h-10 text-base"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     required
@@ -284,7 +286,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
 
             <Button
               type="submit"
-              className="w-full btn-gradient shadow-lg"
+              className="w-full btn-gradient shadow-lg h-11 sm:h-10 text-base font-semibold"
               disabled={loading}
             >
               {loading ? (
@@ -314,7 +316,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
               variant="outline"
               onClick={() => handleProviderSignIn('github')}
               disabled={loading}
-              className="border-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="border-2 hover:bg-slate-50 dark:hover:bg-slate-800 h-11 sm:h-10"
             >
               <Github className="h-4 w-4 mr-2" />
               GitHub
@@ -323,7 +325,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
               variant="outline"
               onClick={() => handleProviderSignIn('google')}
               disabled={loading}
-              className="border-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="border-2 hover:bg-slate-50 dark:hover:bg-slate-800 h-11 sm:h-10"
             >
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

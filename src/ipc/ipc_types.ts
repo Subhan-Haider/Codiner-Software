@@ -58,8 +58,17 @@ export interface ChatProblemsEvent {
   problems: ProblemReport;
 }
 
+export interface EnhancePromptParams {
+  prompt: string;
+}
+
+export interface EnhancePromptResult {
+  enhancedPrompt: string;
+}
+
 export interface CreateAppParams {
   name: string;
+  prompt?: string;
 }
 
 export interface CreateAppResult {

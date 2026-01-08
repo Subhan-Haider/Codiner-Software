@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Bell, Settings, User, Moon, Sun, LogOut, Zap, Crown, Sparkles } from "lucide-react"
+import { Search, Bell, Settings, User, Moon, Sun, LogOut, Zap, Crown, Sparkles, Menu } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,37 +20,41 @@ import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPane
 import { ThemeToggle } from "@/components/theme/ThemeToggle"
 import { useAuth } from "@/hooks/useAuth"
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuToggle?: () => void
+}
+
+export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { setTheme, theme } = useTheme()
   const [searchQuery, setSearchQuery] = useState("")
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const { user, signOut, isAuthenticated } = useAuth()
 
   return (
-    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 px-6 py-4 sticky top-0 z-40">
+    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-40">
       <div className="flex items-center justify-between">
         {/* Logo & Brand */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Codiner</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Codiner</h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">AI App Builder</p>
             </div>
           </div>
 
-          {/* Pro Badge */}
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 shadow-md">
+          {/* Pro Badge - Hidden on mobile */}
+          <Badge className="hidden sm:flex bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 shadow-md">
             <Crown className="w-3 h-3 mr-1" />
             Pro
           </Badge>
         </div>
 
-        {/* Search */}
-        <div className="flex-1 max-w-lg mx-8">
-          <div className="relative">
+        {/* Search - Hidden on mobile */}
+        <div className="hidden md:flex flex-1 max-w-lg mx-8">
+          <div className="relative w-full">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
             <Input
               placeholder="Search projects, templates, or code..."
@@ -62,30 +66,53 @@ export function Header() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center space-x-3">
-          {/* AI Credits */}
-          <div className="hidden md:flex items-center bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl px-4 py-2 border border-blue-200/50 dark:border-blue-800/50">
+        <div className="flex items-center space-x-1 sm:space-x-3">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+            onClick={onMobileMenuToggle}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          {/* Mobile Search Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+            onClick={() => {/* TODO: Open mobile search */}}
+          >
+            <Search className="h-5 w-5" />
+          </Button>
+          {/* AI Credits - Hidden on mobile */}
+          <div className="hidden lg:flex items-center bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl px-4 py-2 border border-blue-200/50 dark:border-blue-800/50">
             <Zap className="h-4 w-4 text-blue-600 mr-2" />
             <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">1,247</span>
             <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">credits</span>
           </div>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* Theme Toggle - Hidden on small mobile */}
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
 
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+          {/* Notifications - Hidden on small mobile */}
+          <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 hidden sm:flex">
             <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white font-bold shadow-lg animate-pulse">
               3
             </span>
           </Button>
 
-          {/* Accessibility */}
-          <AccessibilityPanel />
+          {/* Accessibility - Hidden on mobile */}
+          <div className="hidden md:block">
+            <AccessibilityPanel />
+          </div>
 
-          {/* Settings */}
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+          {/* Settings - Hidden on small mobile */}
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 hidden sm:flex">
             <Settings className="h-5 w-5" />
           </Button>
 

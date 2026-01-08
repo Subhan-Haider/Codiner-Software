@@ -16,11 +16,16 @@ import {
   ChevronsDownUp,
   SendHorizontalIcon,
   Lock,
+  Mic,
+  MicOff,
+  Sparkles,
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { useSettings } from "@/hooks/useSettings";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { IpcClient } from "@/ipc/ipc_client";
 import {
   chatInputValueAtom,
@@ -63,6 +68,7 @@ import { useSummarizeInNewChat } from "./SummarizeInNewChatButton";
 import { ChatInputControls } from "../ChatInputControls";
 import { ChatErrorBox } from "./ChatErrorBox";
 import { AgentConsentBanner } from "./AgentConsentBanner";
+import { QuickActions } from "./QuickActions";
 import {
   selectedComponentsPreviewAtom,
   previewIframeRefAtom,
@@ -137,6 +143,25 @@ export function ChatInput({ chatId }: { chatId?: number }) {
     handlePaste,
   } = useAttachments();
 
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handleEnhance = async () => {
+    if (!inputValue.trim() || isEnhancing) return;
+
+    try {
+      setIsEnhancing(true);
+      const enhanced = await IpcClient.getInstance().enhancePrompt(inputValue);
+      setInputValue(enhanced);
+      toast.success("Prompt enhanced with AI ✨");
+      posthog.capture("chat:prompt_enhanced");
+    } catch (error) {
+      console.error("Failed to enhance prompt:", error);
+      toast.error("Failed to enhance prompt");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
   // Use the hook to fetch the proposal
   const {
     proposalResult,
@@ -145,6 +170,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
     refreshProposal,
   } = useProposal(chatId);
   const { proposal, messageId } = proposalResult ?? {};
+  const { isListening, toggleListening } = useVoiceInput();
   useChatModeToggle();
 
   const lastMessage = (chatId ? (messagesById.get(chatId) ?? []) : []).at(-1);
@@ -429,6 +455,10 @@ export function ChatInput({ chatId }: { chatId?: number }) {
 
           <SelectedComponentsDisplay />
 
+          <div className="px-2 pt-2 border-b border-border/10">
+            <QuickActions />
+          </div>
+
           {/* Use the AttachmentsList component */}
           <AttachmentsList
             attachments={attachments}
@@ -448,6 +478,32 @@ export function ChatInput({ chatId }: { chatId?: number }) {
               excludeCurrentApp={true}
               disableSendButton={disableSendButton}
             />
+
+            <button
+              onClick={handleEnhance}
+              disabled={isStreaming || isEnhancing || !inputValue.trim()}
+              className={cn(
+                "mt-1 shrink-0 p-2 rounded-lg transition-all",
+                isEnhancing
+                  ? "bg-primary text-primary-foreground animate-pulse"
+                  : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              )}
+              title="Enhance prompt with AI"
+            >
+              <Sparkles className={cn("h-5 w-5", isEnhancing && "animate-spin-slow")} />
+            </button>
+
+            <button
+              onClick={() => toggleListening((text) => setInputValue((prev) => (prev ? `${prev} ${text}` : text)))}
+              disabled={isStreaming}
+              className={`mt-1 shrink-0 p-2 rounded-lg transition-all ${isListening
+                ? "bg-red-500 text-white animate-pulse"
+                : "text-muted-foreground hover:bg-muted/80"
+                }`}
+              title={isListening ? "Stop listening" : "Voice input"}
+            >
+              {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+            </button>
 
             {isStreaming ? (
               <Button

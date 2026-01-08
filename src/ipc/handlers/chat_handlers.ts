@@ -45,7 +45,7 @@ export function registerChatHandlers() {
       .values({
         appId,
         initialCommitHash,
-      })
+      } as any)
       .returning();
     logger.info(
       "Created chat:",
@@ -63,7 +63,7 @@ export function registerChatHandlers() {
       where: eq(chats.id, chatId),
       with: {
         messages: {
-          orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+          orderBy: (m: any, { asc }: any) => [asc(m.createdAt)],
         },
       },
     });
@@ -107,7 +107,7 @@ export function registerChatHandlers() {
   });
 
   handle("update-chat", async (_, { chatId, title }: UpdateChatParams) => {
-    await db.update(chats).set({ title }).where(eq(chats.id, chatId));
+    await db.update(chats).set({ title } as any).where(eq(chats.id, chatId));
   });
 
   handle("delete-messages", async (_, chatId: number): Promise<void> => {
@@ -135,7 +135,7 @@ export function registerChatHandlers() {
         appId: c.appId,
         title: c.title,
         createdAt: c.createdAt,
-        matchedMessageContent: null,
+        matchedMessageContent: null as string | null,
       }));
 
       // 2) Find messages that match and join to chats to build one result per message

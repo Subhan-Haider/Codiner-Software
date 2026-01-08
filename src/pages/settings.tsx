@@ -33,6 +33,7 @@ import { AgentToolsSettings } from "@/components/settings/AgentToolsSettings";
 import { WorkspaceTopology } from "@/components/settings/WorkspaceTopology";
 import { NeuralSystemDiagnostics } from "@/components/settings/NeuralSystemDiagnostics";
 import { ZoomSelector } from "@/components/ZoomSelector";
+import { AccentColorPicker } from "@/components/AccentColorPicker";
 import { useSetAtom } from "jotai";
 import { activeSettingsSectionAtom } from "@/atoms/viewAtoms";
 import { cn } from "@/lib/utils";
@@ -751,6 +752,17 @@ export function VisualMechanics() {
 
           <div className="w-full max-w-xs">
             <ZoomSelector />
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-card border-indigo-500/20 rounded-[2.5rem] p-8 md:p-16 shadow-2xl space-y-8 bg-white/20 dark:bg-black/10 group/accent">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="bg-indigo-500/10 p-4 rounded-2xl group-hover/accent:scale-110 transition-transform">
+            <Sparkles className="h-6 w-6 text-indigo-500" />
+          </div>
+          <div className="w-full">
+            <AccentColorPicker />
           </div>
         </div>
       </div>

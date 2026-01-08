@@ -129,7 +129,7 @@ export function AppSidebar() {
       }}
     >
       <SidebarContent className="overflow-hidden">
-        <div className="flex flex-col h-full mt-10">
+        <div className="flex flex-col h-full mt-4 lg:mt-10">
           <div className="flex">
             {/* Left Column: Menu items */}
             <div className="border-r border-border/40 bg-background/20">
@@ -141,7 +141,7 @@ export function AppSidebar() {
               <AppIcons onHoverChange={setHoverState} />
             </div>
             {/* Right Column: Chat List Section */}
-            <div className="w-[240px]">
+            <div className="w-52 lg:w-64">
               <AppList show={selectedItem === "Apps"} />
               <ChatList show={selectedItem === "Chat"} />
               <SettingsList show={selectedItem === "Settings"} />

@@ -253,14 +253,14 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-3">
-                    <button onclick="showAuthModal('signin')" class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors focus-ring">
+                    <button onclick="showAuthModal('signin')" class="hidden md:inline-flex items-center px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors focus-ring min-h-[44px]">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                         </svg>
                         Sign In
                     </button>
 
-                    <button class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors focus-ring">
+                    <button class="hidden md:inline-flex items-center px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors focus-ring min-h-[44px]">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
@@ -296,6 +296,56 @@
         </div>
     </nav>
 
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden opacity-0 invisible transition-all duration-300">
+        <div class="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-white dark:bg-slate-900 shadow-2xl transform translate-x-full transition-transform duration-300">
+            <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-lg font-bold text-slate-900 dark:text-white">Codiner</span>
+                </div>
+                <button id="close-mobile-menu" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-6">
+                <nav class="px-6 space-y-4">
+                    <a href="#features" class="mobile-menu-link block py-3 px-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        Features
+                    </a>
+                    <a href="#how-it-works" class="mobile-menu-link block py-3 px-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        How It Works
+                    </a>
+                    <a href="#pricing" class="mobile-menu-link block py-3 px-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        Pricing
+                    </a>
+                    <a href="/docs" class="block py-3 px-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        Documentation
+                    </a>
+                    <a href="/community" class="block py-3 px-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        Community
+                    </a>
+                </nav>
+
+                <div class="px-6 mt-8 space-y-4">
+                    <button onclick="showAuthModal('signin')" class="w-full py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        Sign In
+                    </button>
+                    <button onclick="showAuthModal('signup')" class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200">
+                        Get Started Free
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
         <!-- Dynamic Background -->
@@ -318,56 +368,57 @@
             <div class="absolute bottom-10 left-10 w-48 h-48 border border-purple-200/20 dark:border-purple-800/20 rounded-lg rotate-45 animate-float" style="animation-delay: -2s;"></div>
         </div>
 
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
             <div class="text-center">
                 <!-- Badge -->
-                <div class="inline-flex items-center bg-gradient-to-r from-blue-500/10 to-purple-600/10 text-blue-600 dark:text-blue-400 rounded-full px-6 py-3 text-sm font-semibold border border-blue-200/20 dark:border-blue-800/20 mb-8 animate-fade-in-up">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="inline-flex items-center bg-gradient-to-r from-blue-500/10 to-purple-600/10 text-blue-600 dark:text-blue-400 rounded-full px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold border border-blue-200/20 dark:border-blue-800/20 mb-6 sm:mb-8 animate-fade-in-up">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
-                    Trusted by 5,000+ Developers Worldwide
+                    <span class="hidden sm:inline">Trusted by 5,000+ Developers Worldwide</span>
+                    <span class="sm:hidden">5,000+ Developers</span>
                 </div>
 
                 <!-- Main Headline -->
-                <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
-                    <span class="block text-slate-900 dark:text-white mb-2">Build Smart Apps</span>
+                <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <span class="block text-slate-900 dark:text-white mb-1 sm:mb-2">Build Smart Apps</span>
                     <span class="block text-gradient animate-gradient-shift bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                         Faster with AI
                     </span>
                 </h1>
 
                 <!-- Subheadline -->
-                <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.4s;">
+                <p class="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up px-4 sm:px-0" style="animation-delay: 0.4s;">
                     Create dashboards, SaaS products, and automation tools in minutes.
-                    <strong>AI-powered development</strong> that turns your ideas into production-ready applications instantly.
+                    <strong class="block sm:inline">AI-powered development</strong> that turns your ideas into production-ready applications instantly.
                 </p>
 
                 <!-- Feature Pills -->
-                <div class="flex flex-wrap justify-center gap-3 mb-10 animate-fade-in-up" style="animation-delay: 0.6s;">
-                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform">
+                <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 animate-fade-in-up px-4 sm:px-0" style="animation-delay: 0.6s;">
+                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform min-h-[32px] flex items-center">
                         🤖 AI Code Generation
                     </span>
-                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform">
+                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform min-h-[32px] flex items-center">
                         ⚡ Real-Time Collaboration
                     </span>
-                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform">
+                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform min-h-[32px] flex items-center">
                         🎨 Drag & Drop UI Builder
                     </span>
-                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform">
+                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform min-h-[32px] flex items-center">
                         🔒 Enterprise Security
                     </span>
-                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform">
+                    <span class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 transition-transform min-h-[32px] flex items-center">
                         🚀 10+ Deployment Platforms
                     </span>
                 </div>
 
                 <!-- CTA Section -->
-                <div class="flex flex-col lg:flex-row items-center justify-center gap-6 mb-8 animate-fade-in-up" style="animation-delay: 0.8s;">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0" style="animation-delay: 0.8s;">
                     <!-- Primary CTA -->
-                    <div class="group relative">
+                    <div class="group relative w-full sm:w-auto">
                         <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                        <button onclick="showAuthModal('signup')" class="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 focus-ring flex items-center space-x-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="showAuthModal('signup')" class="relative w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 focus-ring flex items-center justify-center space-x-3 min-h-[44px]">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                             <span>Get Started Free</span>
@@ -375,8 +426,8 @@
                     </div>
 
                     <!-- Secondary CTA -->
-                    <button onclick="showAuthModal('signin')" class="bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm text-slate-900 dark:text-white px-8 py-5 rounded-xl font-semibold text-lg border border-slate-200/20 dark:border-slate-700/20 hover:bg-white/20 dark:hover:bg-slate-800/70 transition-all duration-300 focus-ring flex items-center space-x-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button onclick="showAuthModal('signin')" class="w-full sm:w-auto bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm text-slate-900 dark:text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-semibold text-base sm:text-lg border border-slate-200/20 dark:border-slate-700/20 hover:bg-white/20 dark:hover:bg-slate-800/70 transition-all duration-300 focus-ring flex items-center justify-center space-x-3 min-h-[44px]">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <span>View Demo</span>
@@ -384,37 +435,37 @@
                 </div>
 
                 <!-- Social Proof Stats -->
-                <div class="flex flex-wrap justify-center gap-8 mb-12 animate-fade-in-up" style="animation-delay: 1s;">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-slate-900 dark:text-white">5,000+</div>
-                        <div class="text-sm text-slate-600 dark:text-slate-400">Active Builders</div>
+                <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 sm:mb-12 animate-fade-in-up px-4 sm:px-0" style="animation-delay: 1s;">
+                    <div class="text-center min-w-[80px]">
+                        <div class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">5,000+</div>
+                        <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Active Builders</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-slate-900 dark:text-white">50+</div>
-                        <div class="text-sm text-slate-600 dark:text-slate-400">Templates</div>
+                    <div class="text-center min-w-[80px]">
+                        <div class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">50+</div>
+                        <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Templates</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-slate-900 dark:text-white">4.9/5</div>
-                        <div class="text-sm text-slate-600 dark:text-slate-400">User Rating</div>
+                    <div class="text-center min-w-[80px]">
+                        <div class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">4.9/5</div>
+                        <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">User Rating</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-slate-900 dark:text-white">Free</div>
-                        <div class="text-sm text-slate-600 dark:text-slate-400">Forever</div>
+                    <div class="text-center min-w-[80px]">
+                        <div class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Free</div>
+                        <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Forever</div>
                     </div>
                 </div>
 
                 <!-- Platform Downloads -->
-                <div class="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up" style="animation-delay: 1s;">
-                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-sm">
+                <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 animate-fade-in-up px-4 sm:px-0" style="animation-delay: 1s;">
+                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-xs sm:text-sm min-h-[36px] flex items-center">
                         macOS
                     </button>
-                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-sm">
+                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-xs sm:text-sm min-h-[36px] flex items-center">
                         Windows
                     </button>
-                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-sm">
+                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-xs sm:text-sm min-h-[36px] flex items-center">
                         Linux
                     </button>
-                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-sm">
+                    <button class="bg-slate-900/80 hover:bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 focus-ring text-xs sm:text-sm min-h-[36px] flex items-center">
                         Web App
                     </button>
                 </div>
@@ -539,7 +590,7 @@
             </div>
 
             <!-- Key Features Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
                 <div class="group feature-card glass-card-dark rounded-2xl p-6 hover:scale-105 transition-all duration-300 animate-on-scroll text-center">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-bounce-gentle">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -602,7 +653,7 @@
             </div>
 
             <!-- Feature Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 animate-on-scroll">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16 animate-on-scroll">
                 <div class="text-center">
                     <div class="text-4xl font-bold text-gradient mb-2">25+</div>
                     <div class="text-slate-600 dark:text-slate-400 font-medium">Enterprise Features</div>
@@ -746,7 +797,7 @@
             </div>
 
             <!-- Steps -->
-            <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
                 <!-- Step 1 -->
                 <div class="text-center animate-on-scroll">
                     <div class="relative mb-8">
@@ -1628,12 +1679,61 @@
 
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('[aria-label="Toggle menu"]');
-        if (mobileMenuButton) {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
             mobileMenuButton.addEventListener('click', function() {
-                // Here you would implement mobile menu logic
-                console.log('Mobile menu toggle clicked');
+                mobileMenu.classList.remove('opacity-0', 'invisible');
+                mobileMenu.classList.add('opacity-100', 'visible');
+                document.querySelector('#mobile-menu > div').classList.remove('translate-x-full');
+                document.querySelector('#mobile-menu > div').classList.add('translate-x-0');
+                document.body.style.overflow = 'hidden';
             });
         }
+
+        if (closeMobileMenu && mobileMenu) {
+            closeMobileMenu.addEventListener('click', function() {
+                closeMobileMenuHandler();
+            });
+        }
+
+        // Close mobile menu when clicking overlay
+        if (mobileMenu) {
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target === mobileMenu) {
+                    closeMobileMenuHandler();
+                }
+            });
+        }
+
+        function closeMobileMenuHandler() {
+            mobileMenu.classList.remove('opacity-100', 'visible');
+            mobileMenu.classList.add('opacity-0', 'invisible');
+            document.querySelector('#mobile-menu > div').classList.remove('translate-x-0');
+            document.querySelector('#mobile-menu > div').classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        // Handle mobile menu links
+        const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    closeMobileMenuHandler();
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 300);
+                }
+            });
+        });
 
         // Loading animation
         window.addEventListener('load', function() {

@@ -69,16 +69,36 @@ const integrations = [
   { name: "Stripe", icon: BarChart3, color: "from-purple-600 to-indigo-700" },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean
+  onMobileClose?: () => void
+}
+
+export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
   return (
-    <div className={cn(
-      "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 transition-all duration-300 shadow-xl",
-      collapsed ? "w-16" : "w-72"
-    )}>
-      <div className="flex flex-col h-full">
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={cn(
+        "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 transition-all duration-300 shadow-xl",
+        // Desktop behavior
+        "hidden lg:flex lg:flex-col",
+        collapsed ? "lg:w-16" : "lg:w-72",
+        // Mobile behavior
+        "fixed inset-y-0 left-0 z-50 w-72 transform lg:transform-none lg:relative lg:z-auto",
+        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-slate-700/50">
           {!collapsed && (
@@ -233,6 +253,7 @@ export function Sidebar() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }
