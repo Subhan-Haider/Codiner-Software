@@ -112,7 +112,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
             <div
               id="layout-main-content-container"
-              className="flex h-[calc(100vh-9rem)] lg:h-[calc(100vh-10rem)] w-full overflow-x-hidden overflow-y-auto mt-24 lg:mt-28 mb-4 lg:mb-10 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
+              className="flex h-[calc(100vh-12rem)] lg:h-[calc(100vh-14rem)] w-full overflow-x-hidden overflow-y-auto mt-32 lg:mt-40 mb-4 lg:mb-10 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
             >
               {children}
             </div>
