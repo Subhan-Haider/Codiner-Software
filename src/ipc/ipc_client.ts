@@ -1506,4 +1506,8 @@ export class IpcClient {
     );
     return result.enhancedPrompt;
   }
+
+  public async checkForUpdates(): Promise<{ success: boolean }> {
+    return this.ipcRenderer.invoke("check-for-updates");
+  }
 }
