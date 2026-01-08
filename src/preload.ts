@@ -151,6 +151,8 @@ const validInvokeChannels = [
   // We can't detect with IS_TEST_BUILD in the preload script because
   // it's a separate process from the main process.
   "supabase:fake-connect-and-set-project",
+  "get-latest-release",
+  "download-update",
 ];
 
 // Add valid receive channels
@@ -174,6 +176,8 @@ const validReceiveChannels = [
   "agent-tool:consent-request",
   // Telemetry events from main to renderer
   "telemetry:event",
+  "update-progress",
+  "update-done",
 ] as const;
 
 type ValidInvokeChannel = (typeof validInvokeChannels)[number];

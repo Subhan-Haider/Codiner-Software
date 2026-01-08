@@ -1507,7 +1507,19 @@ export class IpcClient {
     return result.enhancedPrompt;
   }
 
-  public async checkForUpdates(): Promise<{ success: boolean }> {
-    return this.ipcRenderer.invoke("check-for-updates");
+  public async getLatestRelease(): Promise<any> {
+    return this.ipcRenderer.invoke("get-latest-release");
+  }
+
+  public async downloadUpdate(release: any): Promise<{ success: boolean; path: string }> {
+    return this.ipcRenderer.invoke("download-update", release);
+  }
+
+  public onUpdateProgress(callback: (percent: number) => void) {
+    return (this.ipcRenderer as any).on("update-progress", (percent: number) => callback(percent));
+  }
+
+  public onUpdateDone(callback: (path: string) => void) {
+    return (this.ipcRenderer as any).on("update-done", (path: string) => callback(path));
   }
 }

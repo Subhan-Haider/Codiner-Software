@@ -3,7 +3,6 @@ import * as path from "node:path";
 import { registerIpcHandlers } from "./ipc/ipc_host";
 import dotenv from "dotenv";
 import started from "electron-squirrel-startup";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 import log from "electron-log";
 import {
   getSettingsFilePath,
@@ -111,23 +110,7 @@ export async function onReady() {
   await onFirstRunMaybe(settings);
   createWindow();
 
-  logger.info("Auto-update enabled=", settings.enableAutoUpdate);
-  if (settings.enableAutoUpdate) {
-    // Technically we could just pass the releaseChannel directly to the host,
-    // but this is more explicit and falls back to stable if there's an unknown
-    // release channel.
-    const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://update.codiner.online/update/${postfix}`;
-    logger.info("Auto-update release channel=", postfix);
-    updateElectronApp({
-      logger,
-      updateSource: {
-        type: UpdateSourceType.ElectronPublicUpdateService,
-        repo: "Subhan-Haider/Codiner-SH",
-        host,
-      },
-    }); // additional configuration options available
-  }
+  logger.info("Auto-update preference=", settings.enableAutoUpdate);
 }
 
 export async function onFirstRunMaybe(settings: UserSettings) {
