@@ -201,7 +201,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full pb-16 max-w-4xl w-full mx-auto p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000 mt-38">
+    <div className="flex flex-col items-center justify-center min-h-full pb-16 max-w-4xl w-full mx-auto p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <ForceCloseDialog
         isOpen={forceCloseDialogOpen}
         onClose={() => setForceCloseDialogOpen(false)}
