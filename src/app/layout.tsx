@@ -107,12 +107,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <DeepLinkProvider>
           <SidebarProvider>
             <TitleBar />
-            <div className="-mt-16 lg:-mt-32">
+            <div className="-mt-20">
               <AppSidebar />
             </div>
             <div
               id="layout-main-content-container"
-              className="flex h-[calc(100vh-11rem)] w-full overflow-x-hidden overflow-y-auto mt-[8rem] mb-4 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
+              className="flex h-[calc(100vh-10rem)] w-full overflow-x-hidden overflow-y-auto mt-20 mb-4 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
             >
               {children}
             </div>
