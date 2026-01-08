@@ -201,21 +201,21 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full pb-16 max-w-4xl w-full mx-auto p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+    <div className="flex flex-col items-center justify-center min-h-full pb-8 sm:pb-12 lg:pb-16 max-w-4xl w-full mx-auto p-4 sm:p-8 lg:p-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <ForceCloseDialog
         isOpen={forceCloseDialogOpen}
         onClose={() => setForceCloseDialogOpen(false)}
         performanceData={performanceData}
       />
 
-      <div className="w-full space-y-10">
+      <div className="w-full space-y-4 sm:space-y-6 lg:space-y-10">
         <SetupBanner />
 
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-gradient animate-float">
+        <div className="text-center space-y-2 sm:space-y-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-gradient animate-float">
             What will you build today?
           </h1>
-          <p className="text-lg text-muted-foreground font-medium max-w-lg mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground font-medium max-w-lg mx-auto leading-relaxed">
             Turn your spark of an idea into a fully functional application with human-friendly AI orchestration.
           </p>
         </div>
