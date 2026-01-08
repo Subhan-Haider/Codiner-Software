@@ -153,6 +153,7 @@ const validInvokeChannels = [
   "supabase:fake-connect-and-set-project",
   "get-latest-release",
   "download-update",
+  "export-app-as-zip",
 ];
 
 // Add valid receive channels

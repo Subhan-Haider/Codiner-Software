@@ -1,4 +1,5 @@
 import { ipcMain, app, dialog } from "electron";
+import archiver from "archiver";
 import { db, getDatabasePath } from "../../db";
 import { apps, chats, messages } from "../../db/schema";
 import { desc, eq, like } from "drizzle-orm";
@@ -1985,6 +1986,71 @@ export function registerAppHandlers() {
         logger.error("Failed to enhance prompt:", error);
         throw error;
       }
+    },
+  );
+
+  handle(
+    "export-app-as-zip",
+    async (_, params: ExportAppAsZipParams): Promise<void> => {
+      const { appId } = params;
+      const appRecord = await db.query.apps.findFirst({
+        where: eq(apps.id, appId),
+      });
+
+      if (!appRecord) {
+        throw new Error("App not found");
+      }
+
+      const appPath = getCodinerAppPath(appRecord.path);
+      const { filePath } = await dialog.showSaveDialog({
+        title: "Export App as ZIP",
+        defaultPath: `${appRecord.name}.zip`,
+        filters: [{ name: "ZIP Files", extensions: ["zip"] }],
+      });
+
+      if (!filePath) {
+        return; // User cancelled
+      }
+
+      const output = fs.createWriteStream(filePath);
+      const archive = archiver("zip", {
+        zlib: { level: 9 }, // Sets the compression level.
+      });
+
+      return new Promise((resolve, reject) => {
+        output.on("close", () => {
+          logger.info(appId + " total bytes");
+          logger.info("archiver has been finalized and the output file descriptor has closed.");
+          resolve();
+        });
+
+        output.on("end", () => {
+          logger.info("Data has been drained");
+        });
+
+        archive.on("warning", (err) => {
+          if (err.code === "ENOENT") {
+            logger.warn(err);
+          } else {
+            reject(err);
+          }
+        });
+
+        archive.on("error", (err) => {
+          reject(err);
+        });
+
+        archive.pipe(output);
+
+        archive.directory(appPath, false, (entry) => {
+          if (entry.name.includes("node_modules") || entry.name.includes(".git")) {
+            return false;
+          }
+          return entry;
+        });
+
+        archive.finalize();
+      });
     },
   );
 }
