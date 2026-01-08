@@ -7,6 +7,13 @@ export function createLoggedHandler(logger: log.LogFunctions) {
     channel: string,
     fn: (event: IpcMainInvokeEvent, ...args: any[]) => Promise<any>,
   ) => {
+    // Remove existing handler to support HMR/reloads without error
+    if (ipcMain.eventNames().includes(channel) || true) {
+      // ipcMain.handle throws if duplicate, but doesn't provide a check method for 'handle' specifically
+      // removeHandler is safe to call even if no handler exists
+      ipcMain.removeHandler(channel);
+    }
+
     ipcMain.handle(
       channel,
       async (event: IpcMainInvokeEvent, ...args: any[]) => {
@@ -32,7 +39,7 @@ export function createLoggedHandler(logger: log.LogFunctions) {
 export function createTestOnlyLoggedHandler(logger: log.LogFunctions) {
   if (!IS_TEST_BUILD) {
     // Returns a no-op function for non-e2e test builds.
-    return () => {};
+    return () => { };
   }
   return createLoggedHandler(logger);
 }
