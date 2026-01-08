@@ -300,8 +300,8 @@ function IdentitySettings() {
             <Label htmlFor="architect-name">Display Name</Label>
             <Input
               id="architect-name"
-              value={settings?.architectName || ""}
-              onChange={(e) => updateSettings({ architectName: e.target.value })}
+              value={settings?.userName || ""}
+              onChange={(e) => updateSettings({ userName: e.target.value })}
               placeholder="Enter your name"
               className="max-w-md"
             />
@@ -316,9 +316,9 @@ function IdentitySettings() {
             These instructions will be added to every request you make.
           </p>
           <Textarea
-            value={settings?.customInstructions || ""}
+            value={settings?.customSystemPrompt || ""}
             onChange={(e) =>
-              updateSettings({ customInstructions: e.target.value })
+              updateSettings({ customSystemPrompt: e.target.value })
             }
             placeholder="e.g. Always use TypeScript, prefer functional components..."
             className="min-h-[150px]"
