@@ -1606,7 +1606,23 @@ export function registerAppHandlers() {
     logger.log("removing all app files...");
     const codinerAppPath = getCodinerAppPath(".");
     if (fs.existsSync(codinerAppPath)) {
-      await fsPromises.rm(codinerAppPath, { recursive: true, force: true });
+      let retries = 5;
+      while (retries > 0) {
+        try {
+          await fsPromises.rm(codinerAppPath, { recursive: true, force: true });
+          break;
+        } catch (error: any) {
+          if (error.code === "EBUSY" || error.code === "EPERM") {
+            retries--;
+            logger.warn(
+              `Failed to remove app files (EBUSY/EPERM), retrying in 1s. Retries left: ${retries}`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
       // Recreate the base directory
       await fsPromises.mkdir(codinerAppPath, { recursive: true });
     }
