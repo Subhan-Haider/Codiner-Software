@@ -1998,9 +1998,19 @@ export function registerAppHandlers() {
         });
 
         return { enhancedPrompt: enhancedPrompt.trim() };
-      } catch (error) {
+      } catch (error: any) {
         logger.error("Failed to enhance prompt:", error);
-        throw error;
+
+        // Provide more specific error messages
+        if (error.message?.includes('API key')) {
+          throw new Error('Please configure your AI model API key in Settings to use prompt enhancement.');
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+          throw new Error('Network error: Please check your internet connection.');
+        } else if (error.message?.includes('model')) {
+          throw new Error('Model error: Please check your model configuration in Settings.');
+        }
+
+        throw new Error(`Failed to enhance prompt: ${error.message || 'Unknown error'}`);
       }
     },
   );
