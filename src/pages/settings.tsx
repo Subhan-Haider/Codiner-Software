@@ -12,10 +12,21 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, Settings, Workflow, Cpu, Trash2, AlertTriangle,
-  Github, Globe, Monitor, HelpCircle, Activity,
-  User, Fingerprint, Sparkles, Languages, Zap, Palette, Sun,
-  Box, ShieldCheck, Bug, Command
+  ArrowLeft,
+  Monitor,
+  Activity,
+  Fingerprint,
+  Trash2,
+  AlertTriangle,
+  Github,
+  Globe,
+  Settings,
+  Workflow,
+  Cpu,
+  HelpCircle,
+  Palette,
+  Box,
+  Command,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GitHubIntegration } from "@/components/GitHubIntegration";
@@ -40,18 +51,12 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { SettingsPager } from "@/components/SettingsPager";
 
 export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState("general");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const appVersion = useAppVersion();
-  const { settings, updateSettings } = useSettings();
-  const setActiveSettingsSection = useSetAtom(activeSettingsSectionAtom);
-
-  useEffect(() => {
-    setActiveSettingsSection("general-settings");
-  }, [setActiveSettingsSection]);
 
   const handleResetEverything = async () => {
     setIsResetting(true);
@@ -70,129 +75,164 @@ export default function SettingsPage() {
     }
   };
 
-  const sections = [
+  const tabs = [
     {
       id: "general",
-      label: "Core System",
-      icon: Monitor,
-      component: () => <GeneralSettings appVersion={appVersion} />
+      label: "General",
+      icon: Settings,
+      component: () => <GeneralSettings appVersion={appVersion} />,
     },
     {
       id: "identity",
-      label: "Neural Identity",
+      label: "Identity",
       icon: Fingerprint,
-      component: IdentitySettings
+      component: IdentitySettings,
     },
     {
-      id: "visual",
-      label: "Visual Optics",
+      id: "appearance",
+      label: "Appearance",
       icon: Palette,
-      component: VisualMechanics
+      component: VisualMechanics,
     },
     {
-      id: "logic",
-      label: "Autonomous Logic",
+      id: "workflow",
+      label: "Workflow",
       icon: Workflow,
-      component: WorkflowSettings
+      component: WorkflowSettings,
     },
     {
-      id: "neural",
-      label: "Neural Engine",
-      icon: Cpu,
-      component: AISettings
-    },
-    {
-      id: "providers",
-      label: "Intelligence Units",
+      id: "models",
+      label: "Models",
       icon: Globe,
-      component: ProviderSettingsGrid
+      component: ProviderSettingsGrid,
     },
     {
       id: "integrations",
-      label: "Cloud Nexus",
+      label: "Integrations",
       icon: Github,
       component: () => (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-8">
           <GitHubIntegration />
           <VercelIntegration />
           <SupabaseIntegration />
           <NeonIntegration />
         </div>
-      )
+      ),
     },
     {
       id: "tools",
-      label: "Tool Protocols",
+      label: "Tools",
       icon: Box,
       component: () => (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-8">
           <ToolsMcpSettings />
           <AgentToolsSettings />
           <WorkspaceTopology />
         </div>
-      )
+      ),
     },
     {
       id: "analytics",
-      label: "Engine Analytics",
+      label: "Analytics",
       icon: Activity,
       component: () => (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-8">
           <NeuralSystemDiagnostics />
-          <div className="glass-card border-primary/20 rounded-[2rem] p-8 md:p-12 shadow-2xl flex flex-col items-center space-y-8 bg-white/20 dark:bg-black/10">
-            <h3 className="text-2xl font-black tracking-tight">Telemetry Stream</h3>
+          <div className="p-6 border rounded-lg bg-card/40">
+            <h3 className="text-lg font-medium mb-4">Telemetry</h3>
             <TelemetrySwitch />
           </div>
         </div>
-      )
+      ),
     },
     {
-      id: "danger",
-      label: "Terminal Wipe",
+      id: "reset",
+      label: "Reset",
       icon: Trash2,
       component: () => (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 flex flex-col items-center text-center py-12">
-          <div className="p-6 rounded-[2rem] bg-red-500/10 mb-4">
-            <AlertTriangle className="h-12 w-12 text-red-600 animate-pulse" />
+        <div className="flex flex-col items-start gap-4 p-6 border border-destructive/20 rounded-lg bg-destructive/5">
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            <h3 className="font-bold">Dangerous Area</h3>
           </div>
-          <h2 className="text-4xl font-black tracking-tighter text-red-600">Nuclear Protocol</h2>
-          <p className="text-muted-foreground font-medium max-w-md">This action will permanently purge all local data, application state, and neural signatures.</p>
+          <p className="text-sm text-muted-foreground">
+            This will handle a complete factory reset of the application. All data will be lost.
+          </p>
           <Button
-            onClick={() => setIsResetDialogOpen(true)}
             variant="destructive"
-            className="h-20 px-12 rounded-[2rem] text-xl font-black shadow-2xl shadow-red-500/30 hover:scale-[1.05] transition-all uppercase tracking-widest mt-8"
+            onClick={() => setIsResetDialogOpen(true)}
           >
-            {isResetting ? "Purging..." : "Execute Wipe"}
+            {isResetting ? "Resetting..." : "Reset Everything"}
           </Button>
         </div>
-      )
+      ),
     },
     {
       id: "support",
-      label: "Support Hub",
+      label: "Support",
       icon: HelpCircle,
-      component: SupportSection
+      component: SupportSection,
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-transparent p-4 md:p-8 lg:p-12 flex flex-col gap-8 animate-in fade-in duration-1000">
-      <div className="flex items-center justify-between max-w-7xl mx-auto w-full px-4">
-        <Link to="/" className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-all duration-500">
-          <div className="p-2 rounded-xl bg-primary/5 group-hover:bg-primary/10 transition-all">
-            <ArrowLeft className="h-5 w-5" />
-          </div>
-          <span className="font-black uppercase tracking-widest text-[10px]">Back to Terminal</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-glow animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Neural Matrix Online</span>
-        </div>
-      </div>
+  const ActiveComponent =
+    tabs.find((t) => t.id === activeTab)?.component ||
+    (() => <div>Select a section</div>);
 
-      <div className="max-w-7xl mx-auto w-full flex-1 mb-12">
-        <SettingsPager sections={sections} />
-      </div>
+  return (
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-muted/10 flex flex-col">
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-8">
+            <Link
+              to="/"
+              className="p-2 -ml-2 rounded-md hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <h1 className="font-bold text-xl tracking-tight">Settings</h1>
+          </div>
+          <nav className="space-y-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    activeTab === tab.id
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+        <div className="mt-auto p-6 border-t text-xs text-muted-foreground">
+          <div className="flex items-center justify-between">
+            <span>Codiner v{appVersion || "..."}</span>
+            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto p-8 md:p-12 pb-24">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </h2>
+          </div>
+          <ActiveComponent />
+        </div>
+      </main>
 
       <ConfirmationDialog
         isOpen={isResetDialogOpen}
@@ -207,398 +247,258 @@ export default function SettingsPage() {
   );
 }
 
-export function GeneralSettings({ appVersion }: { appVersion: string | null }) {
+function GeneralSettings({ appVersion }: { appVersion: string | null }) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div id="general-settings" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-primary/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <Monitor className="h-8 w-8 text-primary" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">System UI Core</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Interface personality and foundational orchestration parameters.</p>
-        </div>
-      </div>
-
-      <div className="glass-card border-primary/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-16 shadow-2xl space-y-12 md:space-y-20 flex flex-col items-center bg-white/20 dark:bg-black/10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 w-full text-center items-center">
-          <div className="flex flex-col items-center space-y-4 md:space-y-6">
-            <div className="flex items-center gap-3">
-              <Command className="h-4 w-4 text-primary opacity-40" />
-              <span className="font-bold text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Stable Build</span>
-            </div>
-            <div className="px-10 md:px-14 py-6 md:py-10 rounded-[2rem] md:rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 flex flex-col items-center gap-3 md:gap-4 shadow-inner group/version transition-all hover:bg-indigo-500/10">
-              <span className="font-black text-4xl md:text-6xl text-gradient tracking-tighter">v{appVersion || "0.0.0"}</span>
-              <div className="px-4 md:px-6 py-1.5 md:py-2 bg-green-500 text-white text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] rounded-full shadow-lg shadow-green-500/20">
-                Active Node
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center space-y-4 md:space-y-6">
-            <div className="flex items-center gap-3">
-              <Box className="h-4 w-4 text-primary opacity-40" />
-              <span className="font-bold text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Optics Magnitude</span>
-            </div>
-            <div className="w-full max-w-xs scale-100 md:scale-110">
-              <ZoomSelector />
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-12 md:pt-20 border-t border-primary/10 w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
-          <div className="space-y-6 md:space-y-8 flex flex-col items-center text-center">
-            <div className="space-y-2 md:space-y-3">
-              <h3 className="text-xl md:text-2xl font-black tracking-tight">Sync Stream</h3>
-              <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed max-w-xs mx-auto">Continuous delivery of optimizations.</p>
+    <div className="space-y-8">
+      <Section title="Application">
+        <div className="grid gap-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label>Updates</Label>
+              <p className="text-sm text-muted-foreground">
+                Manage how Codiner receives updates.
+              </p>
             </div>
             <AutoUpdateSwitch />
           </div>
-
-          <div className="space-y-6 md:space-y-8 flex flex-col items-center text-center">
-            <div className="space-y-2 md:space-y-3">
-              <h3 className="text-xl md:text-2xl font-black tracking-tight">Stability Tier</h3>
-              <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed max-w-xs mx-auto">Select the risk magnitude for synchronization.</p>
-            </div>
-            <div className="w-full max-w-xs">
-              <ReleaseChannelSelector />
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-12 md:pt-20 border-t border-primary/10 w-full">
-          <div className="flex flex-col items-center text-center space-y-8 md:space-y-12 w-full">
-            <div className="space-y-2 md:space-y-3">
-              <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-primary">Runtime Framework</h3>
-              <p className="text-sm md:text-lg text-muted-foreground font-medium leading-relaxed max-w-xl mx-auto">Execution layer for localized hosting.</p>
-            </div>
-            <div className="w-full flex flex-col gap-8 md:gap-12 bg-black/5 dark:bg-white/5 p-8 md:p-16 rounded-[2rem] md:rounded-[4rem] border border-primary/5 shadow-inner">
-              <div className="w-full flex justify-center scale-100 md:scale-110">
-                <RuntimeModeSelector />
-              </div>
-              <div className="space-y-6 md:space-y-8 flex flex-col items-center">
-                <span className="font-bold text-[8px] md:text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Node.js Binary Cluster</span>
-                <div className="w-full max-w-lg">
-                  <NodePathSelector />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function WorkflowSettings() {
-  const { settings, updateSettings } = useSettings();
-  return (
-    <div id="workflow-settings" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-primary/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <Workflow className="h-8 w-8 text-primary" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">Orchestration Logic</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Define the cognitive independence for your agent cluster.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:gap-8">
-        <div className="glass-card border-primary/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-16 shadow-2xl transition-all hover:bg-white/30 dark:hover:bg-black/20 flex flex-col items-center text-center space-y-6 md:space-y-10 group/card">
-          <div className="bg-primary/10 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm transition-all group-hover/card:scale-110">
-            <ShieldCheck className="h-8 w-8 md:h-10 md:w-10 text-primary" />
-          </div>
-          <div className="space-y-2 md:space-y-4">
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight">Autonomous Pulse</h3>
-            <p className="text-sm md:text-lg text-muted-foreground font-medium leading-relaxed max-w-md">
-              Enable the agent to execute code modifications instantly without human intervention.
-            </p>
-          </div>
-          <div className="scale-110 md:scale-125">
-            <AutoApproveSwitch showToast={false} />
-          </div>
-        </div>
-
-        <div className="glass-card border-primary/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-16 shadow-2xl transition-all hover:bg-white/30 dark:hover:bg-black/20 flex flex-col items-center text-center space-y-6 md:space-y-10 group/card">
-          <div className="bg-red-500/10 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm transition-all group-hover/card:scale-110">
-            <AlertTriangle className="h-8 w-8 md:h-10 md:w-10 text-red-600" />
-          </div>
-          <div className="space-y-2 md:space-y-4">
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight">Diagnostic Healing</h3>
-            <p className="text-sm md:text-lg text-muted-foreground font-medium leading-relaxed max-w-md">
-              Instantly resolve TypeScript errors and environment inconsistencies during build.
-            </p>
-          </div>
-          <div className="scale-110 md:scale-125">
-            <AutoFixProblemsSwitch />
-          </div>
-        </div>
-
-        <div className="glass-card border-amber-500/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-16 shadow-2xl transition-all hover:bg-white/30 dark:hover:bg-black/20 flex flex-col items-center text-center space-y-6 md:space-y-10 group/card">
-          <div className="bg-amber-500/10 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm transition-all group-hover/card:scale-110">
-            <Zap className="h-8 w-8 md:h-10 md:w-10 text-amber-500" />
-          </div>
-          <div className="space-y-2 md:space-y-4">
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight">Neural Haptics</h3>
-            <p className="text-sm md:text-lg text-muted-foreground font-medium leading-relaxed max-w-md">
-              Enable tactile micro-interactions and sensory feedback during complex architectural operations.
-            </p>
-          </div>
-          <div className="scale-110 md:scale-125">
-            <Switch
-              checked={settings?.enableHaptics ?? true}
-              onCheckedChange={(checked) => updateSettings({ enableHaptics: checked })}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function AISettings() {
-  return (
-    <div id="ai-settings" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-primary/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <Cpu className="h-8 w-8 text-primary" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">Neural Parameters</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Global directives for token context and reasoning budgets.</p>
-        </div>
-      </div>
-
-      <div className="glass-card border-primary/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-20 shadow-2xl flex flex-col items-center space-y-16 md:space-y-24 bg-white/20 dark:bg-black/10">
-        <div className="space-y-8 md:space-y-12 w-full flex flex-col items-center text-center">
-          <div className="space-y-3 md:space-y-4">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
-              <h3 className="text-3xl md:text-4xl font-black tracking-tighter leading-none">Thinking Magnitude</h3>
-              <div className="bg-primary text-white px-4 md:px-5 py-1 md:py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] shadow-lg shadow-primary/20">Reasoning Depth</div>
-            </div>
-            <p className="text-base md:text-xl text-muted-foreground font-medium leading-relaxed max-w-md">
-              Configure the maximum computational effort per architectural thought cycle.
-            </p>
-          </div>
-          <div className="w-full max-w-2xl scale-100 md:scale-110">
-            <ThinkingBudgetSelector />
-          </div>
-        </div>
-
-        <div className="space-y-8 md:space-y-12 w-full flex flex-col items-center text-center">
-          <div className="space-y-3 md:space-y-4">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
-              <h3 className="text-3xl md:text-4xl font-black tracking-tighter leading-none">History Retention</h3>
-              <div className="bg-indigo-500 text-white px-4 md:px-5 py-1 md:py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] shadow-lg shadow-indigo-500/20">Context Window</div>
-            </div>
-            <p className="text-base md:text-xl text-muted-foreground font-medium leading-relaxed max-w-md">
-              Synchronize the token buffer to maintain optimal reasoning velocity.
-            </p>
-          </div>
-          <div className="w-full max-w-md scale-100 md:scale-110">
-            <MaxChatTurnsSelector />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function SupportSection() {
-  const handleReportBug = () => {
-    IpcClient.getInstance().openExternalUrl("https://github.com/Subhan-Haider/Codiner-SH/issues/new");
-  };
-
-  const handleOpenDocs = () => {
-    IpcClient.getInstance().openExternalUrl("https://www.codiner.online/docs");
-  };
-
-  return (
-    <div id="support" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-primary/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <HelpCircle className="h-8 w-8 text-primary" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">Support Hub</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Connect with the neural collective or report system anomalies.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        <div className="glass-card border-primary/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl transition-all hover:bg-white/30 dark:hover:bg-black/20 flex flex-col items-center text-center space-y-6 md:space-y-8 group/card">
-          <div className="bg-blue-500/10 p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] shadow-sm transition-all group-hover/card:scale-110">
-            <Globe className="h-8 w-8 md:h-10 md:w-10 text-blue-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl md:text-3xl font-black tracking-tighter">Documentation</h3>
-            <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed max-w-xs">
-              Explore the architectural blue-prints and integration guides for the Codiner engine.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="rounded-2xl px-8 h-12 font-bold border-primary/20 hover:bg-primary/10 transition-all duration-300"
-            onClick={handleOpenDocs}
-          >
-            Visit Website
-          </Button>
-        </div>
-
-        <div className="glass-card border-red-500/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl transition-all hover:bg-white/30 dark:hover:bg-black/20 flex flex-col items-center text-center space-y-6 md:space-y-8 group/card">
-          <div className="bg-red-500/10 p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] shadow-sm transition-all group-hover/card:scale-110">
-            <Bug className="h-8 w-8 md:h-10 md:w-10 text-red-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl md:text-3xl font-black tracking-tighter">Report Anomaly</h3>
-            <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed max-w-xs">
-              Detected a logic leak or system drift? File a report in the neural repository.
-            </p>
-          </div>
-          <Button
-            variant="destructive"
-            className="rounded-2xl px-8 h-12 font-bold bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all duration-300"
-            onClick={handleReportBug}
-          >
-            Report Bug
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function IdentitySettings() {
-  const { settings, updateSettings } = useSettings();
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateSettings({ userName: e.target.value });
-  };
-
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    updateSettings({ customSystemPrompt: e.target.value });
-  };
-
-  return (
-    <div id="personalization" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-indigo-500/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <Fingerprint className="h-8 w-8 text-indigo-500" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">Neural Identity</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Personalize how the system recognizes and interacts with you.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8">
-        <div className="glass-card border-indigo-500/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-white/20 dark:bg-black/10">
-          <div className="relative group/avatar">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 transition-all group-hover/avatar:scale-105 group-hover/avatar:rotate-3">
-              <User className="h-10 w-10 md:h-14 md:w-14" />
-            </div>
-            <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2 rounded-xl shadow-lg animate-pulse">
-              <Sparkles className="h-4 w-4" />
-            </div>
-          </div>
-
-          <div className="space-y-4 flex-1 w-full">
-            <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500 ml-1">Architect Designation</Label>
-              <Input
-                value={settings?.userName || "Architect"}
-                onChange={handleNameChange}
-                placeholder="How should I address you?"
-                className="bg-white/50 dark:bg-black/20 border-indigo-500/10 focus:border-indigo-500/30 h-14 rounded-2xl px-6 text-lg font-bold"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card border-purple-500/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-8 bg-white/20 dark:bg-black/10 group/soul">
-          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
-            <div className="bg-purple-500/10 p-4 rounded-2xl group-hover/soul:scale-110 transition-transform">
-              <Languages className="h-6 w-6 text-purple-500" />
-            </div>
+          <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h3 className="text-2xl font-black tracking-tight">System Persona</h3>
-              <p className="text-sm text-muted-foreground font-medium">Inject a specialized global directive into the model's neural core.</p>
+              <Label>Release Channel</Label>
+              <p className="text-sm text-muted-foreground">
+                Choose between Stable or Beta builds.
+              </p>
             </div>
-          </div>
-          <div className="space-y-4">
-            <Textarea
-              value={settings?.customSystemPrompt || ""}
-              onChange={handlePromptChange}
-              placeholder="e.g. Always respond in a highly technical tone, or prioritize accessibility and clean code patterns..."
-              className="min-h-[160px] bg-white/50 dark:bg-black/20 border-purple-500/10 focus:border-purple-500/30 rounded-[1.5rem] p-6 text-base leading-relaxed font-medium resize-none shadow-inner"
-            />
+            <ReleaseChannelSelector />
           </div>
         </div>
-      </div>
+      </Section>
+
+      <Section title="Zoom & Scale">
+        <ZoomSelector />
+      </Section>
+
+      <Section title="Runtime">
+        <div className="space-y-4">
+          <RuntimeModeSelector />
+          <NodePathSelector />
+        </div>
+      </Section>
     </div>
   );
 }
 
-export function VisualMechanics() {
+function IdentitySettings() {
+  const { settings, updateSettings } = useSettings();
+
+  return (
+    <div className="space-y-6">
+      <Section title="Your Profile">
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="architect-name">Display Name</Label>
+            <Input
+              id="architect-name"
+              value={settings?.architectName || ""}
+              onChange={(e) => updateSettings({ architectName: e.target.value })}
+              placeholder="Enter your name"
+              className="max-w-md"
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="System Instructions">
+        <div className="grid gap-2">
+          <Label>Custom Instructions</Label>
+          <p className="text-sm text-muted-foreground mb-2">
+            These instructions will be added to every request you make.
+          </p>
+          <Textarea
+            value={settings?.customInstructions || ""}
+            onChange={(e) =>
+              updateSettings({ customInstructions: e.target.value })
+            }
+            placeholder="e.g. Always use TypeScript, prefer functional components..."
+            className="min-h-[150px]"
+          />
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function VisualMechanics() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div id="visual-settings" className="space-y-12 group animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex flex-col items-center text-center space-y-4">
-        <div className="bg-pink-500/10 p-5 rounded-[2rem] transition-all group-hover:scale-110">
-          <Palette className="h-8 w-8 text-pink-500" />
+    <div className="space-y-8">
+      <Section title="Theme">
+        <div className="grid grid-cols-3 gap-4 max-w-md">
+          {["light", "dark", "system"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setTheme(t as any)}
+              className={cn(
+                "flex flex-col items-center justify-center p-4 rounded-lg border transition-all",
+                theme === t
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "hover:bg-muted/50",
+              )}
+            >
+              {t === "light" && <SunIcon className="h-6 w-6 mb-2" />}
+              {t === "dark" && <MoonIcon className="h-6 w-6 mb-2" />}
+              {t === "system" && <Monitor className="h-6 w-6 mb-2" />}
+              <span className="capitalize text-sm font-medium">{t}</span>
+            </button>
+          ))}
         </div>
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tight text-gradient">Visual Mechanics</h2>
-          <p className="text-muted-foreground font-medium text-lg max-w-md">Calibrate the luminous intensity and scale of your architectural interface.</p>
-        </div>
-      </div>
+      </Section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="glass-card border-pink-500/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl flex flex-col items-center text-center space-y-8 bg-white/20 dark:bg-black/10 group/theme">
-          <div className="bg-pink-500/10 p-4 rounded-2xl group-hover/theme:scale-110 transition-transform">
-            <Sun className="h-6 w-6 text-pink-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl font-black tracking-tighter">Digital Ambience</h3>
-            <div className="flex bg-white/50 dark:bg-black/30 p-2 rounded-2xl border border-pink-500/10 w-full mt-4">
-              {(["light", "dark", "system"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTheme(t)}
-                  className={cn(
-                    "flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
-                    theme === t
-                      ? "bg-pink-500 text-white shadow-lg shadow-pink-500/30 scale-105"
-                      : "hover:bg-pink-500/10 text-muted-foreground hover:text-pink-500"
-                  )}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card border-orange-500/20 rounded-[2.5rem] p-8 md:p-12 shadow-2xl flex flex-col items-center text-center space-y-8 bg-white/20 dark:bg-black/10 group/scale">
-          <div className="bg-orange-500/10 p-4 rounded-2xl group-hover/scale:scale-110 transition-transform">
-            <Monitor className="h-6 w-6 text-orange-500" />
-          </div>
-          <div className="space-y-2 w-full">
-            <h3 className="text-2xl font-black tracking-tighter">Interface Density</h3>
-            <div className="w-full mt-4">
-              <ZoomSelector />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="glass-card border-indigo-500/20 rounded-[2.5rem] p-8 md:p-16 shadow-2xl space-y-8 bg-white/20 dark:bg-black/10 group/accent">
+      <Section title="Accent Color">
         <AccentColorPicker />
-      </div>
+      </Section>
     </div>
+  );
+}
+
+function WorkflowSettings() {
+  return (
+    <div className="space-y-8">
+      <Section title="Automation">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Label>Auto-approve Changes</Label>
+            <p className="text-sm text-muted-foreground">
+              Skip confirmation for file edits.
+            </p>
+          </div>
+          <AutoApproveSwitch />
+        </div>
+      </Section>
+
+      <Section title="Diagnostics">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Label>Auto-fix Problems</Label>
+            <p className="text-sm text-muted-foreground">
+              Attempt to verify and fix lint errors automatically.
+            </p>
+          </div>
+          <AutoFixProblemsSwitch />
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function AISettings() {
+  return (
+    <div className="space-y-8">
+      <Section title="Limits">
+        <MaxChatTurnsSelector />
+      </Section>
+      <Section title="Thinking Budget">
+        <ThinkingBudgetSelector />
+      </Section>
+    </div>
+  )
+}
+
+
+function SupportSection() {
+  return (
+    <div className="space-y-6">
+      <Section title="Resources">
+        <div className="grid gap-4">
+          <a
+            href="https://github.com/Subhan-Haider/Codiner-SH/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <Github className="h-5 w-5 mr-3" />
+            <div>
+              <div className="font-medium">Report an Issue</div>
+              <div className="text-sm text-muted-foreground">
+                Found a bug? Let us know on GitHub.
+              </div>
+            </div>
+          </a>
+          <a
+            href="https://codiner.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <Globe className="h-5 w-5 mr-3" />
+            <div>
+              <div className="font-medium">Documentation</div>
+              <div className="text-sm text-muted-foreground">
+                Read the official docs and guides.
+              </div>
+            </div>
+          </a>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        {title}
+      </h3>
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  )
+}
+
+function MoonIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
   );
 }
