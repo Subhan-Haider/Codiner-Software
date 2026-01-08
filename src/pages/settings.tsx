@@ -231,7 +231,7 @@ export default function SettingsPage() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-8 md:p-12 pb-24">
+        <div className="max-w-3xl mx-auto p-8 md:p-12 pb-24 mt-38">
           <div className="mb-8">
             <h2 className="text-2xl font-bold tracking-tight">
               {tabs.find((t) => t.id === activeTab)?.label}
