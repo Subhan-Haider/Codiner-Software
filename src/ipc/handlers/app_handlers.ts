@@ -743,15 +743,12 @@ export function registerAppHandlers() {
           // Explicitly set these to null because we don't want to copy them over.
           // Note: we could just leave them out since they're nullable field, but this
           // is to make it explicit we intentionally don't want to copy them over.
-          // @ts-ignore
           supabaseProjectId: null,
-          // @ts-ignore
           githubOrg: null,
-          // @ts-ignore
           githubRepo: null,
           installCommand: originalApp.installCommand,
           startCommand: originalApp.startCommand,
-        })
+        } as any)
         .returning();
 
       return { app: newDbApp };
@@ -1720,7 +1717,7 @@ export function registerAppHandlers() {
         .orderBy(desc(apps.createdAt));
 
       const appNameMatchesResult: AppSearchResult[] = appNameMatches.map(
-        (r: any) => ({
+        (r: any): AppSearchResult => ({
           id: r.id,
           name: r.name,
           createdAt: r.createdAt,
@@ -1743,7 +1740,7 @@ export function registerAppHandlers() {
         .orderBy(desc(apps.createdAt));
 
       const chatTitleMatchesResult: AppSearchResult[] = chatTitleMatches.map(
-        (r: any) => ({
+        (r: any): AppSearchResult => ({
           id: r.id,
           name: r.name,
           createdAt: r.createdAt,
@@ -1768,7 +1765,7 @@ export function registerAppHandlers() {
         .orderBy(desc(apps.createdAt));
 
       const chatMessageMatchesResult: AppSearchResult[] = chatMessageMatches.map(
-        (r: any) => ({
+        (r: any): AppSearchResult => ({
           id: r.id,
           name: r.name,
           createdAt: r.createdAt,
