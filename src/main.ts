@@ -117,13 +117,13 @@ export async function onReady() {
     // but this is more explicit and falls back to stable if there's an unknown
     // release channel.
     const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://api.codiner.online/v1/update/${postfix}`;
+    const host = `https://update.codiner.online/update/${postfix}`;
     logger.info("Auto-update release channel=", postfix);
     updateElectronApp({
       logger,
       updateSource: {
         type: UpdateSourceType.ElectronPublicUpdateService,
-        repo: "codiner-sh/codiner",
+        repo: "Subhan-Haider/Codiner-SH",
         host,
       },
     }); // additional configuration options available
