@@ -27,6 +27,7 @@ import {
   Palette,
   Box,
   Command,
+  Beaker,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GitHubIntegration } from "@/components/GitHubIntegration";
@@ -144,6 +145,12 @@ export default function SettingsPage() {
           </div>
         </div>
       ),
+    },
+    {
+      id: "labs",
+      label: "Labs",
+      icon: Beaker,
+      component: LabsSettings,
     },
     {
       id: "reset",
@@ -442,6 +449,66 @@ function SupportSection() {
           </a>
         </div>
       </Section>
+    </div>
+  );
+}
+
+function LabsSettings() {
+  const { settings, updateSettings } = useSettings();
+  const experiments = settings?.experiments || {};
+
+  const toggleExperiment = (key: keyof typeof experiments) => {
+    updateSettings({
+      experiments: {
+        ...experiments,
+        [key]: !experiments[key],
+      },
+    });
+  };
+
+  const featureFlags = [
+    { key: "enableGhostText", label: "Ghost Text", description: "Show inline AI code completions as you type." },
+    { key: "enableSemanticSearch", label: "Semantic Search", description: "Use embeddings for deeper code search and understanding." },
+    { key: "enableAutoRefactor", label: "Auto-Refactor", description: "Automatically clean up and format code on save." },
+    { key: "enableVimMode", label: "Vim Mode", description: "Enable Vim keybindings for the editor." },
+    { key: "enableVoiceControl", label: "Voice Control", description: "Control the IDE with voice commands." },
+    { key: "enableLiveCollaboration", label: "Live Collaboration", description: "Share your session with others in real-time." },
+    { key: "enableCloudSync", label: "Cloud Sync", description: "Sync your settings and snippets across devices." },
+    { key: "enableTerminalMultiplexer", label: "Terminal Multiplexer", description: "Advanced terminal management with split panes." },
+    { key: "enableGpuAcceleration", label: "GPU Acceleration", description: "Use local GPU for accelerated model inference." },
+    { key: "enablePrivacyMode", label: "Privacy Mode", description: "Blur sensitive data like API keys and tokens in the UI." },
+    { key: "enableZenMode", label: "Zen Mode", description: "Distraction-free coding environment." },
+    { key: "enableAutoUpdateDependencies", label: "Auto-Update Dependencies", description: "Automatically check and update npm packages." },
+    { key: "enableGitLens", label: "Git Lens", description: "Show git blame information inline." },
+    { key: "enableSnippetManager", label: "Snippet Manager", description: "Manage and insert code snippets easily." },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="p-4 border border-yellow-500/20 bg-yellow-500/10 rounded-lg mb-6">
+        <div className="flex items-center gap-2 text-yellow-500 mb-2">
+          <Beaker className="h-5 w-5" />
+          <h3 className="font-bold">Experimental Features</h3>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          These features are in active development and may be unstable. Toggle them on to test the latest capabilities of Codiner.
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        {featureFlags.map((feature) => (
+          <div key={feature.key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+            <div className="space-y-1">
+              <Label className="text-base">{feature.label}</Label>
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
+            </div>
+            <Switch
+              checked={!!experiments[feature.key as keyof typeof experiments]}
+              onCheckedChange={() => toggleExperiment(feature.key as any)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

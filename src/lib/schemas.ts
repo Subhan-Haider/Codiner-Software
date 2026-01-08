@@ -195,6 +195,21 @@ export type Neon = z.infer<typeof NeonSchema>;
 
 export const ExperimentsSchema = z.object({
   enableLocalAgent: z.boolean().optional(),
+  // New features
+  enableGhostText: z.boolean().optional(),
+  enableSemanticSearch: z.boolean().optional(),
+  enableAutoRefactor: z.boolean().optional(),
+  enableVimMode: z.boolean().optional(),
+  enableVoiceControl: z.boolean().optional(),
+  enableLiveCollaboration: z.boolean().optional(),
+  enableCloudSync: z.boolean().optional(),
+  enableTerminalMultiplexer: z.boolean().optional(),
+  enableGpuAcceleration: z.boolean().optional(),
+  enablePrivacyMode: z.boolean().optional(),
+  enableZenMode: z.boolean().optional(),
+  enableAutoUpdateDependencies: z.boolean().optional(),
+  enableGitLens: z.boolean().optional(),
+  enableSnippetManager: z.boolean().optional(),
   // Deprecated
   enableSupabaseIntegration: z.boolean().describe("DEPRECATED").optional(),
   enableFileEditing: z.boolean().describe("DEPRECATED").optional(),
