@@ -110,6 +110,12 @@ npm run install-template
 | [**Chrome Extension**](community-templates/chrome-extension-starter/) | Browser extension development | React, Vite, Manifest V3, TypeScript | ~2.0MB |
 | [**Bun Runtime**](community-templates/bun-react-ts/) | Next-generation JavaScript runtime | Bun, React, TypeScript, Tailwind | ~1.7MB |
 
+### 🔗 **Integration & APIs**
+
+| Template | Description | Tech Stack | Size |
+|----------|-------------|------------|------|
+| [**Firestore Integration**](community-templates/firestore-integration/) | Complete Firestore with Google OAuth, real-time sync & security | Firebase, JavaScript, React, TypeScript | ~2.1MB |
+
 ## 🎯 **Featured Template: React Official**
 
 ### ✨ **Advanced Features**
