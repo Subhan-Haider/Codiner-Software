@@ -18,6 +18,7 @@
 
 Choose your framework and get started in minutes:
 
+## 🚀 **Option 1: Manual Setup**
 ```bash
 # Clone the repository
 git clone https://github.com/Subhan-Haider/Codiner-Template.git
@@ -30,6 +31,21 @@ cd my-project
 # Install dependencies and start developing
 npm install && npm run dev
 ```
+
+## ⚡ **Option 2: Automated Setup (Recommended)**
+```bash
+# Clone and copy template
+git clone https://github.com/Subhan-Haider/Codiner-Template.git
+cp -r Codiner-Template/community-templates/react-official my-app
+cd my-app
+
+# One-command automated installation
+npm run install-template
+
+# That's it! Everything is set up automatically ✨
+```
+
+**✨ Featured: React Official Template has an interactive setup wizard you can access in the browser!**
 
 ## 📚 **Available Templates**
 
