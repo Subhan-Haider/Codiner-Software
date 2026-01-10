@@ -32,28 +32,41 @@ cd my-store
 
 # Install dependencies
 npm install
+
+# Run setup script (creates .env.local with generated secrets)
+npm run setup
 ```
 
 ### Environment Setup
 
-Create a `.env.local` file:
+1. **Create a Neon Database Account:**
+   - Visit [neon.tech](https://neon.tech)
+   - Sign up for a free account
+   - Create a new project
+   - Copy the connection string
+
+2. **Create a `.env.local` file:**
 
 ```bash
-# Database
-DATABASE_URL="postgresql://username:password@hostname/database"
+# Database - Get from Neon Dashboard
+DATABASE_URL="postgresql://username:password@hostname/database?sslmode=require"
 
 # Payload CMS
-PAYLOAD_SECRET="your-secret-key-here"
+PAYLOAD_SECRET="your-super-secret-key-change-this-in-production"
 NEXT_PUBLIC_SERVER_URL="http://localhost:3000"
 
-# Stripe (optional)
+# Stripe (optional - for payments)
 STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_SECRET_KEY="sk_test_..."
 
-# Next.js
-NEXTAUTH_SECRET="your-nextauth-secret"
+# NextAuth (optional - for authentication)
+NEXTAUTH_SECRET="your-nextauth-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 ```
+
+3. **Update Database URL:**
+   - Replace `username:password@hostname/database` with your actual Neon credentials
+   - Make sure to include `?sslmode=require` for secure connections
 
 ### Database Setup
 
@@ -64,7 +77,7 @@ npm run db:generate
 # Push schema to database
 npm run db:push
 
-# Seed initial data (optional)
+# Seed with sample data (optional)
 npm run db:seed
 ```
 
@@ -340,20 +353,28 @@ STRIPE_SECRET_KEY="sk_live_..."
 ### Scripts
 
 ```bash
+# Setup
+npm run setup            # Initial setup with environment file
+
 # Development
 npm run dev              # Start development server
-npm run cms:dev          # Start CMS only
+npm run cms:dev          # Start CMS admin panel only
 
 # Database
 npm run db:generate      # Generate Drizzle schema
 npm run db:push          # Push schema to database
 npm run db:migrate       # Run migrations
-npm run db:studio        # Open Drizzle Studio
+npm run db:studio        # Open Drizzle Studio (GUI)
+npm run db:seed          # Seed database with sample data
+
+# Production
+npm run build            # Build for production
+npm run start            # Start production server
 
 # Code Quality
 npm run lint             # Run ESLint
 npm run lint:fix         # Fix linting issues
-npm run format           # Format code
+npm run format           # Format code with Prettier
 npm run type-check       # Type checking
 ```
 

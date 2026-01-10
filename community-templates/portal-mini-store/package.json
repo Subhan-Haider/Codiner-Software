@@ -11,13 +11,15 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
+    "setup": "node setup.js",
     "cms:dev": "cd cms && npm run dev",
     "cms:build": "cd cms && npm run build",
     "cms:start": "cd cms && npm start",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/lib/seed.ts"
   },
   "dependencies": {
     "next": "^14.0.0",
@@ -57,6 +59,7 @@
     "postcss": "^8.4.32",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.7.0",
     "typescript": "~5.3.3"
   },
   "keywords": ["nextjs", "payloadcms", "neon", "ecommerce", "cms", "headless"],
