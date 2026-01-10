@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, session } from "electron";
+import { app, BrowserWindow, dialog, Menu } from "electron";
 import * as path from "node:path";
 import { registerIpcHandlers } from "./ipc/ipc_host";
 import dotenv from "dotenv";
@@ -106,17 +106,6 @@ export async function onReady() {
 
   // Start performance monitoring
   startPerformanceMonitoring();
-
-  // Allow microphone access
-  session.defaultSession.setPermissionRequestHandler(
-    (_webContents, permission, callback) => {
-      if (permission === "media") {
-        callback(true);
-      } else {
-        callback(false);
-      }
-    },
-  );
 
   await onFirstRunMaybe(settings);
   createWindow();

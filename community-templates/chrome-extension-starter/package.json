@@ -1,0 +1,33 @@
+{
+  "name": "chrome-extension-starter",
+  "version": "1.0.0",
+  "description": "Chrome Extension Starter template - Create Chrome Extensions in Codiner. Note: Codiner preview does not work but load in browser to test updates.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue --fix",
+    "format": "prettier --write ."
+  },
+  "keywords": ["chrome-extension", "vite", "react", "typescript"],
+  "author": "Codiner",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "@vitejs/plugin-react": "^4.1.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.11"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

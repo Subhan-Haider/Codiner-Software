@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Tailwind CSS base styles are loaded via CDN in index.html */
+/* Custom component styles can be added here */

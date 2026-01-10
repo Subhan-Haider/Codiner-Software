@@ -96,7 +96,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   }, [selectedAppId]);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background relative selection:bg-primary/30">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-background relative selection:bg-primary/30">
       {/* Mesh Gradient Background Effect */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary blur-[120px]" />
@@ -106,20 +106,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <ThemeProvider>
         <DeepLinkProvider>
           <SidebarProvider>
-            <div className="flex flex-col h-full">
-              <TitleBar />
-              <div className="flex flex-1 overflow-hidden">
-                <div className="-mt-38">
-                  <AppSidebar />
-                </div>
-                <div
-                  id="layout-main-content-container"
-                  className="flex flex-1 w-full overflow-x-hidden overflow-y-auto mt-38 mb-4 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
-                >
-                  {children}
-                </div>
+            <TitleBar />
+
+            <div className="flex-1 flex overflow-hidden">
+              {/* Sidebar */}
+              <div className="-mt-38">
+                <AppSidebar />
+              </div>
+
+              {/* Main content */}
+              <div
+                id="layout-main-content-container"
+                className="flex-1 w-full overflow-x-hidden overflow-y-auto mt-40 mb-2 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
+              >
+                {children}
               </div>
             </div>
+
             <MadeWithCodiner />
           </SidebarProvider>
         </DeepLinkProvider>

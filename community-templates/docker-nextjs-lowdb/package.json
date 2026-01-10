@@ -1,0 +1,34 @@
+{
+  "name": "docker-nextjs-lowdb-template",
+  "version": "1.0.0",
+  "description": "Docker / Next.js / Lowdb / GHCR template",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "docker:build": "docker build -t docker-nextjs-lowdb .",
+    "docker:run": "docker run -p 3000:3000 docker-nextjs-lowdb",
+    "docker:push": "docker tag docker-nextjs-lowdb ghcr.io/YOUR_USERNAME/docker-nextjs-lowdb && docker push ghcr.io/YOUR_USERNAME/docker-nextjs-lowdb"
+  },
+  "dependencies": {
+    "lowdb": "^6.0.1",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["nextjs", "docker", "lowdb", "json-database"],
+  "author": "Codiner",
+  "license": "Apache-2.0"
+}

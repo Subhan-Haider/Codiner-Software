@@ -1,0 +1,138 @@
+<script lang="ts">
+  let count = $state(0);
+
+  function increment() {
+    count += 1;
+  }
+
+  function reset() {
+    count = 0;
+  }
+</script>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Hero Section -->
+  <div class="text-center mb-16">
+    <h1 class="text-4xl font-bold tracking-tight mb-4">
+      Welcome to SvelteKit 2.0
+    </h1>
+    <p class="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+      Experience the power of Svelte 5 with SvelteKit's file-based routing,
+      server-side rendering, and modern development practices.
+    </p>
+
+    <!-- Counter Demo -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 max-w-md mx-auto mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Svelte 5 Signals Demo</h2>
+      <div class="text-6xl font-bold text-blue-600 mb-4">{count}</div>
+      <div class="flex space-x-4 justify-center">
+        <button
+          onclick={increment}
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+        >
+          Increment
+        </button>
+        <button
+          onclick={reset}
+          class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="mb-16">
+    <h2 class="text-3xl font-bold text-center mb-8">✨ Key Features</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">🧡</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Svelte 5</h3>
+        <p class="text-muted-foreground">
+          Latest Svelte with runes, signals, and enhanced performance
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">⚡</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">SvelteKit 2.0</h3>
+        <p class="text-muted-foreground">
+          File-based routing, SSR, and modern development experience
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">🔷</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">TypeScript</h3>
+        <p class="text-muted-foreground">
+          Full TypeScript support with type checking and IntelliSense
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">🎨</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Tailwind CSS</h3>
+        <p class="text-muted-foreground">
+          Utility-first CSS framework for rapid UI development
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">🔍</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">ESLint + Prettier</h3>
+        <p class="text-muted-foreground">
+          Code linting and formatting for consistent, high-quality code
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mb-4">
+          <span class="text-2xl">🚀</span>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Production Ready</h3>
+        <p class="text-muted-foreground">
+          Optimized builds, SSR, and deployment-ready configurations
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Getting Started -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+    <h2 class="text-3xl font-bold text-center mb-8">🚀 Getting Started</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-xl font-semibold mb-4">Installation</h3>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm">
+          <div class="mb-2"># Copy this template</div>
+          <div class="mb-2">cp -r sveltekit-ts-tailwind my-app</div>
+          <div class="mb-2">cd my-app</div>
+          <div class="mb-2"># Install dependencies</div>
+          <div>npm install</div>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold mb-4">Development</h3>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm">
+          <div class="mb-2"># Start development server</div>
+          <div class="mb-2">npm run dev</div>
+          <div class="mb-2"># Build for production</div>
+          <div class="mb-2">npm run build</div>
+          <div class="mb-2"># Preview production build</div>
+          <div>npm run preview</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

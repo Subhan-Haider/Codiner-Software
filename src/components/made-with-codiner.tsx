@@ -1,6 +1,6 @@
 export const MadeWithCodiner = () => {
   return (
-    <div className="fixed bottom-4 right-4 z-50 hidden 2xl:block">
+    <div className="fixed bottom-4 right-4 z-50">
       <a
         href="https://codiner.online"
         target="_blank"

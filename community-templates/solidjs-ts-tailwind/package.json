@@ -1,0 +1,30 @@
+{
+  "name": "solidjs-ts-tailwind-template",
+  "version": "1.0.0",
+  "description": "SolidJS Template with TypeScript and Tailwind",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "solid-js": "^1.8.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-plugin-solid": "^1.8.4",
+    "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-plugin-solid": "^2.8.0"
+  },
+  "keywords": ["solidjs", "typescript", "tailwindcss"],
+  "author": "Codiner",
+  "license": "MIT"
+}
