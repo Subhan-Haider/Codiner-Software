@@ -13,7 +13,9 @@
     "type-check": "tsc --noEmit",
     "seo-audit": "node scripts/seo-audit.js",
     "accessibility-check": "node scripts/accessibility-check.js",
-    "performance-test": "node scripts/performance-test.js"
+    "performance-test": "node scripts/performance-test.js",
+    "install-template": "node scripts/install.js",
+    "setup": "node scripts/install.js"
   },
   "dependencies": {
     "react": "^18.2.0",

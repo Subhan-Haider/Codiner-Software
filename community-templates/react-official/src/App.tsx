@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Zap, Shield, Rocket, Menu, X, ChevronRight, CheckCircle, AlertTriangle, Info, Settings, BarChart3, Eye, FileSearch } from "lucide-react";
+import { Search, Zap, Shield, Rocket, Menu, X, ChevronRight, CheckCircle, AlertTriangle, Info, Settings, BarChart3, Eye, FileSearch, Download } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { SEOTools } from "./components/SEOTools";
 import { AccessibilityChecker } from "./components/AccessibilityChecker";
 import { PerformanceMonitor } from "./components/PerformanceMonitor";
+import { SetupWizard } from "./components/SetupWizard";
 
 interface Feature {
   id: string;
@@ -63,6 +64,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [seoScore, setSeoScore] = useState(85);
   const [accessibilityScore, setAccessibilityScore] = useState(92);
   const [performanceScore, setPerformanceScore] = useState(78);
@@ -158,6 +160,14 @@ function App() {
               >
                 Developer Tools
               </button>
+              <Button
+                onClick={() => setShowSetupWizard(true)}
+                size="sm"
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Quick Setup
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -196,6 +206,13 @@ function App() {
                     className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium hover:bg-accent"
                   >
                     Developer Tools
+                  </button>
+                  <button
+                    onClick={() => { setShowSetupWizard(true); setIsMenuOpen(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700"
+                  >
+                    <Download className="h-4 w-4 inline mr-2" />
+                    Quick Setup
                   </button>
                 </div>
               </motion.div>
@@ -265,11 +282,87 @@ function App() {
                 </motion.div>
               </div>
 
+              {/* Quick Setup Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="max-w-4xl mx-auto mb-16"
+              >
+                <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border-blue-200 dark:border-blue-800">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl flex items-center justify-center gap-2">
+                      <Rocket className="h-6 w-6 text-blue-600" />
+                      One-Click Installation
+                    </CardTitle>
+                    <CardDescription className="text-lg">
+                      Get started with automated setup in seconds
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        </div>
+                        <h3 className="font-semibold mb-2">Automated Setup</h3>
+                        <p className="text-sm text-muted-foreground">One command installs everything</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Settings className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <h3 className="font-semibold mb-2">Environment Ready</h3>
+                        <p className="text-sm text-muted-foreground">Auto-configures all settings</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Zap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <h3 className="font-semibold mb-2">Development Ready</h3>
+                        <p className="text-sm text-muted-foreground">Start coding immediately</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border mb-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium">Installation Command:</span>
+                        <Badge variant="secondary">Copy & Run</Badge>
+                      </div>
+                      <code className="block bg-gray-100 dark:bg-gray-700 p-3 rounded text-sm font-mono">
+                        npm run install-template
+                      </code>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        This will automatically install dependencies, configure environment, and start the development server
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        onClick={() => {
+                          navigator.clipboard?.writeText('npm run install-template');
+                          alert('Command copied to clipboard! Open your terminal and paste it.');
+                        }}
+                      >
+                        <Rocket className="mr-2 h-5 w-5" />
+                        Copy Install Command
+                      </Button>
+                      <Button variant="outline" size="lg">
+                        <FileSearch className="mr-2 h-5 w-5" />
+                        View Setup Guide
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
               {/* Interactive Counter Demo */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.6 }}
                 className="max-w-md mx-auto mb-16"
               >
                 <Card>
@@ -518,6 +611,13 @@ function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Setup Wizard Modal */}
+      <AnimatePresence>
+        {showSetupWizard && (
+          <SetupWizard onClose={() => setShowSetupWizard(false)} />
+        )}
+      </AnimatePresence>
     </>
   )
 
