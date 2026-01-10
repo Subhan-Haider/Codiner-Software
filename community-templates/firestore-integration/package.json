@@ -1,0 +1,23 @@
+{
+  "name": "firestore-integration-template",
+  "version": "1.0.0",
+  "description": "Complete Firestore integration with Google OAuth, auto-setup, real-time sync, and security",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "install-template": "node scripts/install.js",
+    "setup": "node scripts/install.js"
+  },
+  "dependencies": {
+    "firebase": "^10.7.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.8"
+  },
+  "keywords": ["firebase", "firestore", "oauth", "google", "realtime", "integration"],
+  "author": "Codiner",
+  "license": "MIT"
+}
