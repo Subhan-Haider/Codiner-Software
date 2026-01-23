@@ -223,6 +223,6 @@ By using Codiner, you agree to our [Terms of Service](TERMS.md). The application
 
 *Empowering developers and security researchers worldwide*
 
-[⭐ Star this repo](https://github.com/setupg963-spec/Codiner-Software) • [🐛 Report Bug](https://github.com/setupg963-spec/Codiner-Software/issues) • [✨ Request Feature](https://github.com/setupg963-spec/Codiner-Software/issues)
+[⭐ Star this repo](https://github.com/haider-subhan/Codiner-Software) • [🐛 Report Bug](https://github.com/haider-subhan/Codiner-Software/issues) • [✨ Request Feature](https://github.com/haider-subhan/Codiner-Software/issues)
 
 </div>
