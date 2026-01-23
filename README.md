@@ -179,28 +179,38 @@ npm install && npm start
 
 ```mermaid
 graph LR
-    Start([🚀 Start]) --> Setup[📦 Setup]
-    Setup --> Config{🧠 Neural Pulse}
-    
-    Config -- "Local" --> Ollama[🏠 Ollama]
-    Config -- "Cloud" --> Cloud[☁️ API]
-    
-    Ollama & Cloud --> Dev[[🏗️ Dev Loop]]
-    
-    Dev --> Guard{🔍 Guard}
-    Guard -- "Pass" --> Build[💾 Atomic Write]
-    Guard -- "Fail" --> Dev
-    
-    Build --> Final{🚢 Ship}
-    Final -- "Web" --> Vercel[🌐 Vercel]
-    Final -- "App" --> Docker[📦 Docker]
+    %% Node Definitions
+    Start(🚀 Start)
+    Setup[📦 Setup]
+    Config{🧠 Neural Pulse}
+    Ollama[🏠 Ollama]
+    Cloud[☁️ API]
+    Dev[🏗️ Dev Loop]
+    Guard{🔍 Guard}
+    Build[💾 Atomic Write]
+    Final{🚢 Ship}
+    Vercel[🌐 Vercel]
+    Docker[📦 Docker]
 
-    classDef default fill:#f9faff,stroke:#7c3aed,stroke-width:2px,color:#1e1b4b;
-    classDef highlight fill:#f0f7ff,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
-    classDef start fill:#f5f3ff,stroke:#8b5cf6,stroke-width:3px,color:#4c1d95;
-    
-    class Config,Guard,Final highlight;
-    class Start start;
+    %% Connections
+    Start --> Setup
+    Setup --> Config
+    Config -- Local --> Ollama
+    Config -- Cloud --> Cloud
+    Ollama --> Dev
+    Cloud --> Dev
+    Dev --> Guard
+    Guard -- Pass --> Build
+    Guard -- Fail --> Dev
+    Build --> Final
+    Final -- Web --> Vercel
+    Final -- App --> Docker
+
+    %% Styling
+    style Start fill:#f5f3ff,stroke:#8b5cf6,stroke-width:2px
+    style Config fill:#f0f7ff,stroke:#2563eb,stroke-width:2px
+    style Guard fill:#f0f7ff,stroke:#2563eb,stroke-width:2px
+    style Final fill:#f0f7ff,stroke:#2563eb,stroke-width:2px
 ```
 
 ---
