@@ -193,15 +193,24 @@ graph LR
 
 ---
 
-## 🤝 Community & Support
+## 📄 Legal
 
-- **Bug Reports**: Please use the [GitHub Issues](https://github.com/setupg963-spec/Codiner-Software/issues) tab for reporting bugs or technical glitches.
-- **Feature Requests**: We love hearing new ideas! Start a discussion or submit a Pull Request.
-- **Documentation**: For deeper dives into specific integrations, check our [Docs Folder](./docs).
+### Privacy Policy
+
+Codiner does not collect, store, or transmit any personal data. All processing happens locally in your desktop app. For more details, see our [Privacy Policy](PRIVACY_POLICY.md).
+
+### Terms of Service
+
+By using Codiner, you agree to our [Terms of Service](TERMS.md). The application is provided "as is" without warranty of any kind.
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the Codiner Team.</p>
-  <p><b>⭐ Star us on GitHub to support the mission of Local-First AI!</b></p>
+
+**Made with ❤️ by [Subhan Haider](https://github.com/Subhan-Haider)**
+
+*Empowering developers and security researchers worldwide*
+
+[⭐ Star this repo](https://github.com/setupg963-spec/Codiner-Software) • [🐛 Report Bug](https://github.com/setupg963-spec/Codiner-Software/issues) • [✨ Request Feature](https://github.com/setupg963-spec/Codiner-Software/issues)
+
 </div>
