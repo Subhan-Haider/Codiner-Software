@@ -117,6 +117,47 @@ Codiner configures your entire production environment with one click.
 
 ---
 
+## 🏛️ Why Local-First AI?
+
+The modern developer's greatest asset is their code. In an era where cloud AI models are trained on everything they ingest, **Privacy is not a luxury—it's a requirement.**
+
+Codiner was built on three core pillars:
+1.  **Sovereignty**: Your source code stays on your hardware. By default, Codiner prioritizes local inference models (like Llama 3) that run entirely without an internet connection.
+2.  **Zero Latency**: Cloud-based AI builders are bottlenecked by network speeds. Codiner talks to your local filesystem and local AI instances at the speed of your internal bus (NVMe).
+3.  **Extensibility**: Every project built with Codiner is **standard, clean code**. No proprietary lock-in, no hidden runtimes, and no "black-box" magic. Just pure industry-standard React, Vue, or TypeScript.
+
+---
+
+## 🧪 Advanced Use Cases
+
+Codiner isn't just for building "Hello World" apps. It's engineered for professional software production:
+
+### 💼 Enterprise Prototypes
+Rapidly scaffold high-fidelity prototypes that use real production infrastructure (Supabase, Neon) without needing a dedicated DevOps team.
+
+### 🛡️ Secure Finance & Health Apps
+Build applications that handle sensitive PII (Personally Identifiable Information) with the peace of mind that no code context is being leaked to external servers.
+
+### 🎓 Educational Lab
+Experiment with different AI models (Claude vs. GPT vs. Llama) to see how they handle the same codebase, right inside the integrated "Neural Pulse" monitor.
+
+---
+
+## 🏗️ Technical Deep-Dive
+
+### The File System Guard
+Whenever the AI suggests a file change, Codiner doesn't just "overwrite" the file. It uses a **Transactional File System** approach:
+- **Shadow Staging**: The new code is written to a temporary memory buffer.
+- **Syntactic Validation**: The buffer is checked for basic syntax errors to prevent breaking your build.
+- **Diff Comparison**: Only the necessary lines are updated, preserving your manual comments and specific formatting.
+
+### The AI Routing Engine
+Codiner's internal agent can intelligently decide which model to use based on the task:
+- **Fast Mode**: Uses lightweight local models for repetitive boilerplate tasks.
+- **Reasoning Mode**: Swaps to high-reasoning cloud models (like Claude 3.5 Sonnet) for complex architectural refactoring.
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
@@ -127,6 +168,12 @@ cd Codiner-Software
 # Install and Ignition
 npm install && npm start
 ```
+
+### 📦 System Requirements
+- **Node.js**: 20.x or 22.x (LTS recommended)
+- **Memory**: 8GB RAM minimum (16GB recommended for local AI)
+- **Disk**: 2GB of free space for the application and templates
+- **OS**: Windows 10+, macOS Monterey+, or a modern Linux distro (Ubuntu 22.04+)
 
 ### ⚡ Visual Flow
 
@@ -148,12 +195,13 @@ graph LR
 
 ## 🤝 Community & Support
 
-- **Bug Reports**: Use the [Issues](https://github.com/setupg963-spec/Codiner-Software/issues) tab.
-- **Contributing**: Check out [CONTRIBUTING.md](CONTRIBUTING.md) to join the mission.
+- **Bug Reports**: Please use the [GitHub Issues](https://github.com/setupg963-spec/Codiner-Software/issues) tab for reporting bugs or technical glitches.
+- **Feature Requests**: We love hearing new ideas! Start a discussion or submit a Pull Request.
+- **Documentation**: For deeper dives into specific integrations, check our [Docs Folder](./docs).
 
 ---
 
 <div align="center">
   <p>Built with ❤️ by the Codiner Team.</p>
-  <p><b>⭐ Star us on GitHub to support local AI!</b></p>
+  <p><b>⭐ Star us on GitHub to support the mission of Local-First AI!</b></p>
 </div>
