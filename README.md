@@ -11,7 +11,7 @@
 
 *Build full-stack modern web applications in seconds using local AI, powerful templates, and real-time neural diagnostics.*
 
-[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy & Security](#-privacy--security-first) • [🏗️ Template Foundry](#-the-template-foundry) • [🧠 Neural Pulse](#-neural-pulse-architecture)
+[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🏙️ Liberty](https://github.com/setupg963-spec/Codiner-Liberty)
 
 <img src="assets/promo-banner.png" alt="Codiner Promo Banner" width="100%" style="border-radius: 10px; margin: 20px 0;" />
 
