@@ -128,6 +128,22 @@ cd Codiner-Software
 npm install && npm start
 ```
 
+### ⚡ Visual Flow
+
+```mermaid
+graph LR
+    A[🌐 Clone Repo] --> B[📦 Install Deps]
+    B --> C[🚀 Launch App]
+    C --> D{✨ What Next?}
+    D -- "Project" --> E[🎨 Select Template]
+    D -- "Verify" --> F[🧠 Neural Pulse]
+    D -- "Ship" --> G[🚢 Vercel / Docker]
+
+    classDef default fill:#f9f9ff,stroke:#8b5cf6,stroke-width:2px,color:#1e1b4b;
+    classDef decision fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a;
+    class D decision;
+```
+
 ---
 
 ## 🤝 Community & Support
