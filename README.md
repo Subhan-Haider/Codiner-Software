@@ -1,4 +1,4 @@
-# <img src="assets/icon/icon.png" width="40" height="40" align="center" /> Codiner
+# <img src="assets/icon/logo.png" width="70" height="70" align="center" /> Codiner
 
 <div align="center">
 
