@@ -20,14 +20,16 @@ import { eq } from "drizzle-orm";
 import { ipcMain } from "electron";
 import { EndpointType } from "@neondatabase/api-client";
 import { retryOnLocked } from "../utils/retryOnLocked";
+import { createLoggedHandler } from "./safe_handle";
 
 export const logger = log.scope("neon_handlers");
+const handle = createLoggedHandler(logger);
 
 const testOnlyHandle = createTestOnlyLoggedHandler(logger);
 
 export function registerNeonHandlers() {
   // Do not use log handler because there's sensitive data in the response
-  ipcMain.handle(
+  handle(
     "neon:create-project",
     async (
       _,
@@ -113,7 +115,7 @@ export function registerNeonHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "neon:get-project",
     async (
       _,

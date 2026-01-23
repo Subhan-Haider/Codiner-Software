@@ -43,7 +43,7 @@ export const PortalMigrate = ({ appId }: PortalMigrateProps) => {
   const openDocs = () => {
     const ipcClient = IpcClient.getInstance();
     ipcClient.openExternalUrl(
-      "https://www.codiner.sh/docs/templates/portal#create-a-database-migration",
+      "https://www.codiner.online/docs/templates/portal#create-a-database-migration",
     );
   };
 
@@ -64,7 +64,7 @@ export const PortalMigrate = ({ appId }: PortalMigrateProps) => {
           <Button
             onClick={handleCreateMigration}
             disabled={migrateMutation.isPending}
-            // className="bg-primary hover:bg-purple-700 text-white"
+          // className="bg-primary hover:bg-purple-700 text-white"
           >
             {migrateMutation.isPending ? (
               <>

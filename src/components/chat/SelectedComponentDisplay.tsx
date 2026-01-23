@@ -25,7 +25,7 @@ export function SelectedComponentsDisplay() {
     if (previewIframeRef?.contentWindow) {
       previewIframeRef.contentWindow.postMessage(
         {
-          type: "remove-Codiner-component-overlay",
+          type: "remove-codiner-component-overlay",
           componentId: componentToRemove.id,
         },
         "*",
@@ -38,7 +38,7 @@ export function SelectedComponentsDisplay() {
     setVisualEditingSelectedComponent(null);
     if (previewIframeRef?.contentWindow) {
       previewIframeRef.contentWindow.postMessage(
-        { type: "clear-Codiner-component-overlays" },
+        { type: "clear-codiner-component-overlays" },
         "*",
       );
     }

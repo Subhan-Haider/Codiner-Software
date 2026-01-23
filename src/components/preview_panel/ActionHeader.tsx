@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Wrench,
   Globe,
+  Activity,
   Shield,
 } from "lucide-react";
 import { ChatActivityButton } from "@/components/chat/ChatActivity";
@@ -41,7 +42,10 @@ export type PreviewMode =
   | "problems"
   | "configure"
   | "publish"
-  | "security";
+  | "security"
+  | "seo"
+  | "accessibility"
+  | "performance"; // Added new modes
 
 // Preview Header component with preview mode toggle
 export const ActionHeader = () => {
@@ -54,6 +58,9 @@ export const ActionHeader = () => {
   const configureRef = useRef<HTMLButtonElement>(null);
   const publishRef = useRef<HTMLButtonElement>(null);
   const securityRef = useRef<HTMLButtonElement>(null);
+  const seoRef = useRef<HTMLButtonElement>(null); // Added ref
+  const accessibilityRef = useRef<HTMLButtonElement>(null);
+  const performanceRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const { problemReport } = useCheckProblems(selectedAppId);
@@ -142,6 +149,15 @@ export const ActionHeader = () => {
         case "security":
           targetRef = securityRef;
           break;
+        case "seo": // Added case
+          targetRef = seoRef;
+          break;
+        case "accessibility":
+          targetRef = accessibilityRef;
+          break;
+        case "performance":
+          targetRef = performanceRef;
+          break;
         default:
           return;
       }
@@ -180,14 +196,12 @@ export const ActionHeader = () => {
       <button
         data-testid={testId}
         ref={ref}
-        className="no-app-region-drag cursor-pointer relative flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-medium z-10 hover:bg-[var(--background)] flex-col"
+        className="no-app-region-drag cursor-pointer relative flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold z-10 hover:bg-accent transition-colors flex-row"
         onClick={() => selectPanel(mode)}
       >
         {icon}
-        <span>
-          {!isCompact && <span>{text}</span>}
-          {badge}
-        </span>
+        {!isCompact && <span className="uppercase tracking-tight">{text}</span>}
+        {badge}
       </button>
     );
 
@@ -208,7 +222,7 @@ export const ActionHeader = () => {
 
   return (
     <TooltipProvider>
-      <div className="flex items-center justify-between px-1 py-2 mt-1 border-b border-border">
+      <div className="flex items-center justify-between px-1 py-0.5">
         <div className="relative flex rounded-md p-0.5 gap-0.5">
           <motion.div
             className="absolute top-0.5 bottom-0.5 bg-[var(--background-lightest)] shadow rounded-md"
@@ -250,6 +264,27 @@ export const ActionHeader = () => {
             "code-mode-button",
           )}
           {renderButton(
+            "seo", // Added button
+            seoRef,
+            <Globe size={iconSize} />, // Globe icon for SEO
+            "SEO",
+            "seo-mode-button",
+          )}
+          {renderButton(
+            "accessibility",
+            accessibilityRef,
+            <Shield size={iconSize} />,
+            "A11y",
+            "accessibility-mode-button",
+          )}
+          {renderButton(
+            "performance",
+            performanceRef,
+            <Activity size={iconSize} />,
+            "Perf",
+            "performance-mode-button",
+          )}
+          {renderButton(
             "configure",
             configureRef,
             <Wrench size={iconSize} />,
@@ -266,7 +301,7 @@ export const ActionHeader = () => {
           {renderButton(
             "publish",
             publishRef,
-            <Globe size={iconSize} />,
+            <Globe size={iconSize} />, // This is duplicate icon, maybe use Send for publish? Or Share?
             "Publish",
             "publish-mode-button",
           )}

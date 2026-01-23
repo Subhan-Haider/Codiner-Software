@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { ipcMain, IpcMainInvokeEvent } from "electron";
+import { spawn } from "child_process";
 import {
   ModelMessage,
   TextPart,
@@ -19,10 +20,6 @@ import {
   constructSystemPrompt,
   readAiRules,
 } from "../../prompts/system_prompt";
-import {
-  SUPABASE_AVAILABLE_SYSTEM_PROMPT,
-  SUPABASE_NOT_AVAILABLE_SYSTEM_PROMPT,
-} from "../../prompts/supabase_prompt";
 import { getCodinerAppPath } from "../../paths/paths";
 import { readSettings } from "../../main/settings";
 import type { ChatResponseEnd, ChatStreamParams } from "../ipc_types";
@@ -40,10 +37,6 @@ import { getTestResponse } from "./testing_chat_handlers";
 import { getModelClient, ModelClient } from "../utils/get_model_client";
 import log from "electron-log";
 import { sendTelemetryEvent } from "../utils/telemetry";
-import {
-  getSupabaseContext,
-  getSupabaseClientCode,
-} from "../../supabase_admin/supabase_context";
 import { SUMMARIZE_CHAT_SYSTEM_PROMPT } from "../../prompts/summarize_chat_system_prompt";
 import { SECURITY_REVIEW_SYSTEM_PROMPT } from "../../prompts/security_review_prompt";
 import fs from "node:fs";
@@ -60,6 +53,8 @@ import { requireMcpToolConsent } from "../utils/mcp_consent";
 
 import { handleLocalAgentStream } from "../../pro/main/ipc/handlers/local_agent/local_agent_handler";
 
+import { generateAndSaveImage } from "../utils/image_generator";
+import { safeJoin } from "../utils/path_utils";
 import { safeSend } from "../utils/safe_sender";
 import { cleanFullResponse } from "../utils/cleanFullResponse";
 import { generateProblemReport } from "../processors/tsc";
@@ -88,10 +83,14 @@ import {
   VersionedFiles,
 } from "../utils/versioned_codebase_context";
 import { getAiMessagesJsonIfWithinLimit } from "../utils/ai_messages_utils";
+import { parseAiErrorMessage } from "../utils/errorMessage";
 
 type AsyncIterableStream<T> = AsyncIterable<T> & ReadableStream<T>;
 
+import { createLoggedHandler } from "./safe_handle";
+
 const logger = log.scope("chat_stream_handlers");
+const handle = createLoggedHandler(logger);
 
 // Track active streams for cancellation
 const activeStreams = new Map<number, AbortController>();
@@ -220,7 +219,7 @@ async function processStreamChunks({
 }
 
 export function registerChatStreamHandlers() {
-  ipcMain.handle("chat:stream", async (event, req: ChatStreamParams) => {
+  handle("chat:stream", async (event, req: ChatStreamParams) => {
     let attachmentPaths: string[] = [];
     try {
       const fileUploadsState = FileUploadsState.getInstance();
@@ -234,11 +233,11 @@ export function registerChatStreamHandlers() {
         where: eq(chats.id, req.chatId),
         with: {
           messages: {
-            orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+            orderBy: (m: any, { asc }: any) => [asc(m.createdAt)],
           },
           app: true, // Include app information
         },
-      });
+      } as any);
 
       if (!chat) {
         throw new Error(`Chat not found: ${req.chatId}`);
@@ -261,8 +260,8 @@ export function registerChatStreamHandlers() {
         if (lastUserMessageIndex >= 0) {
           // Delete the user message
           await db
-            .delete(messages)
-            .where(eq(messages.id, chatMessages[lastUserMessageIndex].id));
+            .delete(messages as any)
+            .where(eq(messages.id as any, chatMessages[lastUserMessageIndex].id));
 
           // If there's an assistant message after the user message, delete it too
           if (
@@ -270,9 +269,9 @@ export function registerChatStreamHandlers() {
             chatMessages[lastUserMessageIndex + 1].role === "assistant"
           ) {
             await db
-              .delete(messages)
+              .delete(messages as any)
               .where(
-                eq(messages.id, chatMessages[lastUserMessageIndex + 1].id),
+                eq(messages.id as any, chatMessages[lastUserMessageIndex + 1].id),
               );
           }
         }
@@ -363,7 +362,7 @@ export function registerChatStreamHandlers() {
           let componentSnippet = "[component snippet not available]";
           try {
             const componentFileContent = await readFile(
-              path.join(getCodinerAppPath(chat.app.path), component.relativePath),
+              path.join(getCodinerAppPath(chat.app.path as string), component.relativePath),
               "utf8",
             );
             const lines = componentFileContent.split(/\r?\n/);
@@ -418,8 +417,8 @@ ${componentSnippet}
       }
 
       // Add a placeholder assistant message immediately
-      const [placeholderAssistantMessage] = await db
-        .insert(messages)
+      const [placeholderAssistantMessage] = (await db
+        .insert(messages as any)
         .values({
           chatId: req.chatId,
           role: "assistant",
@@ -427,21 +426,21 @@ ${componentSnippet}
           requestId: codinerRequestId,
           model: settings.selectedModel.name,
           sourceCommitHash: await getCurrentCommitHash({
-            path: getCodinerAppPath(chat.app.path),
+            path: getCodinerAppPath(chat.app.path as string),
           }),
         })
-        .returning();
+        .returning()) as any[];
 
       // Fetch updated chat data after possible deletions and additions
-      const updatedChat = await db.query.chats.findFirst({
+      const updatedChat = (await db.query.chats.findFirst({
         where: eq(chats.id, req.chatId),
         with: {
           messages: {
-            orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+            orderBy: (m: any, { asc }: any) => [asc(m.createdAt)],
           },
           app: true, // Include app information
         },
-      });
+      })) as any;
 
       if (!updatedChat) {
         throw new Error(`Chat not found: ${req.chatId}`);
@@ -556,7 +555,7 @@ ${componentSnippet}
         );
 
         // Prepare message history for the AI
-        const messageHistory = updatedChat.messages.map((message) => ({
+        const messageHistory = updatedChat.messages.map((message: any) => ({
           role: message.role as "user" | "assistant" | "system",
           content: message.content,
           sourceCommitHash: message.sourceCommitHash,
@@ -580,14 +579,14 @@ ${componentSnippet}
           // Each turn is a user + assistant pair
           // Calculate how many messages to keep (maxChatTurns * 2)
           let recentMessages = messageHistory
-            .filter((msg) => msg.role !== "system")
+            .filter((msg: any) => msg.role !== "system")
             .slice(-maxChatTurns * 2);
 
           // Ensure the first message is a user message
           if (recentMessages.length > 0 && recentMessages[0].role !== "user") {
             // Find the first user message
             const firstUserIndex = recentMessages.findIndex(
-              (msg) => msg.role === "user",
+              (msg: any) => msg.role === "user",
             );
             if (firstUserIndex > 0) {
               // Drop assistant messages before the first user message
@@ -600,7 +599,7 @@ ${componentSnippet}
             }
           }
 
-          limitedMessageHistory = [...recentMessages];
+          limitedMessageHistory = [...recentMessages] as any;
 
           logger.log(
             `Limiting chat history from ${messageHistory.length} to ${limitedMessageHistory.length} messages (max ${maxChatTurns} turns)`,
@@ -651,32 +650,7 @@ ${componentSnippet}
           }
         }
 
-        if (
-          updatedChat.app?.supabaseProjectId &&
-          isSupabaseConnected(settings)
-        ) {
-          systemPrompt +=
-            "\n\n" +
-            SUPABASE_AVAILABLE_SYSTEM_PROMPT +
-            "\n\n" +
-            // For local agent, we will explicitly fetch the database context when needed.
-            (settings.selectedChatMode === "local-agent"
-              ? ""
-              : await getSupabaseContext({
-                supabaseProjectId: updatedChat.app.supabaseProjectId,
-                organizationSlug:
-                  updatedChat.app.supabaseOrganizationSlug ?? null,
-              }));
-        } else if (
-          // Neon projects don't need Supabase.
-          !updatedChat.app?.neonProjectId &&
-          // In local agent mode, we will suggest supabase as part of the add-integration tool
-          settings.selectedChatMode !== "local-agent" &&
-          // If in security review mode, we don't need to mention supabase is available.
-          !isSecurityReviewIntent
-        ) {
-          systemPrompt += "\n\n" + SUPABASE_NOT_AVAILABLE_SYSTEM_PROMPT;
-        }
+
         const isSummarizeIntent = req.prompt.startsWith(
           "Summarize from chat-id=",
         );
@@ -729,7 +703,16 @@ This conversation includes one or more image attachments. When the user uploads 
 `;
         }
 
-        const codebasePrefix = isEngineEnabled
+        if (updatedChat.app.firebaseProjectId) {
+          systemPrompt += `
+
+# Firebase Integration
+The current app corresponds to Firebase Project ID: ${updatedChat.app.firebaseProjectId}.
+When you need to deploy, update rules, or manage Firebase services, you can use the \`firebase-command\` tool in Agent mode. If you are in Build mode, you should modify the relevant configuration files (e.g., firebase.json, firestore.rules, storage.rules) and then remind the user they can deploy or manage their Firebase project via the Firebase Integration Dialog.
+`;
+        }
+
+        const codebasePrefix: any[] = isEngineEnabled
           ? // No codebase prefix if engine is set, we will take of it there.
           []
           : ([
@@ -745,7 +728,7 @@ This conversation includes one or more image attachments. When the user uploads 
 
         // If engine is enabled, we will send the other apps codebase info to the engine
         // and process it with smart context.
-        const otherCodebasePrefix =
+        const otherCodebasePrefix: any[] =
           otherAppsCodebaseInfo && !isEngineEnabled
             ? ([
               {
@@ -759,7 +742,7 @@ This conversation includes one or more image attachments. When the user uploads 
             ] as const)
             : [];
 
-        const limitedHistoryChatMessages = limitedMessageHistory.map((msg) => ({
+        const limitedHistoryChatMessages = limitedMessageHistory.map((msg: any) => ({
           role: msg.role as "user" | "assistant" | "system",
           // Why remove thinking tags?
           // Thinking tags are generally not critical for the context
@@ -801,9 +784,9 @@ This conversation includes one or more image attachments. When the user uploads 
               ]);
               if (userAiMessagesJson) {
                 await db
-                  .update(messages)
-                  .set({ aiMessagesJson: userAiMessagesJson })
-                  .where(eq(messages.id, userMessageId));
+                  .update(messages as any)
+                  .set({ aiMessagesJson: userAiMessagesJson } as any)
+                  .where(eq(messages.id as any, userMessageId));
               }
             }
           }
@@ -815,14 +798,14 @@ This conversation includes one or more image attachments. When the user uploads 
         }
 
         if (isSummarizeIntent) {
-          const previousChat = await db.query.chats.findFirst({
+          const previousChat = (await db.query.chats.findFirst({
             where: eq(chats.id, parseInt(req.prompt.split("=")[1])),
             with: {
               messages: {
-                orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+                orderBy: (m: any, { asc }: any) => [asc(m.createdAt)],
               },
             },
-          });
+          })) as any;
           chatMessages = [
             {
               role: "user",
@@ -890,7 +873,7 @@ This conversation includes one or more image attachments. When the user uploads 
             providerOptions,
             system: systemPromptOverride,
             tools,
-            messages: chatMessages.filter((m) => m.content),
+            messages: chatMessages.filter((m: any) => m.content),
             onFinish: (response) => {
               const totalTokens = response.usage?.totalTokens;
 
@@ -901,10 +884,10 @@ This conversation includes one or more image attachments. When the user uploads 
 
                 // Persist the aggregated token usage on the placeholder assistant message
                 void db
-                  .update(messages)
-                  .set({ maxTokensUsed: maxTokensUsed })
+                  .update(messages as any)
+                  .set({ maxTokensUsed: maxTokensUsed } as any)
                   .where(eq(messages.id, placeholderAssistantMessage.id))
-                  .catch((error) => {
+                  .catch((error: any) => {
                     logger.error(
                       "Failed to save total tokens for assistant message",
                       error,
@@ -954,20 +937,7 @@ This conversation includes one or more image attachments. When the user uploads 
         }: {
           fullResponse: string;
         }) => {
-          if (
-            fullResponse.includes("$$SUPABASE_CLIENT_CODE$$") &&
-            updatedChat.app?.supabaseProjectId
-          ) {
-            const supabaseClientCode = await getSupabaseClientCode({
-              projectId: updatedChat.app?.supabaseProjectId,
-              organizationSlug:
-                updatedChat.app?.supabaseOrganizationSlug ?? null,
-            });
-            fullResponse = fullResponse.replace(
-              "$$SUPABASE_CLIENT_CODE$$",
-              supabaseClientCode,
-            );
-          }
+
           // Store the current partial response
           partialResponses.set(req.chatId, fullResponse);
           // Save to DB (in case user is switching chats during the stream)
@@ -1025,6 +995,66 @@ This conversation includes one or more image attachments. When the user uploads 
                   "ALWAYS use this tool whenever generating or editing code for the codebase.",
                 inputSchema: z.object({}),
                 execute: async () => "",
+              },
+              "generate-image": {
+                description: "Generate a high-quality image or logo and save it to the codebase.",
+                inputSchema: z.object({
+                  prompt: z.string().describe("Visual description of the image to generate"),
+                  path: z.string().describe("Project-relative path where to save the image (e.g., 'public/logo.png')"),
+                  description: z.string().optional().describe("Brief description of the generation task"),
+                }),
+                execute: async ({ prompt, path: targetPath }) => {
+                  const openaiKey = readSettings().providerSettings?.openai?.apiKey?.value;
+                  if (!openaiKey) return "Error: OpenAI API key is missing in settings. Please add it to use image generation.";
+
+                  try {
+                    const fullPath = safeJoin(getCodinerAppPath(updatedChat.app.path), targetPath);
+                    await generateAndSaveImage({
+                      prompt,
+                      outputPath: fullPath,
+                      apiKey: openaiKey
+                    });
+                    return `Successfully generated image and saved to ${targetPath}`;
+                  } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    return `Error generating image: ${errorMessage}`;
+                  }
+                }
+              },
+              "firebase-command": {
+                description: "Run a Firebase CLI command (e.g., 'deploy', 'use', 'init', 'firestore:rules:update'). Only works if the user is logged in via the Firebase Integration Dialog.",
+                inputSchema: z.object({
+                  command: z.string().describe("The firebase command to run (without 'firebase' prefix, e.g. 'deploy --only hosting')"),
+                }),
+                execute: async ({ command }) => {
+                  const appPath = getCodinerAppPath(updatedChat.app.path);
+                  try {
+                    const fullCommand = `firebase ${command}`;
+                    logger.log(`Executing firebase command for app ${updatedChat.app.id}: ${fullCommand}`);
+
+                    // We should run this in the app directory
+                    const result = await new Promise<string>((resolve, reject) => {
+                      const process = spawn(fullCommand, {
+                        shell: true,
+                        cwd: appPath,
+                        stdio: ["ignore", "pipe", "pipe"],
+                      });
+
+                      let output = "";
+                      process.stdout?.on("data", (data) => (output += data.toString()));
+                      process.stderr?.on("data", (data) => (output += data.toString()));
+
+                      process.on("close", (code) => {
+                        if (code === 0) resolve(output);
+                        else reject(new Error(`Command failed with code ${code}. Output: ${output}`));
+                      });
+                    });
+
+                    return result;
+                  } catch (error: any) {
+                    return `Error: ${error.message}`;
+                  }
+                },
               },
             },
             systemPromptOverride: constructSystemPrompt({
@@ -1283,7 +1313,7 @@ ${problemReport.problems
                   modelClient,
                   files: files,
                   chatMessages: [
-                    ...chatMessages.map((msg, index) => {
+                    ...chatMessages.map((msg: any, index) => {
                       if (
                         index === 0 &&
                         msg.role === "user" &&
@@ -1324,7 +1354,7 @@ ${problemReport.problems
 
                 problemReport = await generateProblemReport({
                   fullResponse,
-                  appPath: getCodinerAppPath(updatedChat.app.path),
+                  appPath: getCodinerAppPath((updatedChat.app as any).path),
                 });
               }
             } catch (error) {
@@ -1378,16 +1408,16 @@ ${problemReport.problems
         );
         if (chatTitle) {
           await db
-            .update(chats)
-            .set({ title: chatTitle[1] })
+            .update(chats as any)
+            .set({ title: chatTitle[1] } as any)
             .where(and(eq(chats.id, req.chatId), isNull(chats.title)));
         }
         const chatSummary = chatTitle?.[1];
 
         // Update the placeholder assistant message with the full response
         await db
-          .update(messages)
-          .set({ content: fullResponse })
+          .update(messages as any)
+          .set({ content: fullResponse } as any)
           .where(eq(messages.id, placeholderAssistantMessage.id));
         const settings = readSettings();
         if (
@@ -1403,14 +1433,14 @@ ${problemReport.problems
             }, // Use placeholder ID
           );
 
-          const chat = await db.query.chats.findFirst({
+          const chat = (await db.query.chats.findFirst({
             where: eq(chats.id, req.chatId),
             with: {
               messages: {
-                orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+                orderBy: (m: any, { asc }: any) => [asc(m.createdAt)],
               },
             },
-          });
+          })) as any;
 
           safeSend(event.sender, "chat:response:chunk", {
             chatId: req.chatId,
@@ -1441,11 +1471,14 @@ ${problemReport.problems
 
       // Return the chat ID for backwards compatibility
       return req.chatId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error("Error calling LLM:", error);
+
+      const errorMessage = parseAiErrorMessage(error);
+
       safeSend(event.sender, "chat:response:error", {
         chatId: req.chatId,
-        error: `Sorry, there was an error processing your request: ${error}`,
+        error: `Sorry, there was an error from the AI: ${errorMessage}`,
       });
 
       // Clean up file uploads state on error
@@ -1479,7 +1512,7 @@ ${problemReport.problems
   });
 
   // Handler to cancel an ongoing stream
-  ipcMain.handle("chat:cancel", async (event, chatId: number) => {
+  handle("chat:cancel", async (event, chatId: number) => {
     const abortController = activeStreams.get(chatId);
 
     if (abortController) {

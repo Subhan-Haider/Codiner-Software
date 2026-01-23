@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SendIcon, StopCircleIcon, Mic, MicOff, Sparkles } from "lucide-react";
+import { SendIcon, StopCircleIcon, Mic, MicOff, Sparkles, Folder, X } from "lucide-react";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 import { useSettings } from "@/hooks/useSettings";
@@ -31,7 +31,21 @@ export function HomeChatInput({
     hasChatId: false,
   }); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [projectLocation, setProjectLocation] = useState<string | null>(null);
   useChatModeToggle();
+
+  const handleSelectLocation = async () => {
+    try {
+      const response = await IpcClient.getInstance().selectAppLocation();
+      if (!response.canceled && response.path) {
+        setProjectLocation(response.path);
+        posthog.capture("chat:location_selected");
+      }
+    } catch (error) {
+      console.error("Failed to select location:", error);
+    }
+  };
+
 
   const typingText = useTypingPlaceholder([
     "an ecommerce store...",
@@ -60,7 +74,7 @@ export function HomeChatInput({
     }
 
     // Call the parent's onSubmit handler with attachments
-    onSubmit({ attachments });
+    onSubmit({ attachments, parentDirectory: projectLocation || undefined });
 
     // Clear attachments as part of submission process
     clearAttachments();
@@ -86,9 +100,9 @@ export function HomeChatInput({
       setInputValue(enhanced);
       toast.success("Prompt enhanced with AI ✨");
       posthog.capture("chat:prompt_enhanced");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to enhance prompt:", error);
-      toast.error("Failed to enhance prompt");
+      toast.error(error.message || "Failed to enhance prompt");
     } finally {
       setIsEnhancing(false);
     }
@@ -140,6 +154,21 @@ export function HomeChatInput({
             </button>
 
             <button
+              onClick={handleSelectLocation}
+              disabled={isStreaming}
+              className={cn(
+                "px-3 py-2 mt-1 mr-1 rounded-xl transition-all",
+                projectLocation
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              )}
+              title={projectLocation ? `Project location: ${projectLocation}` : "Select project location"}
+            >
+              <Folder size={20} />
+            </button>
+
+
+            <button
               onClick={() => toggleListening(handleVoiceResult)}
               disabled={isStreaming}
               className={`px-3 py-2 mt-1 mr-1 rounded-xl transition-all ${isListening
@@ -176,8 +205,22 @@ export function HomeChatInput({
               </button>
             )}
           </div>
-          <div className="px-2 pb-2">
+          <div className="px-2 pb-2 flex items-center justify-between">
             <ChatInputControls />
+            {projectLocation && (
+              <div className="flex items-center gap-2 bg-primary/5 px-3 py-1 rounded-full border border-primary/10 animate-in fade-in slide-in-from-right-2">
+                <Folder size={12} className="text-primary" />
+                <span className="text-[10px] font-medium text-primary truncate max-w-[200px]" title={projectLocation}>
+                  {projectLocation}
+                </span>
+                <button
+                  onClick={() => setProjectLocation(null)}
+                  className="hover:text-destructive transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -5,12 +5,15 @@ import {
   HelpCircle,
   Store,
   BookOpen,
+  Beaker,
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
 import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 import { dropdownOpenAtom } from "@/atoms/uiAtoms";
+import { useSettings } from "@/hooks/useSettings";
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -28,6 +31,8 @@ import { ChatList } from "./ChatList";
 import { AppList } from "./AppList";
 import { HelpDialog } from "./HelpDialog"; // Import the new dialog
 import { SettingsList } from "./SettingsList";
+import { LabsList } from "./LabsList";
+import { HubList } from "./HubList";
 // @ts-ignore
 import logo from "../../assets/logo.png";
 
@@ -44,11 +49,6 @@ const items = [
     icon: Inbox,
   },
   {
-    title: "Settings",
-    to: "/settings",
-    icon: Settings,
-  },
-  {
     title: "Library",
     to: "/library",
     icon: BookOpen,
@@ -58,6 +58,16 @@ const items = [
     to: "/hub",
     icon: Store,
   },
+  {
+    title: "Labs",
+    to: "/labs",
+    icon: Beaker,
+  },
+  {
+    title: "Settings",
+    to: "/settings",
+    icon: Settings,
+  },
 ];
 
 // Hover state types
@@ -66,17 +76,24 @@ type HoverState =
   | "start-hover:chat"
   | "start-hover:settings"
   | "start-hover:library"
+  | "start-hover:hub"
+  | "start-hover:labs"
   | "clear-hover"
   | "no-hover";
 
-export function AppSidebar() {
+export function AppSidebar({ className }: { className?: string }) {
   const { state, toggleSidebar } = useSidebar(); // retrieve current sidebar state
   const [hoverState, setHoverState] = useState<HoverState>("no-hover");
   const expandedByHover = useRef(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false); // State for dialog
   const [isDropdownOpen] = useAtom(dropdownOpenAtom);
 
+  const { settings } = useSettings();
+  const isHoverEnabled = settings?.enableSidebarHover ?? true;
+
   useEffect(() => {
+    if (!isHoverEnabled) return;
+
     if (hoverState.startsWith("start-hover") && state === "collapsed") {
       expandedByHover.current = true;
       toggleSidebar();
@@ -91,7 +108,7 @@ export function AppSidebar() {
       expandedByHover.current = false;
       setHoverState("no-hover");
     }
-  }, [hoverState, toggleSidebar, state, setHoverState, isDropdownOpen]);
+  }, [hoverState, toggleSidebar, state, setHoverState, isDropdownOpen, isHoverEnabled]);
 
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
@@ -109,6 +126,10 @@ export function AppSidebar() {
     selectedItem = "Settings";
   } else if (hoverState === "start-hover:library") {
     selectedItem = "Library";
+  } else if (hoverState === "start-hover:hub") {
+    selectedItem = "Hub";
+  } else if (hoverState === "start-hover:labs") {
+    selectedItem = "Labs";
   } else if (state === "expanded") {
     if (isAppRoute) {
       selectedItem = "Apps";
@@ -127,50 +148,37 @@ export function AppSidebar() {
           setHoverState("clear-hover");
         }
       }}
+      className={cn("border-r border-border", className)}
     >
       <SidebarContent className="overflow-hidden">
-        <div className="flex flex-col h-full mt-4 lg:mt-10">
-          <div className="flex">
-            {/* Left Column: Menu items */}
-            <div className="border-r border-border/40 bg-background/20">
-              <SidebarTrigger
-                onMouseEnter={() => {
-                  setHoverState("clear-hover");
-                }}
-              />
-              <AppIcons onHoverChange={setHoverState} />
-            </div>
-            {/* Right Column: Chat List Section */}
-            <div className="w-52 lg:w-64">
+        {/* Main Flex Container */}
+        <div className="flex h-full">
+
+          {/* Left Column: Icon Rail */}
+          {/* Added pt-12 to account for window drag region */}
+          <div className="flex flex-col items-center border-r border-border/50 bg-secondary/20 w-[72px] pt-2 pb-4 gap-2 h-full z-20">
+            <SidebarTrigger className="mb-4 h-10 w-10" />
+            <AppIcons onHoverChange={setHoverState} />
+          </div>
+
+          {/* Right Column: Content List */}
+          {/* Hidden when collapsed to prevent crushing */}
+          <div className={`
+                flex-1 min-w-0 bg-background transition-all duration-300 ease-in-out pt-2
+                ${state === "collapsed" ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"}
+            `}>
+            <div className="h-full w-full px-1">
               <AppList show={selectedItem === "Apps"} />
               <ChatList show={selectedItem === "Chat"} />
               <SettingsList show={selectedItem === "Settings"} />
+              <LabsList show={selectedItem === "Labs"} />
+              <HubList show={selectedItem === "Hub"} />
             </div>
           </div>
         </div>
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            {/* Change button to open dialog instead of linking */}
-            <SidebarMenuButton
-              size="sm"
-              className="font-medium w-14 flex flex-col items-center gap-1 h-14 mb-2 rounded-2xl"
-              onClick={() => setIsHelpDialogOpen(true)} // Open dialog on click
-            >
-              <HelpCircle className="h-5 w-5" />
-              <span className={"text-xs"}>Help</span>
-            </SidebarMenuButton>
-            <HelpDialog
-              isOpen={isHelpDialogOpen}
-              onClose={() => setIsHelpDialogOpen(false)}
-            />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-
-      <SidebarRail />
+      {/* Footer and Rail removed/simplified as they are integrated above or unused */}
     </Sidebar>
   );
 }
@@ -184,13 +192,11 @@ function AppIcons({
   const pathname = routerState.location.pathname;
 
   return (
-    // When collapsed: only show the main menu
-    <SidebarGroup className="pr-0">
-
-
+    <SidebarGroup className="p-0">
       <SidebarGroupContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-2 items-center w-full">
           {items.map((item) => {
+            // "Active" logic (simplified)
             const isActive =
               (item.to === "/" && pathname === "/") ||
               (item.to !== "/" && pathname.startsWith(item.to));
@@ -199,36 +205,63 @@ function AppIcons({
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  size="sm"
-                  className="font-medium w-14 group transition-all duration-300"
+                  tooltip={{ children: item.title, side: "right" }}
+                  className="w-12 h-12 p-0 justify-center group"
                 >
                   <Link
                     to={item.to}
-                    className={`flex flex-col items-center gap-1 h-14 mb-2 rounded-2xl transition-all duration-300 border border-transparent ${isActive ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" : "hover:bg-accent hover:border-primary/10"
-                      }`}
-                    onMouseEnter={() => {
-                      if (item.title === "Apps") {
-                        onHoverChange("start-hover:app");
-                      } else if (item.title === "Chat") {
-                        onHoverChange("start-hover:chat");
-                      } else if (item.title === "Settings") {
-                        onHoverChange("start-hover:settings");
-                      } else if (item.title === "Library") {
-                        onHoverChange("start-hover:library");
+                    className={`
+                      flex flex-col items-center justify-center w-10 h-10 rounded-xl transition-all duration-200
+                      ${isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }
+                    `}
+                    onMouseEnter={() => {
+                      // Keep hover logic for expanding sub-menus if desired
+                      if (item.title === "Apps") onHoverChange("start-hover:app");
+                      else if (item.title === "Chat") onHoverChange("start-hover:chat");
+                      else if (item.title === "Settings") onHoverChange("start-hover:settings");
+                      else if (item.title === "Library") onHoverChange("start-hover:library");
+                      else if (item.title === "Hub") onHoverChange("start-hover:hub");
+                      else if (item.title === "Labs") onHoverChange("start-hover:labs");
                     }}
                   >
-                    <div className="flex flex-col items-center gap-1">
-                      <item.icon className="h-5 w-5" />
-                      <span className={"text-xs"}>{item.title}</span>
-                    </div>
+                    <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+                    {/* Tiny text label is optionally removed for a cleaner look, or kept if desired. 
+                        Let's remove the text label for a pure rail look, relying on Tooltips. */}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
           })}
+
+          {/* Help Button moved here to be part of the rail flow */}
+          <div className="mt-auto pt-4 border-t w-8 border-border/50" />
+          <SidebarMenuItem>
+            <HelpButton />
+          </SidebarMenuItem>
+
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
   );
+}
+
+function HelpButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <SidebarMenuButton
+        className="w-12 h-12 p-0 justify-center"
+        onClick={() => setIsOpen(true)}
+        tooltip={{ children: "Help", side: "right" }}
+      >
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+          <HelpCircle className="h-5 w-5" />
+        </div>
+      </SidebarMenuButton>
+      <HelpDialog isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </>
+  )
 }

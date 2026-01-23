@@ -1,5 +1,5 @@
 import React from "react";
-import { Folder, FolderOpen } from "lucide-react";
+import { Folder, FolderOpen, Search } from "lucide-react";
 import { selectedFileAtom } from "@/atoms/viewAtoms";
 import { useSetAtom } from "jotai";
 
@@ -52,11 +52,35 @@ const buildFileTree = (files: string[]): TreeNode[] => {
 
 // File tree component
 export const FileTree = ({ files }: FileTreeProps) => {
-  const treeData = buildFileTree(files);
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const filteredFiles = React.useMemo(() => {
+    if (!searchQuery.trim()) return files;
+    const query = searchQuery.toLowerCase();
+    return files.filter((file) => file.toLowerCase().includes(query));
+  }, [files, searchQuery]);
+
+  const treeData = buildFileTree(filteredFiles);
+  const isSearching = !!searchQuery.trim();
 
   return (
     <div className="file-tree mt-2">
-      <TreeNodes nodes={treeData} level={0} />
+      <div className="px-2 mb-2">
+        <div className="relative">
+          <Search
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={14}
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search files..."
+            className="w-full pl-8 pr-2 py-1 text-sm bg-transparent border rounded focus:outline-none focus:border-blue-500"
+          />
+        </div>
+      </div>
+      <TreeNodes nodes={treeData} level={0} expandAll={isSearching} />
     </div>
   );
 };
@@ -64,6 +88,7 @@ export const FileTree = ({ files }: FileTreeProps) => {
 interface TreeNodesProps {
   nodes: TreeNode[];
   level: number;
+  expandAll?: boolean;
 }
 
 // Sort nodes to show directories first
@@ -77,10 +102,10 @@ const sortNodes = (nodes: TreeNode[]): TreeNode[] => {
 };
 
 // Tree nodes component
-const TreeNodes = ({ nodes, level }: TreeNodesProps) => (
+const TreeNodes = ({ nodes, level, expandAll }: TreeNodesProps) => (
   <ul className="ml-4">
-    {sortNodes(nodes).map((node, index) => (
-      <TreeNode key={index} node={node} level={level} />
+    {sortNodes(nodes).map((node) => (
+      <TreeNode key={node.path} node={node} level={level} expandAll={expandAll} />
     ))}
   </ul>
 );
@@ -88,12 +113,19 @@ const TreeNodes = ({ nodes, level }: TreeNodesProps) => (
 interface TreeNodeProps {
   node: TreeNode;
   level: number;
+  expandAll?: boolean;
 }
 
 // Individual tree node component
-const TreeNode = ({ node, level }: TreeNodeProps) => {
+const TreeNode = ({ node, level, expandAll }: TreeNodeProps) => {
   const [expanded, setExpanded] = React.useState(level < 2);
   const setSelectedFile = useSetAtom(selectedFileAtom);
+
+  React.useEffect(() => {
+    if (expandAll) {
+      setExpanded(true);
+    }
+  }, [expandAll]);
 
   const handleClick = () => {
     if (node.isDirectory) {
@@ -120,7 +152,7 @@ const TreeNode = ({ node, level }: TreeNodeProps) => {
       </div>
 
       {node.isDirectory && expanded && node.children.length > 0 && (
-        <TreeNodes nodes={node.children} level={level + 1} />
+        <TreeNodes nodes={node.children} level={level + 1} expandAll={expandAll} />
       )}
     </li>
   );

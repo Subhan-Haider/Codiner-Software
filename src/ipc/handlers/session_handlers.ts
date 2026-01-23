@@ -1,9 +1,14 @@
-import { ipcMain, session } from "electron";
+import { session } from "electron";
 import fs from "node:fs/promises";
 import { getTypeScriptCachePath } from "@/paths/paths";
+import { createLoggedHandler } from "./safe_handle";
+import log from "electron-log";
+
+const logger = log.scope("session_handlers");
+const handle = createLoggedHandler(logger);
 
 export const registerSessionHandlers = () => {
-  ipcMain.handle("clear-session-data", async (_event) => {
+  handle("clear-session-data", async (_event) => {
     const defaultAppSession = session.defaultSession;
 
     await defaultAppSession.clearStorageData({

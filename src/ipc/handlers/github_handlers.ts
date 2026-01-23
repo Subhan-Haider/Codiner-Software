@@ -1,12 +1,12 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from "electron";
-import fetch from "node-fetch"; // Use node-fetch for making HTTP requests in main process
+// Switched to native fetch (available in Node 18+) for better compatibility in the main process.
 import { writeSettings, readSettings } from "../../main/settings";
 import { gitSetRemoteUrl, gitPush, gitClone } from "../utils/git_utils";
 import * as schema from "../../db/schema";
 import fs from "node:fs";
 import { getCodinerAppPath } from "../../paths/paths";
 import { db } from "../../db";
-import { apps } from "../../db/schema";
+import { apps as appsTable } from "../../db/schema";
 import type { CloneRepoParams, CloneRepoReturnType } from "../ipc_types";
 import { eq } from "drizzle-orm";
 import { GithubUser } from "../../lib/schemas";
@@ -71,27 +71,44 @@ let currentFlowState: DeviceFlowState | null = null;
  */
 export async function getGithubUser(): Promise<GithubUser | null> {
   const settings = readSettings();
-  const email = settings.githubUser?.email;
-  if (email) return { email };
+  const githubUser = settings.githubUser;
+  // If we already have login or email, return what we have (cached)
+  if (githubUser?.login || githubUser?.email) return githubUser;
+
   try {
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) return null;
-    const res = await fetch(`${GITHUB_API_BASE}/user/emails`, {
+
+    // Fetch user profile (for login and avatar)
+    const profileRes = await fetch(`${GITHUB_API_BASE}/user`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!res.ok) return null;
-    const emails = await res.json();
+    if (!profileRes.ok) return null;
+    const profile = (await profileRes.json()) as any;
+    const login = profile.login;
+    const avatarUrl = profile.avatar_url;
+
+    // Fetch user emails (for primary email)
+    const emailRes = await fetch(`${GITHUB_API_BASE}/user/emails`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!emailRes.ok) return null;
+    const emails = (await emailRes.json()) as any[];
     const email = emails.find((e: any) => e.primary)?.email;
-    if (!email) return null;
+    if (!email && !login) return null;
+
+    const user: GithubUser = {
+      email: email || "",
+      login: login,
+      avatarUrl: avatarUrl,
+    };
 
     writeSettings({
-      githubUser: {
-        email,
-      },
+      githubUser: user,
     });
-    return { email };
+    return user;
   } catch (err) {
-    logger.error("[GitHub Handler] Failed to get GitHub username:", err);
+    logger.error("[GitHub Handler] Failed to get GitHub user info:", err);
     return null;
   }
 }
@@ -129,7 +146,7 @@ async function pollForAccessToken(event: IpcMainInvokeEvent) {
       }),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
 
     if (response.ok && data.access_token) {
       logger.log("Successfully obtained GitHub Access Token.");
@@ -258,26 +275,33 @@ function handleStartGithubFlow(
     message: "Requesting device code from GitHub...",
   });
 
+  logger.info(`Initiating GitHub device flow for client ID: ${GITHUB_CLIENT_ID}`);
+
   fetch(GITHUB_DEVICE_CODE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "User-Agent": "Codiner-App",
     },
     body: JSON.stringify({
       client_id: GITHUB_CLIENT_ID,
       scope: GITHUB_SCOPES,
     }),
   })
-    .then((res) => {
+    .then(async (res) => {
+      logger.info(`GitHub device code response status: ${res.status}`);
       if (!res.ok) {
-        return res.json().then((errData) => {
-          throw new Error(
-            `GitHub API Error: ${errData.error_description || res.statusText}`,
-          );
-        });
+        let errDetails = res.statusText;
+        try {
+          const errData = (await res.json()) as any;
+          errDetails = errData.error_description || errData.error || res.statusText;
+        } catch (e) {
+          // Fallback if not JSON
+        }
+        throw new Error(`GitHub API Error (${res.status}): ${errDetails}`);
       }
-      return res.json();
+      return res.json() as Promise<any>;
     })
     .then((data) => {
       logger.info("Received device code response");
@@ -334,13 +358,13 @@ async function handleListGithubRepos(): Promise<
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as any;
       throw new Error(
         `GitHub API error: ${errorData.message || response.statusText}`,
       );
     }
 
-    const repos = await response.json();
+    const repos = (await response.json()) as any[];
     return repos.map((repo: any) => ({
       name: repo.name,
       full_name: repo.full_name,
@@ -377,13 +401,13 @@ async function handleGetRepoBranches(
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as any;
       throw new Error(
         `GitHub API error: ${errorData.message || response.statusText}`,
       );
     }
 
-    const branches = await response.json();
+    const branches = (await response.json()) as any[];
     return branches.map((branch: any) => ({
       name: branch.name,
       commit: { sha: branch.commit.sha },
@@ -413,7 +437,7 @@ async function handleIsRepoAvailable(
         headers: { Authorization: `Bearer ${accessToken}` },
       })
         .then((r) => r.json())
-        .then((u) => u.login));
+        .then((u: any) => u.login));
     // Check if repo exists
     const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
     const res = await fetch(url, {
@@ -424,7 +448,7 @@ async function handleIsRepoAvailable(
     } else if (res.ok) {
       return { available: false, error: "Repository already exists." };
     } else {
-      const data = await res.json();
+      const data = (await res.json()) as any;
       return { available: false, error: data.message || "Unknown error" };
     }
   } catch (err: any) {
@@ -454,7 +478,7 @@ async function handleCreateRepo(
     const userRes = await fetch(`${GITHUB_API_BASE}/user`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    const user = await userRes.json();
+    const user = (await userRes.json()) as any;
     owner = user.login;
   }
   // Create repo
@@ -476,7 +500,7 @@ async function handleCreateRepo(
   if (!res.ok) {
     let errorMessage = `Failed to create repository (${res.status} ${res.statusText})`;
     try {
-      const data = await res.json();
+      const data = (await res.json()) as any;
       logger.error("GitHub API error when creating repo:", {
         status: res.status,
         statusText: res.statusText,
@@ -547,7 +571,7 @@ async function handleConnectToExistingRepo(
     );
 
     if (!repoResponse.ok) {
-      const errorData = await repoResponse.json();
+      const errorData = (await repoResponse.json()) as any;
       throw new Error(
         `Repository not found or access denied: ${errorData.message}`,
       );
@@ -574,7 +598,9 @@ async function handlePushToGithub(
       return { success: false, error: "Not authenticated with GitHub." };
     }
     // Get app info from DB
-    const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
+    const app = await db.query.apps.findFirst({
+      where: eq(appsTable.id, appId),
+    });
     if (!app || !app.githubOrg || !app.githubRepo) {
       return { success: false, error: "App is not linked to a GitHub repo." };
     }
@@ -615,7 +641,7 @@ async function handleDisconnectGithubRepo(
 
   // Get the app from the database
   const app = await db.query.apps.findFirst({
-    where: eq(apps.id, appId),
+    where: eq(schema.apps.id, appId),
   });
 
   if (!app) {
@@ -624,13 +650,13 @@ async function handleDisconnectGithubRepo(
 
   // Update app in database to remove GitHub repo, org, and branch
   await db
-    .update(apps)
+    .update(appsTable as any)
     .set({
       githubOrg: null,
       githubRepo: null,
       githubBranch: null,
     })
-    .where(eq(apps.id, appId));
+    .where(eq(appsTable.id, appId));
 }
 // --- GitHub Clone Repo from URL Handler ---
 async function handleCloneRepoFromUrl(
@@ -641,34 +667,61 @@ async function handleCloneRepoFromUrl(
   try {
     const settings = readSettings();
     const accessToken = settings.githubAccessToken?.value;
-    const urlPattern = /github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?\/?$/;
-    const match = url.match(urlPattern);
+    // More robust URL parsing
+    // Handles https://github.com/owner/repo, github.com/owner/repo, git@github.com:owner/repo.git, owner/repo, etc.
+    const urlPattern = /(?:(?:https?:\/\/|git@)?(?:www\.)?github\.com[/|:])?([^/:\s]+)\/([^/\s#?]+)/i;
+    const match = url.trim().match(urlPattern);
+
     if (!match) {
+      logger.error(`[GitHub Handler] URL match failed for: "${url}"`);
       return {
         error:
-          "Invalid GitHub URL. Expected format: https://github.com/owner/repo.git",
+          `Invalid GitHub URL format: "${url}". Please provide a full URL (https://github.com/owner/repo) or shorthand (owner/repo).`,
       };
     }
-    const [, owner, repoName] = match;
+
+    const owner = match[1];
+    let repoName = match[2];
+    logger.info(`[GitHub Handler] Parsed URL - Owner: ${owner}, Repo: ${repoName}`);
+
+    // Clean up repo name: remove .git, trailing slashes, or subpaths
+    repoName = repoName.replace(/\.git$/, "").split("/")[0];
+    const cleanRepoName = repoName;
+
+    // Check repository accessibility before cloning
+    const repoHeaders: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+    };
     if (accessToken) {
-      const repoResponse = await fetch(
-        `${GITHUB_API_BASE}/repos/${owner}/${repoName}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: "application/vnd.github+json",
-          },
-        },
-      );
-      if (!repoResponse.ok) {
+      repoHeaders.Authorization = `Bearer ${accessToken}`;
+    }
+
+    const repoResponse = await fetch(
+      `${GITHUB_API_BASE}/repos/${owner}/${cleanRepoName}`,
+      { headers: repoHeaders },
+    );
+
+    if (!repoResponse.ok) {
+      if (repoResponse.status === 401 || repoResponse.status === 403) {
         return {
-          error: "Repository not found or you do not have access to it.",
+          error:
+            "Authentication failed or access denied. Please check your GitHub Access Token in Settings and ensure it has 'repo' permissions.",
         };
       }
+      if (repoResponse.status === 404) {
+        return {
+          error: `Repository "${owner}/${cleanRepoName}" not found. If it is a private repository, please ensure you have configured a valid GitHub Access Token in Settings.`,
+        };
+      }
+      // For other errors, we continue and try the clone anyway as fallback
+      logger.warn(
+        `[GitHub Handler] Repo check returned ${repoResponse.status}: ${repoResponse.statusText}`,
+      );
     }
-    const finalAppName = appName && appName.trim() ? appName.trim() : repoName;
+
+    const finalAppName = appName && appName.trim() ? appName.trim() : cleanRepoName;
     const existingApp = await db.query.apps.findFirst({
-      where: eq(apps.name, finalAppName),
+      where: eq(appsTable.name, finalAppName),
     });
 
     if (existingApp) {
@@ -676,51 +729,52 @@ async function handleCloneRepoFromUrl(
     }
 
     const appPath = getCodinerAppPath(finalAppName);
-    // Ensure the app directory exists if native git is disabled
-    if (!settings.enableNativeGit) {
-      if (!fs.existsSync(appPath)) {
-        fs.mkdirSync(appPath, { recursive: true });
-      }
+
+    // Check if directory already exists and is not empty
+    if (fs.existsSync(appPath) && fs.readdirSync(appPath).length > 0) {
+      return { error: `The directory for "${finalAppName}" already exists and is not empty.` };
     }
-    // Use authenticated URL if token exists, otherwise use public HTTPS URL
-    const cloneUrl = accessToken
-      ? IS_TEST_BUILD
-        ? `${GITHUB_GIT_BASE}/${owner}/${repoName}.git`
-        : `https://${accessToken}:x-oauth-basic@github.com/${owner}/${repoName}.git`
-      : `https://github.com/${owner}/${repoName}.git`; // Changed: use public HTTPS URL instead of original url
+
+    // Build the clone URL. We pass the clean HTTPS URL to gitClone, 
+    // which handles adding the accessToken if needed.
+    const cloneUrl = `https://github.com/${owner}/${cleanRepoName}.git`;
+
     try {
       await gitClone({
         path: appPath,
         url: cloneUrl,
         accessToken,
         singleBranch: false,
+        depth: 1, // Default to shallow clone for faster initial import
       });
-    } catch (cloneErr) {
+    } catch (cloneErr: any) {
       logger.error("[GitHub Handler] Clone failed:", cloneErr);
+      let errorMessage = cloneErr.message || "Unknown error";
+      if (errorMessage.includes("401") || errorMessage.includes("403")) {
+        errorMessage =
+          "Authentication failed. Please check your GitHub Access Token in Settings and ensure it has 'repo' permissions.";
+      }
       return {
-        error:
-          "Failed to clone repository. Please check the URL and try again.",
+        error: `Failed to clone repository: ${errorMessage}`,
       };
     }
     const aiRulesPath = path.join(appPath, "AI_RULES.md");
     const hasAiRules = fs.existsSync(aiRulesPath);
-    const [newApp] = await db
-      .insert(schema.apps)
+    const [newApp] = (await db
+      .insert(appsTable as any)
       .values({
         name: finalAppName,
         path: finalAppName,
         installCommand: installCommand || null,
         startCommand: startCommand || null,
       })
-      .returning();
+      .returning()) as any[];
     logger.log(`Successfully cloned repo ${owner}/${repoName} to ${appPath}`);
     // Return success object
     return {
       app: {
         ...newApp,
         files: [],
-        supabaseProjectName: null,
-        supabaseOrganizationSlug: null,
         vercelTeamSlug: null,
       },
       hasAiRules,
@@ -776,11 +830,11 @@ export async function updateAppGithubRepo({
   branch?: string;
 }): Promise<void> {
   await db
-    .update(schema.apps)
+    .update(appsTable as any)
     .set({
       githubOrg: org,
       githubRepo: repo,
       githubBranch: branch || "main",
     })
-    .where(eq(schema.apps.id, appId));
+    .where(eq(appsTable.id, appId));
 }

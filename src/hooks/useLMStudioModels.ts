@@ -25,8 +25,11 @@ export function useLocalLMSModels() {
       setError(null);
 
       return modelList;
-    } catch (error) {
-      console.error("Error loading local LMStudio models:", error);
+    } catch (error: any) {
+      const isConnectionError = error?.message?.includes("Could not connect") || error?.message?.includes("fetch failed");
+      if (!isConnectionError) {
+        console.error("Error loading local LMStudio models:", error);
+      }
       setError(error instanceof Error ? error : new Error(String(error)));
       return [];
     } finally {

@@ -1,21 +1,23 @@
-import { ipcMain } from "electron";
+import { createLoggedHandler } from "./safe_handle";
+import log from "electron-log";
 import type { UserSettings } from "../../lib/schemas";
-import { writeSettings } from "../../main/settings";
-import { readSettings } from "../../main/settings";
+import { writeSettings, readSettings } from "../../main/settings";
+
+const logger = log.scope("settings_handlers");
+const handle = createLoggedHandler(logger);
 
 export function registerSettingsHandlers() {
-  // Intentionally do NOT use handle because it could log sensitive data from the return value.
-  ipcMain.handle("get-user-settings", async () => {
+  handle("get-user-settings", async () => {
     const settings = readSettings();
     return settings;
-  });
+  }, { logResult: false }); // Do not log potentially sensitive settings
 
-  // Intentionally do NOT use handle because it could log sensitive data from the args.
-  ipcMain.handle(
+  handle(
     "set-user-settings",
     async (_, settings: Partial<UserSettings>) => {
       writeSettings(settings);
       return readSettings();
     },
+    { logArgs: false, logResult: false } // Do not log sensitive args or results
   );
 }

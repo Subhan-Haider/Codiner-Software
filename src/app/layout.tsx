@@ -4,6 +4,7 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import { DeepLinkProvider } from "../contexts/DeepLinkContext";
 import { MadeWithCodiner } from "@/components/made-with-codiner";
 import { TitleBar } from "./TitleBar";
+import { CommandCenter } from "@/components/CommandCenter";
 import { useEffect, type ReactNode } from "react";
 import { useRunApp } from "@/hooks/useRunApp";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -12,11 +13,12 @@ import {
   previewModeAtom,
   selectedAppIdAtom,
 } from "@/atoms/appAtoms";
+import { activeSettingsSectionAtom } from "@/atoms/viewAtoms";
 import { useSettings } from "@/hooks/useSettings";
 import type { ZoomLevel } from "@/lib/schemas";
 import { selectedComponentsPreviewAtom } from "@/atoms/previewAtoms";
 import { chatInputValueAtom } from "@/atoms/chatAtoms";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_ZOOM_LEVEL: ZoomLevel = "100";
@@ -24,14 +26,24 @@ const DEFAULT_ZOOM_LEVEL: ZoomLevel = "100";
 export default function RootLayout({ children }: { children: ReactNode }) {
   const { refreshAppIframe } = useRunApp();
   const previewMode = useAtomValue(previewModeAtom);
-  const { settings } = useSettings();
+  const { settings, loading } = useSettings();
   const setSelectedComponentsPreview = useSetAtom(
     selectedComponentsPreviewAtom,
   );
   const setChatInput = useSetAtom(chatInputValueAtom);
   const selectedAppId = useAtomValue(selectedAppIdAtom);
   const location = useLocation();
+  const navigate = useNavigate();
   const setConsoleEntries = useSetAtom(appConsoleEntriesAtom);
+
+  const isOnboarding = location.pathname === "/onboarding";
+
+  useEffect(() => {
+    // Redirect if onboarding is not completed
+    if (settings && settings.hasCompletedOnboarding === false && !isOnboarding) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [settings?.hasCompletedOnboarding, isOnboarding, navigate]);
 
   useEffect(() => {
     const zoomLevel = settings?.zoomLevel ?? DEFAULT_ZOOM_LEVEL;
@@ -57,6 +69,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   }, [settings?.zoomLevel]);
 
   useEffect(() => {
+    // Prevent style thrashing/resetting while loading
+    if (loading) return;
+
     if (settings?.accentColor) {
       document.documentElement.style.setProperty("--primary", settings.accentColor);
       document.documentElement.style.setProperty("--ring", settings.accentColor);
@@ -66,17 +81,56 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       document.documentElement.style.removeProperty("--ring");
       document.documentElement.style.removeProperty("--sidebar-primary");
     }
-  }, [settings?.accentColor]);
+
+    if (settings?.appFontFamily) {
+      const fontMap: Record<string, string> = {
+        inter: "Inter, sans-serif",
+        system: "system-ui, -apple-system, sans-serif",
+        mono: "monospace",
+        dyslexic: "OpenDyslexic, sans-serif",
+      };
+      const font = fontMap[settings.appFontFamily] || fontMap.inter;
+      document.body.style.fontFamily = font;
+    } else {
+      document.body.style.removeProperty("font-family");
+    }
+
+    if (settings?.appFontWeight) {
+      const weightMap: Record<string, string> = {
+        normal: "400",
+        medium: "500",
+        bold: "600"
+      };
+      // Apply to body and maybe force it on all elements via css var or direct style if needed
+      // For now, body style inheritance is standard.
+      document.body.style.fontWeight = weightMap[settings.appFontWeight] || "400";
+    } else {
+      document.body.style.removeProperty("font-weight");
+    }
+
+    if (settings?.appFontSize) {
+      const sizeMap: Record<string, string> = {
+        small: "14px",
+        normal: "16px",
+        large: "18px",
+        "extra-large": "20px",
+      };
+      document.documentElement.style.fontSize = sizeMap[settings.appFontSize] || "16px";
+    } else {
+      document.documentElement.style.removeProperty("font-size");
+    }
+  }, [settings?.accentColor, settings?.appFontFamily, settings?.appFontWeight, settings?.appFontSize, loading]);
 
   // Global keyboard listener for refresh events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Ctrl+R (Windows/Linux) or Cmd+R (macOS)
       if (event.key === "r" && (event.ctrlKey || event.metaKey)) {
-        event.preventDefault(); // Prevent default browser refresh
         if (previewMode === "preview") {
+          event.preventDefault(); // Prevent default browser refresh
           refreshAppIframe(); // Use our custom refresh function instead
         }
+        // Otherwise, allow the standard browser/Electron refresh to happen
       }
     };
 
@@ -97,34 +151,42 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-background relative selection:bg-primary/30">
-      {/* Mesh Gradient Background Effect */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary blur-[120px]" />
-      </div>
-
       <ThemeProvider>
         <DeepLinkProvider>
-          <SidebarProvider>
-            <TitleBar />
+          <div className="flex flex-col h-screen w-full overflow-hidden">
+            {!isOnboarding && <TitleBar />}
 
-            <div className="flex-1 flex overflow-hidden">
-              {/* Sidebar */}
-              <div className="-mt-38">
-                <AppSidebar />
+            <SidebarProvider className="flex-1 overflow-hidden">
+              {!isOnboarding && <CommandCenter />}
+
+              <div className="flex-1 flex overflow-hidden w-full h-full relative">
+                {/* Sidebar */}
+                {!isOnboarding && (
+                  <div className="mt-11 h-[calc(100vh-44px)]">
+                    <AppSidebar className="!top-[44px] !h-[calc(100vh-44px)]" />
+                  </div>
+                )}
+
+                {/* Main content */}
+                <main
+                  id="layout-main-content-container"
+                  className={cn(
+                    "flex-1 flex flex-col overflow-hidden min-w-0 transition-all duration-300 ease-in-out h-[calc(100vh-88px)]",
+                    !isOnboarding ? "mt-14" : "m-0"
+                  )}
+                >
+                  <div className={cn(
+                    "flex-1 w-full h-full overflow-x-hidden overflow-y-auto border-l border-border/40 bg-background",
+                    isOnboarding ? "border-none" : ""
+                  )}>
+                    {children}
+                  </div>
+                </main>
               </div>
 
-              {/* Main content */}
-              <div
-                id="layout-main-content-container"
-                className="flex-1 w-full overflow-x-hidden overflow-y-auto mt-40 mb-2 mx-2 lg:ml-0 lg:mr-2 border border-border/40 rounded-2xl bg-background/60 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-sm"
-              >
-                {children}
-              </div>
-            </div>
-
-            <MadeWithCodiner />
-          </SidebarProvider>
+              {!isOnboarding && <MadeWithCodiner />}
+            </SidebarProvider>
+          </div>
         </DeepLinkProvider>
       </ThemeProvider>
     </div>

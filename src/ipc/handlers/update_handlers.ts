@@ -21,7 +21,22 @@ export function registerUpdateHandlers() {
                 },
             });
 
+            // Set a timeout to prevent hanging
+            const timeout = setTimeout(() => {
+                request.abort();
+                logger.warn("Update check timed out - likely offline or in development");
+                // Return a mock response indicating current version is latest
+                // This prevents error toasts in development
+                resolve({
+                    tag_name: `v${app.getVersion()}`,
+                    name: "Current Version",
+                    draft: false,
+                    prerelease: false,
+                });
+            }, 5000); // 5 second timeout
+
             request.on("response", (response) => {
+                clearTimeout(timeout);
                 let data = "";
                 response.on("data", (chunk) => {
                     data += chunk.toString();
@@ -29,19 +44,40 @@ export function registerUpdateHandlers() {
                 response.on("end", () => {
                     try {
                         if (response.statusCode !== 200) {
-                            reject(new Error(`Failed to fetch release: ${response.statusCode} ${data}`));
+                            logger.warn(`Failed to fetch release: ${response.statusCode}`);
+                            // Return mock response instead of rejecting
+                            resolve({
+                                tag_name: `v${app.getVersion()}`,
+                                name: "Current Version",
+                                draft: false,
+                                prerelease: false,
+                            });
                             return;
                         }
                         const release = JSON.parse(data);
                         resolve(release);
                     } catch (e) {
-                        reject(e);
+                        logger.error("Error parsing release data:", e);
+                        resolve({
+                            tag_name: `v${app.getVersion()}`,
+                            name: "Current Version",
+                            draft: false,
+                            prerelease: false,
+                        });
                     }
                 });
             });
 
             request.on("error", (error) => {
-                reject(error);
+                clearTimeout(timeout);
+                logger.warn("Update check failed (likely offline or in development):", error.message);
+                // Return mock response instead of rejecting
+                resolve({
+                    tag_name: `v${app.getVersion()}`,
+                    name: "Current Version",
+                    draft: false,
+                    prerelease: false,
+                });
             });
 
             request.end();

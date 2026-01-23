@@ -74,69 +74,83 @@ export function AppList({ show }: { show?: boolean }) {
   return (
     <>
       <SidebarGroup
-        className="overflow-y-auto h-[calc(100vh-112px)]"
+        className="overflow-y-auto h-[calc(100vh-112px)] py-4"
         data-testid="app-list-container"
       >
-        <SidebarGroupLabel>Your Apps</SidebarGroupLabel>
         <SidebarGroupContent>
-          <div className="flex flex-col space-y-2">
-            <Button
-              onClick={handleNewApp}
-              variant="outline"
-              className="flex items-center justify-start gap-2 mx-2 py-2"
-            >
-              <PlusCircle size={16} />
-              <span>New App</span>
-            </Button>
-            <Button
-              onClick={() => setIsSearchDialogOpen(!isSearchDialogOpen)}
-              variant="outline"
-              className="flex items-center justify-start gap-2 mx-2 py-3"
-              data-testid="search-apps-button"
-            >
-              <Search size={16} />
-              <span>Search Apps</span>
-            </Button>
-
-            {loading ? (
-              <div className="py-2 px-4 text-sm text-gray-500">
-                Loading apps...
-              </div>
-            ) : error ? (
-              <div className="py-2 px-4 text-sm text-red-500">
-                Error loading apps
-              </div>
-            ) : apps.length === 0 ? (
-              <div className="py-2 px-4 text-sm text-gray-500">
-                No apps found
-              </div>
-            ) : (
-              <SidebarMenu className="space-y-1" data-testid="app-list">
-                <SidebarGroupLabel>Favorite apps</SidebarGroupLabel>
-                {favoriteApps.map((app) => (
-                  <AppItem
-                    key={app.id}
-                    app={app}
-                    handleAppClick={handleAppClick}
-                    selectedAppId={selectedAppId}
-                    handleToggleFavorite={handleToggleFavorite}
-                    isFavoriteLoading={isFavoriteLoading}
-                  />
-                ))}
-                <SidebarGroupLabel>Other apps</SidebarGroupLabel>
-                {nonFavoriteApps.map((app) => (
-                  <AppItem
-                    key={app.id}
-                    app={app}
-                    handleAppClick={handleAppClick}
-                    selectedAppId={selectedAppId}
-                    handleToggleFavorite={handleToggleFavorite}
-                    isFavoriteLoading={isFavoriteLoading}
-                  />
-                ))}
-              </SidebarMenu>
-            )}
+          <div className="flex items-center justify-between px-4 py-2 mb-2">
+            <h2 className="text-sm font-semibold text-foreground tracking-tight">Apps</h2>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsSearchDialogOpen(true)}
+                data-testid="search-apps-button"
+                title="Search Apps"
+              >
+                <Search size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={handleNewApp}
+                title="Create New App"
+              >
+                <PlusCircle size={16} />
+              </Button>
+            </div>
           </div>
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/50 gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+              <span className="text-xs">Loading apps...</span>
+            </div>
+          ) : error ? (
+            <div className="py-4 px-4 text-xs text-red-500 text-center bg-red-500/5 rounded-lg mx-2 border border-red-500/10">
+              Failed to load apps
+            </div>
+          ) : apps.length === 0 ? (
+            <div className="py-8 px-4 text-sm text-muted-foreground text-center">
+              No apps found. Create one to get started!
+            </div>
+          ) : (
+            <SidebarMenu className="space-y-1 px-1" data-testid="app-list">
+              {favoriteApps.length > 0 && (
+                <>
+                  <div className="px-2 mt-4 mb-2 text-[10px] font-bold text-muted-foreground/60 tracking-wider uppercase">
+                    Favorites
+                  </div>
+                  {favoriteApps.map((app) => (
+                    <AppItem
+                      key={app.id}
+                      app={app}
+                      handleAppClick={handleAppClick}
+                      selectedAppId={selectedAppId}
+                      handleToggleFavorite={handleToggleFavorite}
+                      isFavoriteLoading={isFavoriteLoading}
+                    />
+                  ))}
+                </>
+              )}
+
+              <div className="px-2 mt-4 mb-2 text-[10px] font-bold text-muted-foreground/60 tracking-wider uppercase">
+                All Apps
+              </div>
+              {nonFavoriteApps.map((app) => (
+                <AppItem
+                  key={app.id}
+                  app={app}
+                  handleAppClick={handleAppClick}
+                  selectedAppId={selectedAppId}
+                  handleToggleFavorite={handleToggleFavorite}
+                  isFavoriteLoading={isFavoriteLoading}
+                />
+              ))}
+            </SidebarMenu>
+          )}
         </SidebarGroupContent>
       </SidebarGroup>
       <AppSearchDialog

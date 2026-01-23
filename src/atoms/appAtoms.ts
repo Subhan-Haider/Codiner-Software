@@ -7,7 +7,16 @@ export const selectedAppIdAtom = atom<number | null>(null);
 export const appsListAtom = atom<App[]>([]);
 export const versionsListAtom = atom<Version[]>([]);
 export const previewModeAtom = atom<
-  "preview" | "code" | "problems" | "configure" | "publish" | "security"
+  | "preview"
+  | "code"
+  | "problems"
+  | "configure"
+  | "publish"
+  | "security"
+  | "seo"
+  | "accessibility"
+  | "performance"
+  | "simulator"
 >("preview");
 export const selectedVersionIdAtom = atom<string | null>(null);
 
@@ -16,7 +25,6 @@ export interface ConsoleEntry {
   type:
   | "server"
   | "client"
-  | "edge-function"
   | "network-requests"
   | "build-time";
   message: string;
@@ -40,3 +48,5 @@ export const previewPanelKeyAtom = atom<number>(0);
 export const previewErrorMessageAtom = atom<
   { message: string; source: "preview-app" | "codiner-app" } | undefined
 >(undefined);
+
+export const previewStatusAtom = atom<string | null>(null);

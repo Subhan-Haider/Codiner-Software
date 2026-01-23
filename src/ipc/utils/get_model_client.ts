@@ -295,7 +295,13 @@ function getRegularModelClient(
       };
     }
     case "openrouter": {
-      const provider = createOpenRouter({ apiKey });
+      const provider = createOpenRouter({
+        apiKey,
+        headers: {
+          "HTTP-Referer": "https://codiner.online",
+          "X-Title": "Codiner",
+        },
+      });
       return {
         modelClient: {
           model: provider(model.name),

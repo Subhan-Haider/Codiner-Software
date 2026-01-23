@@ -5,14 +5,9 @@ import {
   constructSystemPrompt,
   readAiRules,
 } from "../../prompts/system_prompt";
-import {
-  SUPABASE_AVAILABLE_SYSTEM_PROMPT,
-  SUPABASE_NOT_AVAILABLE_SYSTEM_PROMPT,
-} from "../../prompts/supabase_prompt";
 import { getCodinerAppPath } from "../../paths/paths";
 import log from "electron-log";
 import { extractCodebase } from "../../utils/codebase";
-import { getSupabaseContext } from "../../supabase_admin/supabase_context";
 
 import { TokenCountParams } from "../ipc_types";
 import { TokenCountResult } from "../ipc_types";
@@ -70,22 +65,8 @@ export function registerTokenCountHandlers() {
             : settings.selectedChatMode,
         enableTurboEditsV2: isTurboEditsV2Enabled(settings),
       });
-      let supabaseContext = "";
 
-      if (chat.app?.supabaseProjectId) {
-        systemPrompt += "\n\n" + SUPABASE_AVAILABLE_SYSTEM_PROMPT;
-        supabaseContext = await getSupabaseContext({
-          supabaseProjectId: chat.app.supabaseProjectId,
-          organizationSlug: chat.app.supabaseOrganizationSlug ?? null,
-        });
-      } else if (
-        // Neon projects don't need Supabase.
-        !chat.app?.neonProjectId
-      ) {
-        systemPrompt += "\n\n" + SUPABASE_NOT_AVAILABLE_SYSTEM_PROMPT;
-      }
-
-      const systemPromptTokens = estimateTokens(systemPrompt + supabaseContext);
+      const systemPromptTokens = estimateTokens(systemPrompt);
 
       // Extract codebase information if app is associated with the chat
       let codebaseInfo = "";

@@ -11,6 +11,7 @@ import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useStreamChat } from "@/hooks/useStreamChat";
 import { HomeChatInput } from "@/components/chat/HomeChatInput";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePostHog } from "posthog-js/react";
 import { PrivacyBanner } from "@/components/TelemetryBanner";
 import { INSPIRATION_PROMPTS } from "@/prompts/inspiration_prompts";
@@ -40,6 +41,7 @@ import logo from "../../assets/new-logo.png";
 // Adding an export for attachments
 export interface HomeSubmitOptions {
   attachments?: FileAttachment[];
+  parentDirectory?: string;
 }
 
 export default function HomePage() {
@@ -146,14 +148,18 @@ export default function HomePage() {
       const result = await IpcClient.getInstance().createApp({
         name: generateCuteAppName(),
         prompt: inputValue,
+        parentDirectory: options?.parentDirectory,
       });
       if (
         settings?.selectedTemplateId &&
         NEON_TEMPLATE_IDS.has(settings.selectedTemplateId)
       ) {
-        await neonTemplateHook({
+        // Run template hook in background to speed up the initial transition
+        neonTemplateHook({
           appId: result.app.id,
           appName: result.app.name,
+        }).catch((err) => {
+          console.error("Failed to setup template-specific background tasks:", err);
         });
       }
 
@@ -163,16 +169,23 @@ export default function HomePage() {
         chatId: result.chatId,
         attachments,
       });
-      await new Promise((resolve) =>
-        setTimeout(resolve, settings?.isTestMode ? 0 : 2000),
-      );
+      // Removed artificial delay that was slowing down app creation perceived performance
+
 
       setInputValue("");
       setSelectedAppId(result.app.id);
       setIsPreviewOpen(false);
-      await refreshApps();
+
+      // Essential for the next page to load correctly
       await invalidateAppQuery(queryClient, { appId: result.app.id });
+
+      // Perform background updates
+      refreshApps().catch(console.error);
       posthog.capture("home:chat-submit");
+
+      // Tiny delay to ensure stability before navigation
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       navigate({ to: "/chat", search: { id: result.chatId } });
     } catch (error) {
       console.error("Failed to create chat:", error);
@@ -181,20 +194,59 @@ export default function HomePage() {
     }
   };
 
+  const [loadingStep, setLoadingStep] = useState(0);
+  const BUILDING_STEPS = [
+    "Orchestrating AI for the perfect name...",
+    "Cloning the project blueprint...",
+    "Scaffolding your file structure...",
+    "Initializing local repository...",
+    "Polishing the final details...",
+    "Almost there, finalizing your masterpiece..."
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setLoadingStep((prev) => (prev + 1) % BUILDING_STEPS.length);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md z-[9999]">
-        <div className="flex flex-col items-center animate-pulse-soft">
-          <img src={logo} alt="Codiner" className="w-24 h-24 mb-8 rounded-3xl shadow-2xl" />
-          <h2 className="text-3xl font-extrabold mb-2 tracking-tight text-gradient">
+        <div className="flex flex-col items-center">
+          <div className="relative mb-12">
+            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse-slow"></div>
+            <img src={logo} alt="Codiner" className="relative w-28 h-28 rounded-3xl shadow-2xl animate-float" />
+          </div>
+
+          <h2 className="text-3xl font-extrabold mb-3 tracking-tight text-gradient">
             Building your masterpiece
           </h2>
-          <p className="text-muted-foreground text-center max-w-md mb-8 font-medium">
-            We're orchestrating the AI to bring your vision to life.
-          </p>
-          <div className="h-1.5 w-64 bg-muted rounded-full overflow-hidden shadow-inner">
+
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={loadingStep}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="text-muted-foreground text-center max-w-md h-6 mb-8 font-medium italic"
+            >
+              {BUILDING_STEPS[loadingStep]}
+            </motion.p>
+          </AnimatePresence>
+
+          <div className="h-1.5 w-72 bg-muted rounded-full overflow-hidden shadow-inner relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-shimmer"></div>
             <div className="h-full bg-primary animate-marquee"></div>
           </div>
+
+          <p className="mt-12 text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground/60">
+            Powered by Advanced Agentic Coding
+          </p>
         </div>
       </div>
     );

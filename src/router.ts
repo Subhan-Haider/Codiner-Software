@@ -8,8 +8,11 @@ import { appDetailsRoute } from "./routes/app-details";
 import { hubRoute } from "./routes/hub";
 import { libraryRoute } from "./routes/library";
 
+import { onboardingRoute } from "./routes/onboarding";
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
+  onboardingRoute,
   hubRoute,
   libraryRoute,
   chatRoute,
@@ -38,10 +41,18 @@ export function NotFoundRedirect() {
   // Or: return <div>Redirecting...</div>;
 }
 
+export function RouterErrorBoundary({ error }: { error: any }) {
+  console.error('Router Error:', error);
+  // Return a simple error message - the RouterProvider will handle the rendering
+  return `Router Error: ${error?.message || 'Unknown error'}. Please reload the application.`;
+}
+
 export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundRedirect,
-  defaultErrorComponent: ErrorBoundary,
+  defaultErrorComponent: RouterErrorBoundary,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 30_000,
 });
 
 declare module "@tanstack/react-router" {

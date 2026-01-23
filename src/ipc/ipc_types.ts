@@ -1,9 +1,10 @@
 import { z } from "zod";
 import type { ProblemReport, Problem } from "../../shared/tsc_types";
+import type { DocumentData } from "firebase/firestore";
 export type { ProblemReport, Problem };
 
 export interface AppOutput {
-  type: "stdout" | "stderr" | "info" | "client-error" | "input-requested";
+  type: "stdout" | "stderr" | "info" | "client-error" | "input-requested" | "status";
   message: string;
   timestamp: number;
   appId: number;
@@ -69,6 +70,7 @@ export interface EnhancePromptResult {
 export interface CreateAppParams {
   name: string;
   prompt?: string;
+  parentDirectory?: string;
 }
 
 export interface CreateAppResult {
@@ -114,10 +116,6 @@ export interface App {
   githubOrg: string | null;
   githubRepo: string | null;
   githubBranch: string | null;
-  supabaseProjectId: string | null;
-  supabaseParentProjectId: string | null;
-  supabaseProjectName: string | null;
-  supabaseOrganizationSlug: string | null;
   neonProjectId: string | null;
   neonDevelopmentBranchId: string | null;
   neonPreviewBranchId: string | null;
@@ -125,10 +123,28 @@ export interface App {
   vercelProjectName: string | null;
   vercelTeamSlug: string | null;
   vercelDeploymentUrl: string | null;
+  firebaseProjectId: string | null;
+  supabaseProjectUrl: string | null;
+  slackWebhookUrl: string | null;
+  defaultModel: string | null;
+  pwaIcon: string | null;
+  testCommand: string | null;
+  buildPath: string | null;
+  dockerConfig: string | null;
+  seoMetadata: string | null;
+  i18nConfig: string | null;
+  billingConfig: string | null;
   installCommand: string | null;
   startCommand: string | null;
   isFavorite: boolean;
   resolvedPath?: string;
+}
+
+export interface AppAnalytics {
+  totalTokensUsed: number;
+  chatCount: number;
+  messageCount: number;
+  lastActive: Date | null;
 }
 
 export interface Version {
@@ -388,6 +404,10 @@ export interface VercelProject {
   framework: string | null;
 }
 
+export interface DeployToVercelParams {
+  appId: number;
+}
+
 export interface UpdateChatParams {
   chatId: number;
   title: string;
@@ -558,73 +578,6 @@ export type CloneRepoReturnType =
     error: string;
   };
 
-export interface SupabaseBranch {
-  id: string;
-  name: string;
-  isDefault: boolean;
-  projectRef: string;
-  parentProjectRef: string;
-}
-
-/**
- * Supabase organization info for display (without secrets).
- */
-export interface SupabaseOrganizationInfo {
-  organizationSlug: string;
-  name?: string;
-  ownerEmail?: string;
-}
-
-/**
- * Supabase project info.
- */
-export interface SupabaseProject {
-  id: string;
-  name: string;
-  region?: string;
-  organizationSlug: string;
-}
-
-export interface SetSupabaseAppProjectParams {
-  projectId: string;
-  parentProjectId?: string;
-  appId: number;
-  organizationSlug: string | null;
-}
-
-export interface DeleteSupabaseOrganizationParams {
-  organizationSlug: string;
-}
-
-// Supabase Logs
-export interface LogMetadata {
-  // For Edge Functions
-  function?: string;
-  request_id?: string;
-  status?: number;
-
-  // For Database logs
-  query?: string;
-  table?: string;
-  rows_affected?: number;
-
-  // For Auth logs
-  user_id?: string;
-  event?: string;
-
-  // Additional dynamic fields
-  [key: string]: any;
-}
-
-export interface SupabaseLog {
-  id: string;
-  timestamp: string;
-  log_type: "function" | "database" | "auth" | "api" | "realtime" | "system";
-  event_message: string;
-  metadata?: LogMetadata;
-  body?: any;
-}
-
 export interface SetNodePathParams {
   nodePath: string;
 }
@@ -707,3 +660,4 @@ export interface TelemetryEventPayload {
   eventName: string;
   properties?: Record<string, unknown>;
 }
+

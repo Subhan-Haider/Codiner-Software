@@ -189,7 +189,7 @@ export function ProviderSettingsGrid() {
   }
 
   return (
-    <div className="p-6 md:p-12 flex flex-col items-center">
+    <div className="py-6 flex flex-col items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full max-w-6xl">
         {providers
           ?.filter((p) => p.type !== "local")

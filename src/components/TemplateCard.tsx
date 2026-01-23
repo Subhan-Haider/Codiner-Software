@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowRight, ExternalLink, Check, Sparkles, Zap, Beaker } from "lucide-react";
 import { IpcClient } from "@/ipc/ipc_client";
 import { useSettings } from "@/hooks/useSettings";
 import { CommunityCodeConsentDialog } from "./CommunityCodeConsentDialog";
+import { NeonRequiredDialog } from "./NeonRequiredDialog";
 import type { Template } from "@/shared/templates";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { showWarning } from "@/lib/toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface TemplateCardProps {
   template: Template;
@@ -23,36 +25,29 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 }) => {
   const { settings, updateSettings } = useSettings();
   const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [showNeonDialog, setShowNeonDialog] = useState(false);
 
   const handleCardClick = () => {
-    // If it's a community template and user hasn't accepted community code yet, show dialog
     if (!template.isOfficial && !settings?.acceptedCommunityCode) {
       setShowConsentDialog(true);
       return;
     }
 
     if (template.requiresNeon && !settings?.neon?.accessToken) {
-      showWarning("Please connect your Neon account to use this template.");
+      setShowNeonDialog(true);
       return;
     }
 
-    // Otherwise, proceed with selection
     onSelect(template.id);
   };
 
   const handleConsentAccept = () => {
-    // Update settings to accept community code
     updateSettings({ acceptedCommunityCode: true });
-
-    // Select the template
     onSelect(template.id);
-
-    // Close dialog
     setShowConsentDialog(false);
   };
 
   const handleConsentCancel = () => {
-    // Just close dialog, don't update settings or select template
     setShowConsentDialog(false);
   };
 
@@ -65,98 +60,140 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 
   return (
     <>
-      <div
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -8, transition: { duration: 0.2 } }}
         onClick={handleCardClick}
-        className={`
-          bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden 
-          transform transition-all duration-300 ease-in-out 
-          cursor-pointer group relative
-          ${
-            isSelected
-              ? "ring-2 ring-blue-500 dark:ring-blue-400 shadow-xl"
-              : "hover:shadow-lg hover:-translate-y-1"
-          }
-        `}
+        className={cn(
+          "group relative flex flex-col h-full rounded-2xl overflow-hidden cursor-pointer transition-all duration-300",
+          "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border",
+          isSelected
+            ? "border-primary shadow-2xl ring-1 ring-primary/20 scale-[1.01]"
+            : "border-border hover:border-primary/50 hover:shadow-xl"
+        )}
       >
-        <div className="relative">
+        {/* Selection Glow */}
+        <AnimatePresence>
+          {isSelected && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-primary/5 pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Thumbnail Area */}
+        <div className="relative h-48 overflow-hidden">
           <img
             src={template.imageUrl}
             alt={template.title}
-            className={`w-full h-52 object-cover transition-opacity duration-300 group-hover:opacity-80 ${
-              isSelected ? "opacity-75" : ""
-            }`}
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110",
+              isSelected ? "brightness-110" : "brightness-95 group-hover:brightness-100"
+            )}
           />
-          {isSelected && (
-            <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-lg">
-              Selected
-            </span>
-          )}
-        </div>
-        <div className="p-4">
-          <div className="flex justify-between items-center mb-1.5">
-            <h2
-              className={`text-lg font-semibold ${
-                isSelected
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-900 dark:text-white"
-              }`}
-            >
-              {template.title}
-            </h2>
-            {template.isOfficial && !template.isExperimental && (
-              <span
-                className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  isSelected
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-600 dark:text-blue-100"
-                    : "bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200"
-                }`}
-              >
-                Official
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+            {template.isOfficial && (
+              <span className="flex items-center gap-1 bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-lg">
+                <Sparkles size={12} /> Official
               </span>
             )}
             {template.isExperimental && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200">
-                Experimental
+              <span className="flex items-center gap-1 bg-amber-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-lg">
+                <Beaker size={12} /> Experimental
+              </span>
+            )}
+            {!template.isOfficial && !template.isExperimental && (
+              <span className="flex items-center gap-1 bg-purple-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-lg">
+                <Zap size={12} /> Community
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 h-10 overflow-y-auto">
-            {template.description}
-          </p>
-          {template.githubUrl && (
-            <a
-              className={`inline-flex items-center text-sm font-medium transition-colors duration-200 ${
-                isSelected
-                  ? "text-blue-500 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200"
-                  : "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-              }`}
-              onClick={handleGithubClick}
-            >
-              View on GitHub{" "}
-              <ArrowLeft className="w-4 h-4 ml-1 transform rotate-180" />
-            </a>
-          )}
 
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onCreateApp();
-            }}
-            size="sm"
-            className={cn(
-              "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-2",
-              settings?.selectedTemplateId !== template.id && "invisible",
+          {/* Selected Tick */}
+          <AnimatePresence>
+            {isSelected && (
+              <motion.div
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                className="absolute top-3 right-3 bg-primary text-primary-foreground p-1.5 rounded-full shadow-xl"
+              >
+                <Check size={20} strokeWidth={3} />
+              </motion.div>
             )}
-          >
-            Create App
-          </Button>
+          </AnimatePresence>
         </div>
-      </div>
+
+        {/* content */}
+        <div className="p-5 flex flex-col flex-1">
+          <div className="mb-3">
+            <h3 className={cn(
+              "text-xl font-bold line-clamp-1 transition-colors",
+              isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
+            )}>
+              {template.title}
+            </h3>
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 min-h-[40px] italic leading-relaxed">
+              {template.description}
+            </p>
+          </div>
+
+          <div className="mt-auto pt-4 flex items-center justify-between gap-4">
+            {template.githubUrl ? (
+              <button
+                onClick={handleGithubClick}
+                className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest"
+              >
+                GitHub <ExternalLink size={14} />
+              </button>
+            ) : <div />}
+
+            <AnimatePresence mode="wait">
+              {isSelected ? (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                >
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCreateApp();
+                    }}
+                    size="sm"
+                    className="rounded-full px-5 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group/btn active:scale-95 transition-all"
+                  >
+                    <span>Create Now</span>
+                    <ArrowRight size={16} className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              ) : (
+                <div className="text-xs font-medium text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Click to select
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
 
       <CommunityCodeConsentDialog
         isOpen={showConsentDialog}
         onAccept={handleConsentAccept}
         onCancel={handleConsentCancel}
+      />
+
+      <NeonRequiredDialog
+        isOpen={showNeonDialog}
+        onClose={() => setShowNeonDialog(false)}
+        templateTitle={template.title}
       />
     </>
   );

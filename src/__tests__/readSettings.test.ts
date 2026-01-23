@@ -42,7 +42,7 @@ describe("readSettings", () => {
   describe("when settings file does not exist", () => {
     it("should create default settings file and return default settings", () => {
       mockFs.existsSync.mockReturnValue(false);
-      mockFs.writeFileSync.mockImplementation(() => {});
+      mockFs.writeFileSync.mockImplementation(() => { });
 
       const result = readSettings();
 
@@ -160,38 +160,7 @@ describe("readSettings", () => {
       });
     });
 
-    it("should decrypt encrypted Supabase tokens", () => {
-      const mockFileContent = {
-        supabase: {
-          accessToken: {
-            value: "encrypted-access-token",
-            encryptionType: "electron-safe-storage",
-          },
-          refreshToken: {
-            value: "encrypted-refresh-token",
-            encryptionType: "electron-safe-storage",
-          },
-        },
-      };
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(JSON.stringify(mockFileContent));
-      mockSafeStorage.decryptString
-        .mockReturnValueOnce("decrypted-refresh-token")
-        .mockReturnValueOnce("decrypted-access-token");
-
-      const result = readSettings();
-
-      expect(mockSafeStorage.decryptString).toHaveBeenCalledTimes(2);
-      expect(result.supabase?.refreshToken).toEqual({
-        value: "decrypted-refresh-token",
-        encryptionType: "electron-safe-storage",
-      });
-      expect(result.supabase?.accessToken).toEqual({
-        value: "decrypted-access-token",
-        encryptionType: "electron-safe-storage",
-      });
-    });
 
     it("should handle plaintext secrets without decryption", () => {
       const mockFileContent = {

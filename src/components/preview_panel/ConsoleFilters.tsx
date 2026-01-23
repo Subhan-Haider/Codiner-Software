@@ -1,14 +1,14 @@
-import { Filter, X } from "lucide-react";
+import { Filter, X, Trash2 } from "lucide-react";
 
 interface ConsoleFiltersProps {
   levelFilter: "all" | "info" | "warn" | "error";
   typeFilter:
-    | "all"
-    | "server"
-    | "client"
-    | "edge-function"
-    | "network-requests"
-    | "build-time";
+  | "all"
+  | "server"
+  | "client"
+  | "edge-function"
+  | "network-requests"
+  | "build-time";
   sourceFilter: string;
   onLevelFilterChange: (value: "all" | "info" | "warn" | "error") => void;
   onTypeFilterChange: (
@@ -25,6 +25,7 @@ interface ConsoleFiltersProps {
   uniqueSources: string[];
   totalLogs: number;
   showFilters: boolean;
+  onClearConsole: () => void;
 }
 
 export const ConsoleFilters = ({
@@ -38,6 +39,7 @@ export const ConsoleFilters = ({
   uniqueSources,
   totalLogs,
   showFilters,
+  onClearConsole,
 }: ConsoleFiltersProps) => {
   const hasActiveFilters =
     levelFilter !== "all" || typeFilter !== "all" || sourceFilter !== "";
@@ -70,12 +72,12 @@ export const ConsoleFilters = ({
         onChange={(e) =>
           onTypeFilterChange(
             e.target.value as
-              | "all"
-              | "server"
-              | "client"
-              | "edge-function"
-              | "network-requests"
-              | "build-time",
+            | "all"
+            | "server"
+            | "client"
+            | "edge-function"
+            | "network-requests"
+            | "build-time",
           )
         }
         className="text-xs px-2 py-1 border border-border rounded bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -115,7 +117,16 @@ export const ConsoleFilters = ({
         </button>
       )}
 
-      <div className="ml-auto text-xs text-gray-500">{totalLogs} logs</div>
+      <div className="ml-auto text-xs text-gray-500 flex items-center gap-2">
+        <span>{totalLogs} logs</span>
+        <button
+          onClick={onClearConsole}
+          className="p-1 text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+          title="Clear Console"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
     </div>
   );
 };

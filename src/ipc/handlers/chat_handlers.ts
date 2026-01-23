@@ -58,7 +58,7 @@ export function registerChatHandlers() {
     return chat.id;
   });
 
-  ipcMain.handle("get-chat", async (_, chatId: number) => {
+  handle("get-chat", async (_, chatId: number) => {
     const chat = await db.query.chats.findFirst({
       where: eq(chats.id, chatId),
       with: {

@@ -16,9 +16,15 @@ import {
   serializeEnvFile,
 } from "../utils/app_env_var_utils";
 
+import { createLoggedHandler } from "./safe_handle";
+import log from "electron-log";
+
+const logger = log.scope("env_vars");
+const handle = createLoggedHandler(logger);
+
 export function registerAppEnvVarsHandlers() {
   // Handler to get app environment variables
-  ipcMain.handle(
+  handle(
     "get-app-env-vars",
     async (event, { appId }: GetAppEnvVarsParams) => {
       try {
@@ -54,7 +60,7 @@ export function registerAppEnvVarsHandlers() {
   );
 
   // Handler to set app environment variables
-  ipcMain.handle(
+  handle(
     "set-app-env-vars",
     async (event, { appId, envVars }: SetAppEnvVarsParams) => {
       try {

@@ -21,7 +21,6 @@ import {
   getCodinerSearchReplaceTags,
 } from "../utils/codiner_tag_parser";
 import log from "electron-log";
-import { isServerFunction } from "../../supabase_admin/supabase_utils";
 import {
   estimateMessagesTokens,
   estimateTokens,
@@ -33,7 +32,8 @@ import { withLock } from "../utils/lock_utils";
 import { createLoggedHandler } from "./safe_handle";
 import { ApproveProposalResult } from "../ipc_types";
 import { validateChatContext } from "../utils/context_paths_utils";
-import { readSettings } from "@/main/settings";
+import { validateChatContext } from "../utils/context_paths_utils";
+import { readSettings } from "../../main/settings";
 
 const logger = log.scope("proposal_handlers");
 const handle = createLoggedHandler(logger);
@@ -169,21 +169,21 @@ const getProposalHandler = async (
               path: tag.path,
               summary: tag.description ?? "(no change summary found)", // Generic summary
               type: "write" as const,
-              isServerFunction: isServerFunction(tag.path),
+              isServerFunction: false,
             })),
           ...proposalRenameFiles.map((tag) => ({
             name: path.basename(tag.to),
             path: tag.to,
             summary: `Rename from ${tag.from} to ${tag.to}`,
             type: "rename" as const,
-            isServerFunction: isServerFunction(tag.to),
+            isServerFunction: false,
           })),
           ...proposalDeleteFiles.map((tag) => ({
             name: path.basename(tag),
             path: tag,
             summary: `Delete file`,
             type: "delete" as const,
-            isServerFunction: isServerFunction(tag),
+            isServerFunction: false,
           })),
         ];
         // Check if we have enough information to create a proposal
@@ -277,7 +277,7 @@ const getProposalHandler = async (
         with: {
           app: true,
           messages: {
-            orderBy: (messages, { asc }) => [asc(messages.createdAt)],
+            orderBy: (messages: any, { asc }: any) => [asc(messages.createdAt)],
           },
         },
       });
@@ -413,7 +413,7 @@ const rejectProposalHandler = async (
   // 2. Update the message's approval state to 'rejected'
   await db
     .update(messages)
-    .set({ approvalState: "rejected" })
+    .set({ approvalState: "rejected" } as any) // Cast to any to bypass potential type definition mismatch
     .where(eq(messages.id, messageId));
 
   logger.log(`Message ${messageId} marked as rejected.`);

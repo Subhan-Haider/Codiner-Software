@@ -126,7 +126,7 @@ export function AppUpgrades({ appId }: { appId: number | null }) {
                         onClick={(e) => {
                           e.stopPropagation();
                           IpcClient.getInstance().openExternalUrl(
-                            upgrade.manualUpgradeUrl ?? "https://codiner.sh/docs",
+                            upgrade.manualUpgradeUrl ?? "https://codiner.online/docs",
                           );
                         }}
                         className="underline font-medium hover:dark:text-red-200"

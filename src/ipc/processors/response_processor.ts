@@ -8,17 +8,7 @@ import { safeJoin } from "../utils/path_utils";
 
 import log from "electron-log";
 import { executeAddDependency } from "./executeAddDependency";
-import {
-  deleteSupabaseFunction,
-  deploySupabaseFunction,
-  executeSupabaseSql,
-} from "../../supabase_admin/supabase_management_client";
-import {
-  isServerFunction,
-  isSharedServerModule,
-  deployAllSupabaseFunctions,
-  extractFunctionNameFromPath,
-} from "../../supabase_admin/supabase_utils";
+
 import { UserSettings } from "../../lib/schemas";
 import {
   gitCommit,
@@ -36,7 +26,9 @@ import {
   getCodinerAddDependencyTags,
   getCodinerExecuteSqlTags,
   getCodinerSearchReplaceTags,
+  getCodinerGenerateImageTags,
 } from "../utils/codiner_tag_parser";
+import { generateAndSaveImage } from "../utils/image_generator";
 import { applySearchReplace } from "../../pro/main/ipc/processors/search_replace_processor";
 import { storeDbTimestampAtCurrentVersion } from "../utils/neon_timestamp_utils";
 
@@ -138,7 +130,7 @@ export async function processFullResponseActions(
       logger.error("Error creating Neon branch at current version:", error);
       throw new Error(
         "Could not create Neon branch; database versioning functionality is not working: " +
-        error,
+        String(error),
       );
     }
   }
@@ -149,9 +141,6 @@ export async function processFullResponseActions(
   const renamedFiles: string[] = [];
   const deletedFiles: string[] = [];
   let hasChanges = false;
-  // Track if any shared modules were modified
-  let sharedModulesChanged = false;
-
   const warnings: Output[] = [];
   const errors: Output[] = [];
 
@@ -161,9 +150,8 @@ export async function processFullResponseActions(
     const codinerRenameTags = getCodinerRenameTags(fullResponse);
     const codinerDeletePaths = getCodinerDeleteTags(fullResponse);
     const codinerAddDependencyPackages = getCodinerAddDependencyTags(fullResponse);
-    const codinerExecuteSqlQueries = chatWithApp.app.supabaseProjectId
-      ? getCodinerExecuteSqlTags(fullResponse)
-      : [];
+    const codinerGenerateImageTags = getCodinerGenerateImageTags(fullResponse);
+    const codinerExecuteSqlQueries = [];
 
     const message = await db.query.messages.findFirst({
       where: and(
@@ -178,41 +166,7 @@ export async function processFullResponseActions(
       return {};
     }
 
-    // Handle SQL execution tags
-    if (codinerExecuteSqlQueries.length > 0) {
-      for (const query of codinerExecuteSqlQueries) {
-        try {
-          await executeSupabaseSql({
-            supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-            query: query.content,
-            organizationSlug: chatWithApp.app.supabaseOrganizationSlug ?? null,
-          });
 
-          // Only write migration file if SQL execution succeeded
-          if (settings.enableSupabaseWriteSqlMigration) {
-            try {
-              const migrationFilePath = await writeMigrationFile(
-                appPath,
-                query.content,
-                query.description,
-              );
-              writtenFiles.push(migrationFilePath);
-            } catch (error) {
-              errors.push({
-                message: `Failed to write SQL migration file for: ${query.description}`,
-                error: error,
-              });
-            }
-          }
-        } catch (error) {
-          errors.push({
-            message: `Failed to execute SQL query: ${query.content}`,
-            error: error,
-          });
-        }
-      }
-      logger.log(`Executed ${codinerExecuteSqlQueries.length} SQL queries`);
-    }
 
     // TODO: Handle add dependency tags
     if (codinerAddDependencyPackages.length > 0) {
@@ -257,10 +211,7 @@ export async function processFullResponseActions(
     for (const filePath of codinerDeletePaths) {
       const fullFilePath = safeJoin(appPath, filePath);
 
-      // Track if this is a shared module
-      if (isSharedServerModule(filePath)) {
-        sharedModulesChanged = true;
-      }
+
 
       // Delete the file if it exists
       if (fs.existsSync(fullFilePath)) {
@@ -282,21 +233,7 @@ export async function processFullResponseActions(
       } else {
         logger.warn(`File to delete does not exist: ${fullFilePath}`);
       }
-      // Only delete individual functions, not shared modules
-      if (isServerFunction(filePath)) {
-        try {
-          await deleteSupabaseFunction({
-            supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-            functionName: extractFunctionNameFromPath(filePath),
-            organizationSlug: chatWithApp.app.supabaseOrganizationSlug ?? null,
-          });
-        } catch (error) {
-          errors.push({
-            message: `Failed to delete Supabase function: ${filePath}`,
-            error: error,
-          });
-        }
-      }
+
     }
 
     // Process all file renames
@@ -304,10 +241,7 @@ export async function processFullResponseActions(
       const fromPath = safeJoin(appPath, tag.from);
       const toPath = safeJoin(appPath, tag.to);
 
-      // Track if this involves shared modules
-      if (isSharedServerModule(tag.from) || isSharedServerModule(tag.to)) {
-        sharedModulesChanged = true;
-      }
+
 
       // Ensure target directory exists
       const dirPath = path.dirname(toPath);
@@ -330,37 +264,7 @@ export async function processFullResponseActions(
       } else {
         logger.warn(`Source file for rename does not exist: ${fromPath}`);
       }
-      // Only handle individual functions, not shared modules
-      if (isServerFunction(tag.from)) {
-        try {
-          await deleteSupabaseFunction({
-            supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-            functionName: extractFunctionNameFromPath(tag.from),
-            organizationSlug: chatWithApp.app.supabaseOrganizationSlug ?? null,
-          });
-        } catch (error) {
-          warnings.push({
-            message: `Failed to delete Supabase function: ${tag.from} as part of renaming ${tag.from} to ${tag.to}`,
-            error: error,
-          });
-        }
-      }
-      // Deploy renamed function (skip if shared modules changed - will be handled later)
-      if (isServerFunction(tag.to) && !sharedModulesChanged) {
-        try {
-          await deploySupabaseFunction({
-            supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-            functionName: extractFunctionNameFromPath(tag.to),
-            appPath,
-            organizationSlug: chatWithApp.app.supabaseOrganizationSlug ?? null,
-          });
-        } catch (error) {
-          errors.push({
-            message: `Failed to deploy Supabase function: ${tag.to} as part of renaming ${tag.from} to ${tag.to}`,
-            error: error,
-          });
-        }
-      }
+
     }
 
     // Process all search-replace edits
@@ -369,10 +273,7 @@ export async function processFullResponseActions(
       const filePath = tag.path;
       const fullFilePath = safeJoin(appPath, filePath);
 
-      // Track if this is a shared module
-      if (isSharedServerModule(filePath)) {
-        sharedModulesChanged = true;
-      }
+
 
       try {
         if (!fs.existsSync(fullFilePath)) {
@@ -393,23 +294,7 @@ export async function processFullResponseActions(
         fs.writeFileSync(fullFilePath, result.content);
         writtenFiles.push(filePath);
 
-        // If server function (not shared), redeploy (skip if shared modules changed)
-        if (isServerFunction(filePath) && !sharedModulesChanged) {
-          try {
-            await deploySupabaseFunction({
-              supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-              functionName: extractFunctionNameFromPath(filePath),
-              appPath,
-              organizationSlug:
-                chatWithApp.app.supabaseOrganizationSlug ?? null,
-            });
-          } catch (error) {
-            errors.push({
-              message: `Failed to deploy Supabase function after search-replace: ${filePath}`,
-              error: error,
-            });
-          }
-        }
+
       } catch (error) {
         errors.push({
           message: `Error applying search-replace to ${filePath}`,
@@ -424,10 +309,7 @@ export async function processFullResponseActions(
       let content: string | Buffer = tag.content;
       const fullFilePath = safeJoin(appPath, filePath);
 
-      // Track if this is a shared module
-      if (isSharedServerModule(filePath)) {
-        sharedModulesChanged = true;
-      }
+
 
       // Check if content (stripped of whitespace) exactly matches a file ID and replace with actual file content
       if (fileUploadsMap) {
@@ -459,59 +341,39 @@ export async function processFullResponseActions(
 
       // Write file content
       fs.writeFileSync(fullFilePath, content);
-      logger.log(`Successfully wrote file: ${fullFilePath}`);
       writtenFiles.push(filePath);
-      // Deploy individual function (skip if shared modules changed - will be handled later)
-      if (
-        isServerFunction(filePath) &&
-        typeof content === "string" &&
-        !sharedModulesChanged
-      ) {
-        try {
-          await deploySupabaseFunction({
-            supabaseProjectId: chatWithApp.app.supabaseProjectId!,
-            functionName: extractFunctionNameFromPath(filePath),
-            appPath,
-            organizationSlug: chatWithApp.app.supabaseOrganizationSlug ?? null,
-          });
-        } catch (error) {
-          errors.push({
-            message: `Failed to deploy Supabase function: ${filePath}`,
-            error: error,
-          });
-        }
+
+    }
+
+    // Process all image generations
+    for (const tag of codinerGenerateImageTags) {
+      const fullOutputPath = safeJoin(appPath, tag.path);
+      const openaiKey = settings.providerSettings?.openai?.apiKey?.value;
+
+      if (!openaiKey) {
+        warnings.push({
+          message: `Cannot generate image for ${tag.path}: OpenAI API key not found in Settings.`,
+          error: "OpenAI API key is required for image generation."
+        });
+        continue;
+      }
+
+      try {
+        await generateAndSaveImage({
+          prompt: tag.prompt,
+          outputPath: fullOutputPath,
+          apiKey: openaiKey
+        });
+        writtenFiles.push(tag.path);
+      } catch (error) {
+        errors.push({
+          message: `Failed to generate image for ${tag.path}`,
+          error: error
+        });
       }
     }
 
-    // If shared modules changed, redeploy all functions
-    if (sharedModulesChanged && chatWithApp.app.supabaseProjectId) {
-      try {
-        logger.info(
-          "Shared modules changed, redeploying all Supabase functions",
-        );
-        const deployErrors = await deployAllSupabaseFunctions({
-          appPath,
-          supabaseProjectId: chatWithApp.app.supabaseProjectId,
-          supabaseOrganizationSlug:
-            chatWithApp.app.supabaseOrganizationSlug ?? null,
-        });
-        if (deployErrors.length > 0) {
-          for (const err of deployErrors) {
-            errors.push({
-              message:
-                "Failed to deploy Supabase function after shared module change",
-              error: err,
-            });
-          }
-        }
-      } catch (error) {
-        errors.push({
-          message:
-            "Failed to redeploy all Supabase functions after shared module change",
-          error: error,
-        });
-      }
-    }
+
 
     // If we have any file changes, commit them all at once
     hasChanges =
@@ -557,7 +419,7 @@ export async function processFullResponseActions(
       // Check for any uncommitted changes after the commit
       uncommittedFiles = await getGitUncommittedFiles({ path: appPath });
 
-      if (uncommittedFiles.length > 0) {
+      if (uncommittedFiles && uncommittedFiles.length > 0) {
         // Stage all changes
         await gitAddAll({ path: appPath });
         try {
@@ -569,7 +431,7 @@ export async function processFullResponseActions(
           logger.log(
             `Amend commit with changes outside of codiner: ${uncommittedFiles.join(", ")}`,
           );
-        } catch (error) {
+        } catch (error: any) {
           // Just log, but don't throw an error because the user can still
           // commit these changes outside of Codiner if needed.
           logger.error(
@@ -577,35 +439,38 @@ export async function processFullResponseActions(
               ", ",
             )}`,
           );
-          extraFilesError = (error as any).toString();
+          extraFilesError = error?.toString() ?? "Unknown error";
         }
       }
 
       // Save the commit hash to the message
       await db
-        .update(messages)
+        .update(messages as any)
         .set({
           commitHash: commitHash,
-        })
+        } as any)
         .where(eq(messages.id, messageId));
     }
     logger.log("mark as approved: hasChanges", hasChanges);
     // Update the message to approved
     await db
-      .update(messages)
+      .update(messages as any)
       .set({
         approvalState: "approved",
-      })
+      } as any)
       .where(eq(messages.id, messageId));
 
     return {
       updatedFiles: hasChanges,
-      extraFiles: uncommittedFiles.length > 0 ? uncommittedFiles : undefined,
+      extraFiles:
+        uncommittedFiles && uncommittedFiles.length > 0
+          ? uncommittedFiles
+          : undefined,
       extraFilesError,
     };
   } catch (error: unknown) {
     logger.error("Error processing files:", error);
-    return { error: (error as any).toString() };
+    return { error: (error as any).stack || (error as any).toString() };
   } finally {
     const appendedContent = `
     ${warnings
@@ -621,12 +486,12 @@ export async function processFullResponseActions(
         )
         .join("\n")}
     `;
-    if (appendedContent.length > 0) {
+    if (appendedContent.trim().length > 0) {
       await db
-        .update(messages)
+        .update(messages as any)
         .set({
           content: fullResponse + "\n\n" + appendedContent,
-        })
+        } as any)
         .where(eq(messages.id, messageId));
     }
   }

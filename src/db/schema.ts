@@ -36,25 +36,28 @@ export const apps = sqliteTable("apps", {
   githubOrg: text("github_org"),
   githubRepo: text("github_repo"),
   githubBranch: text("github_branch"),
-  supabaseProjectId: text("supabase_project_id"),
-  // If supabaseProjectId is a branch, then the parent project id set.
-  // This is because there's no way to retrieve ALL the branches for ALL projects
-  // in a single API call
-  // This is only used for display purposes but is NOT used for any actual
-  // supabase management logic.
-  supabaseParentProjectId: text("supabase_parent_project_id"),
-  // Supabase organization slug for credential lookup
-  supabaseOrganizationSlug: text("supabase_organization_slug"),
   neonProjectId: text("neon_project_id"),
   neonDevelopmentBranchId: text("neon_development_branch_id"),
   neonPreviewBranchId: text("neon_preview_branch_id"),
   vercelProjectId: text("vercel_project_id"),
   vercelProjectName: text("vercel_project_name"),
-  vercelTeamId: text("vercel_team_id"),
+  vercelTeamSlug: text("vercel_team_slug"),
   vercelDeploymentUrl: text("vercel_deployment_url"),
+  firebaseProjectId: text("firebase_project_id"),
+  firebaseApiKey: text("firebase_api_key"),
+  supabaseProjectUrl: text("supabase_project_url"),
+  slackWebhookUrl: text("slack_webhook_url"),
+  defaultModel: text("default_model"),
+  pwaIcon: text("pwa_icon"),
+  testCommand: text("test_command"),
+  buildPath: text("build_path"),
+  dockerConfig: text("docker_config"),
+  seoMetadata: text("seo_metadata"),
+  i18nConfig: text("i18n_config"),
+  billingConfig: text("billing_config"),
   installCommand: text("install_command"),
   startCommand: text("start_command"),
-  chatContext: text("chat_context", { mode: "json" }),
+  chatContext: text("chat_context"),
   isFavorite: integer("is_favorite", { mode: "boolean" })
     .notNull()
     .default(sql`0`),

@@ -8,7 +8,6 @@ import {
   gitAddAll,
   getGitUncommittedFiles,
 } from "@/ipc/utils/git_utils";
-import { deployAllSupabaseFunctions } from "../../../../../../supabase_admin/supabase_utils";
 import type { AgentContext } from "../tools/types";
 
 const logger = log.scope("file_operations");
@@ -21,6 +20,7 @@ export interface FileOperationResult {
 
 /**
  * Deploy all Supabase functions (after shared module changes)
+ * NOTE: This function is now a no-op since Supabase integration was removed
  */
 export async function deployAllFunctionsIfNeeded(
   ctx: Pick<
@@ -31,32 +31,8 @@ export async function deployAllFunctionsIfNeeded(
     | "isSharedModulesChanged"
   >,
 ): Promise<FileOperationResult> {
-  if (!ctx.supabaseProjectId || !ctx.isSharedModulesChanged) {
-    return { success: true };
-  }
-
-  try {
-    logger.info("Shared modules changed, redeploying all Supabase functions");
-    const deployErrors = await deployAllSupabaseFunctions({
-      appPath: ctx.appPath,
-      supabaseProjectId: ctx.supabaseProjectId,
-      supabaseOrganizationSlug: ctx.supabaseOrganizationSlug ?? null,
-    });
-
-    if (deployErrors.length > 0) {
-      return {
-        success: true,
-        warning: `Some Supabase functions failed to deploy: ${deployErrors.join(", ")}`,
-      };
-    }
-
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: `Failed to redeploy Supabase functions: ${error}`,
-    };
-  }
+  // Supabase integration removed - this is now a no-op
+  return { success: true };
 }
 
 /**

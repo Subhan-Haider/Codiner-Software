@@ -1,8 +1,9 @@
-import { ipcMain } from "electron";
+import { createLoggedHandler } from "./safe_handle";
 import log from "electron-log";
 import { LocalModelListResponse, LocalModel } from "../ipc_types";
 
 const logger = log.scope("ollama_handler");
+const handle = createLoggedHandler(logger);
 
 export function parseOllamaHost(host?: string): string {
   if (!host) {
@@ -62,7 +63,7 @@ export async function fetchOllamaModels(): Promise<LocalModelListResponse> {
       throw new Error(`Failed to fetch model: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { models: OllamaModel[] };
     const ollamaModels: OllamaModel[] = data.models || [];
 
     const models: LocalModel[] = ollamaModels.map((model: OllamaModel) => {
@@ -83,21 +84,22 @@ export async function fetchOllamaModels(): Promise<LocalModelListResponse> {
     });
     logger.info(`Successfully fetched ${models.length} models from Ollama`);
     return { models };
-  } catch (error) {
+  } catch (error: any) {
     if (
-      error instanceof TypeError &&
-      (error as Error).message.includes("fetch failed")
+      error.message.includes("fetch failed") ||
+      error.code === "ECONNREFUSED" ||
+      error.code === "ETIMEDOUT"
     ) {
       throw new Error(
-        "Could not connect to Ollama. Make sure it's running at http://localhost:11434",
+        `Could not connect to Ollama. Make sure it's running at ${getOllamaApiUrl()}`,
       );
     }
-    throw new Error("Failed to fetch models from Ollama");
+    throw new Error(`Failed to fetch models from Ollama: ${error.message}`);
   }
 }
 
 export function registerOllamaHandlers() {
-  ipcMain.handle(
+  handle(
     "local-models:list-ollama",
     async (): Promise<LocalModelListResponse> => {
       return fetchOllamaModels();

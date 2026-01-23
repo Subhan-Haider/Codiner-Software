@@ -6,12 +6,10 @@ import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 // @ts-ignore
 import logo from "../../assets/new-logo.png";
-import { providerSettingsRoute } from "@/routes/settings/providers/$provider";
 import { cn } from "@/lib/utils";
 import { useDeepLink } from "@/contexts/DeepLinkContext";
 import { useEffect, useState } from "react";
 import { CodinerProSuccessDialog } from "@/components/CodinerProSuccessDialog";
-import { useTheme } from "@/contexts/ThemeContext";
 import { IpcClient } from "@/ipc/ipc_client";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
 import { UserBudgetInfo } from "@/ipc/ipc_types";
@@ -78,7 +76,7 @@ export const TitleBar = () => {
 
   return (
     <>
-      <div className="@container z-[50] w-full h-11 backdrop-blur-xl fixed top-0 left-0 app-region-drag flex items-center border-b border-black/5 dark:border-white/5 bg-white/70 dark:bg-black/40 shadow-sm transition-all duration-500">
+      <div className="@container z-[100] w-full h-11 backdrop-blur-xl fixed top-0 left-0 app-region-drag flex items-center border-b border-black/5 dark:border-white/5 bg-white/70 dark:bg-black/40 shadow-sm transition-all duration-500">
         <div className={`${showWindowControls ? "pl-2" : "pl-18"}`}></div>
 
         <img src={logo} alt="Codiner Logo" className="w-8 h-8 mr-2" />
@@ -100,7 +98,6 @@ export const TitleBar = () => {
             <ActionHeader />
           </div>
         )}
-
 
         {showWindowControls && <WindowsControls />}
       </div>

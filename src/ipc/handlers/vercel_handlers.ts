@@ -84,7 +84,7 @@ async function getVercelProjects(
     );
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as any;
   return {
     projects: data.projects || [],
   };
@@ -116,7 +116,7 @@ async function getDefaultTeamId(token: string): Promise<string> {
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
 
     // Use the first team (typically the personal account or default team)
     if (data.teams && data.teams.length > 0) {
@@ -139,19 +139,19 @@ async function detectFramework(
       file: string;
       framework: CreateProjectFramework;
     }> = [
-      { file: "next.config.js", framework: "nextjs" },
-      { file: "next.config.mjs", framework: "nextjs" },
-      { file: "next.config.ts", framework: "nextjs" },
-      { file: "vite.config.js", framework: "vite" },
-      { file: "vite.config.ts", framework: "vite" },
-      { file: "vite.config.mjs", framework: "vite" },
-      { file: "nuxt.config.js", framework: "nuxtjs" },
-      { file: "nuxt.config.ts", framework: "nuxtjs" },
-      { file: "astro.config.js", framework: "astro" },
-      { file: "astro.config.mjs", framework: "astro" },
-      { file: "astro.config.ts", framework: "astro" },
-      { file: "svelte.config.js", framework: "svelte" },
-    ];
+        { file: "next.config.js", framework: "nextjs" },
+        { file: "next.config.mjs", framework: "nextjs" },
+        { file: "next.config.ts", framework: "nextjs" },
+        { file: "vite.config.js", framework: "vite" },
+        { file: "vite.config.ts", framework: "vite" },
+        { file: "vite.config.mjs", framework: "vite" },
+        { file: "nuxt.config.js", framework: "nuxtjs" },
+        { file: "nuxt.config.ts", framework: "nuxtjs" },
+        { file: "astro.config.js", framework: "astro" },
+        { file: "astro.config.mjs", framework: "astro" },
+        { file: "astro.config.ts", framework: "astro" },
+        { file: "svelte.config.js", framework: "svelte" },
+      ];
 
     for (const { file, framework } of configFiles) {
       if (fs.existsSync(path.join(appPath, file))) {
@@ -502,11 +502,11 @@ async function handleDisconnectVercelProject(
 
   // Update app in database to remove Vercel project info
   await db
-    .update(apps)
+    .update(schema.apps)
     .set({
       vercelProjectId: null,
       vercelProjectName: null,
-      vercelTeamId: null,
+      vercelTeamSlug: null,
       vercelDeploymentUrl: null,
     })
     .where(eq(apps.id, appId));
@@ -515,7 +515,7 @@ async function handleDisconnectVercelProject(
 // --- Registration ---
 export function registerVercelHandlers() {
   // DO NOT LOG this handler because tokens are sensitive
-  ipcMain.handle("vercel:save-token", handleSaveVercelToken);
+  handle("vercel:save-token", handleSaveVercelToken, { logArgs: false });
 
   // Logged handlers
   handle("vercel:list-projects", handleListVercelProjects);
@@ -524,6 +524,160 @@ export function registerVercelHandlers() {
   handle("vercel:connect-existing-project", handleConnectToExistingProject);
   handle("vercel:get-deployments", handleGetVercelDeployments);
   handle("vercel:disconnect", handleDisconnectVercelProject);
+  handle("vercel:deploy", handleDeployToVercel);
+}
+
+// --- Vercel File System Deployment (No GitHub) ---
+
+import crypto from "crypto";
+import { globSync } from "glob";
+import * as fsPromises from "fs/promises";
+import { DeployToVercelParams } from "../ipc_types";
+
+async function getSha1(filePath: string): Promise<string> {
+  const fileBuffer = await fsPromises.readFile(filePath);
+  const hashSum = crypto.createHash("sha1");
+  hashSum.update(fileBuffer);
+  return hashSum.digest("hex");
+}
+
+async function handleDeployToVercel(
+  event: IpcMainInvokeEvent,
+  { appId }: DeployToVercelParams
+): Promise<string> {
+  const settings = readSettings();
+  const accessToken = settings.vercelAccessToken?.value;
+  if (!accessToken) {
+    throw new Error("Not authenticated with Vercel.");
+  }
+
+  const app = await db.query.apps.findFirst({ where: eq(apps.id, appId) });
+  if (!app) {
+    throw new Error("App not found");
+  }
+
+  if (!app.vercelProjectId) {
+    throw new Error("App is not connected to a Vercel project.");
+  }
+
+  logger.info(`Starting file system deployment for app ${appId}`);
+
+  const appPath = getCodinerAppPath(app.path);
+
+  // 1. Gather files
+  // Ignore node_modules, .git, etc.
+  const files = globSync("**/*", {
+    cwd: appPath,
+    ignore: [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/dist/**", // Usually we deploy source if we want Vercel to build, OR we deploy dist if pre-built. 
+      // Vercel prefers source for frameworks.
+      "**/.next/**"
+    ],
+    nodir: true,
+    dot: true,
+  });
+
+  const fileList = [];
+  logger.info(`Found ${files.length} files to deploy.`);
+
+  // 2. Hash files
+  for (const file of files) {
+    const filePath = path.join(appPath, file);
+    const sha = await getSha1(filePath);
+    const stat = await fsPromises.stat(filePath);
+    fileList.push({
+      file: file.replace(/\\/g, "/"), // Force forward slashes
+      sha,
+      size: stat.size,
+      path: filePath // Store absolute path for uploading later
+    });
+  }
+
+  // 3. Create Deployment Request
+  const body = {
+    name: app.vercelProjectName || app.name,
+    project: app.vercelProjectId,
+    files: fileList.map(f => ({ file: f.file, sha: f.sha, size: f.size })),
+    target: "production"
+  };
+
+  logger.info("Posting deployment to Vercel...");
+
+  // We use fetch directly because SDK might try to wrap this logic differently or we want raw control
+  const response = await fetch("https://api.vercel.com/v13/deployments", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json() as any;
+
+  if (response.status !== 200) {
+    // If it's just missing files, we handle it.
+    // But Vercel returns 200 usually even if missing files, with separate logic? 
+    // Actually v13 returns 200 but includes 'error' object if failed? 
+    // Wait, documentation says: 
+    // If files are missing, it sends back a list of missing files in the error response?
+    // No, strictly speaking: POST /v13/deployments
+    // If some files are not yet uploaded, the response status will be 200 OK 
+    // but the state will be 'INITIALIZING' ?
+    // Actually, historical API (v2) returned missing files. v13 is "monorepo aware".
+    // Let's assume standard behavior: if 200, check if we need to upload anything?
+    // Actually, Vercel API v13 requires uploading files to a separate endpoint first?
+    // Or we upload to the endpoint provided?
+
+    // Let's implement the standard "upload files" pattern.
+    // If "error": { "code": "missing_files", "missing": [...] }
+    if (data.error && data.error.code === "missing_files") {
+      logger.info(`Vercel requested ${data.error.missing.length} missing files.`);
+
+      const missingHashes = new Set(data.error.missing);
+      const filesToUpload = fileList.filter(f => missingHashes.has(f.sha));
+
+      await Promise.all(filesToUpload.map(async (f) => {
+        const content = await fsPromises.readFile(f.path);
+        const uploadRes = await fetch("https://api.vercel.com/v2/files", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/octet-stream",
+            "x-vercel-digest": f.sha,
+            "Content-Length": f.size.toString()
+          },
+          body: content
+        });
+        if (!uploadRes.ok) {
+          throw new Error(`Failed to upload file ${f.file}`);
+        }
+      }));
+
+      // Retry deployment
+      logger.info("All missing files uploaded. Retrying deployment...");
+      const retryResponse = await fetch("https://api.vercel.com/v13/deployments", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      const retryData = await retryResponse.json() as any;
+      if (!retryResponse.ok) {
+        throw new Error(`Deployment failed: ${JSON.stringify(retryData)}`);
+      }
+      return retryData.url;
+    } else if (data.error) {
+      throw new Error(`Deployment failed: ${data.error.message}`);
+    }
+  }
+
+  return data.url || `https://${data.alias[0]}`; // Fallback
 }
 
 export async function updateAppVercelProject({
@@ -544,7 +698,7 @@ export async function updateAppVercelProject({
     .set({
       vercelProjectId: projectId,
       vercelProjectName: projectName,
-      vercelTeamId: teamId,
+      vercelTeamSlug: teamId,
       vercelDeploymentUrl: deploymentUrl,
     })
     .where(eq(schema.apps.id, appId));

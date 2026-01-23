@@ -3,6 +3,7 @@ import {
   appUrlAtom,
   appConsoleEntriesAtom,
   previewErrorMessageAtom,
+  previewStatusAtom,
 } from "@/atoms/appAtoms";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -24,6 +25,8 @@ import {
   Tablet,
   Smartphone,
   Pen,
+  ZoomIn,
+  RotateCw,
 } from "lucide-react";
 import { selectedChatIdAtom } from "@/atoms/chatAtoms";
 import { CopyErrorMessage } from "@/components/CopyErrorMessage";
@@ -45,6 +48,8 @@ import {
   annotatorModeAtom,
   screenshotDataUrlAtom,
   pendingVisualChangesAtom,
+  deviceTypeAtom,
+  isLandscapeAtom,
 } from "@/atoms/previewAtoms";
 import { ComponentSelection } from "@/ipc/ipc_types";
 import {
@@ -74,9 +79,10 @@ interface ErrorBannerProps {
   error: { message: string; source: "preview-app" | "codiner-app" } | undefined;
   onDismiss: () => void;
   onAIFix: () => void;
+  onRestart?: (options?: { removeNodeModules?: boolean }) => void;
 }
 
-const ErrorBanner = ({ error, onDismiss, onAIFix }: ErrorBannerProps) => {
+const ErrorBanner = ({ error, onDismiss, onAIFix, onRestart }: ErrorBannerProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const { isStreaming } = useStreamChat();
   if (!error) return null;
@@ -152,6 +158,16 @@ const ErrorBanner = ({ error, onDismiss, onAIFix }: ErrorBannerProps) => {
       {!isDockerError && error.source === "preview-app" && (
         <div className="mt-3 px-6 flex justify-end gap-2">
           <CopyErrorMessage errorMessage={error.message} />
+          {error.message.includes("Cannot find package") && (
+            <button
+              disabled={isStreaming}
+              onClick={() => onRestart?.({ removeNodeModules: true })}
+              className="cursor-pointer flex items-center space-x-1 px-2 py-1 bg-blue-500 dark:bg-blue-600 text-white rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw size={14} />
+              <span>Fix Dependencies</span>
+            </button>
+          )}
           <button
             disabled={isStreaming}
             onClick={onAIFix}
@@ -174,6 +190,7 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
   // State to trigger iframe reload
   const [reloadKey, setReloadKey] = useState(0);
   const [errorMessage, setErrorMessage] = useAtom(previewErrorMessageAtom);
+  const previewStatus = useAtomValue(previewStatusAtom);
   const selectedChatId = useAtomValue(selectedChatIdAtom);
   const { streamMessage } = useStreamChat();
   const { routes: availableRoutes } = useParseRouter(selectedAppId);
@@ -211,15 +228,19 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
   const [isDynamicComponent, setIsDynamicComponent] = useState(false);
   const [hasStaticText, setHasStaticText] = useState(false);
 
-  // Device mode state
-  type DeviceMode = "desktop" | "tablet" | "mobile";
-  const [deviceMode, setDeviceMode] = useState<DeviceMode>("desktop");
+  // Device mode state (synced with global atoms)
+  const [deviceMode, setDeviceMode] = useAtom(deviceTypeAtom);
+  const [isRotated, setIsRotated] = useAtom(isLandscapeAtom);
   const [isDevicePopoverOpen, setIsDevicePopoverOpen] = useState(false);
+  const [scale, setScale] = useState(1); // Zoom state
 
   // Device configurations
-  const deviceWidthConfig = {
-    tablet: 768,
-    mobile: 375,
+  const deviceConfig: Record<typeof deviceMode, { name: string; width: number; height: number; type: "mobile" | "tablet" | "desktop" }> = {
+    desktop: { name: "Desktop", width: 1920, height: 1080, type: "desktop" },
+    "iphone-14-pro": { name: "iPhone 14 Pro", width: 393, height: 852, type: "mobile" },
+    "pixel-7": { name: "Pixel 7", width: 412, height: 915, type: "mobile" },
+    "galaxy-s22": { name: "Galaxy S22", width: 360, height: 780, type: "mobile" },
+    "ipad-air": { name: "iPad Air", width: 820, height: 1180, type: "tablet" },
   };
 
   //detect if the user is using Mac
@@ -799,8 +820,8 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
                   <button
                     onClick={handleActivateComponentSelector}
                     className={`p-1 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${isPicking
-                        ? "bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700"
-                        : " text-purple-700 hover:bg-purple-200  dark:text-purple-300 dark:hover:bg-purple-900"
+                      ? "bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700"
+                      : " text-purple-700 hover:bg-purple-200  dark:text-purple-300 dark:hover:bg-purple-900"
                       }`}
                     disabled={
                       loading ||
@@ -828,8 +849,8 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
                   <button
                     onClick={handleAnnotatorClick}
                     className={`p-1 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${annotatorMode
-                        ? "bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700"
-                        : " text-purple-700 hover:bg-purple-200  dark:text-purple-300 dark:hover:bg-purple-900"
+                      ? "bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700"
+                      : " text-purple-700 hover:bg-purple-200  dark:text-purple-300 dark:hover:bg-purple-900"
                       }`}
                     disabled={
                       loading ||
@@ -916,14 +937,31 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
 
           {/* Action Buttons */}
           <div className="flex space-x-1">
-            <button
-              onClick={onRestart}
-              className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm hover:bg-[var(--background-darkest)] transition-colors"
-              title="Restart App"
-            >
-              <Power size={16} />
-              <span>Restart</span>
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={(e) => {
+                      if (e.shiftKey) {
+                        restartApp({ removeNodeModules: true });
+                      } else {
+                        onRestart();
+                      }
+                    }}
+                    className="flex items-center space-x-1 px-3 py-1 rounded-md text-sm hover:bg-[var(--background-darkest)] transition-colors"
+                    title="Restart App"
+                  >
+                    <Power size={16} />
+                    <span>Restart</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Click to restart</p>
+                  <p className="text-red-400">Shift+Click to Hard Restart (Clear node_modules)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <button
               data-testid="preview-open-browser-button"
               onClick={() => {
@@ -934,6 +972,24 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
               className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-300"
             >
               <ExternalLink size={16} />
+            </button>
+
+            {/* Zoom Control */}
+            <button
+              onClick={() => {
+                const zooms = [1, 1.25, 1.5, 0.5, 0.75];
+                const currentIndex = zooms.indexOf(scale);
+                const nextScale = zooms[(currentIndex + 1) % zooms.length];
+                setScale(nextScale);
+              }}
+              className={cn(
+                "p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-300 flex items-center gap-1",
+                scale !== 1 && "text-blue-500 font-bold"
+              )}
+              title={`Zoom: ${Math.round(scale * 100)}% (Click to cycle)`}
+            >
+              <ZoomIn size={16} />
+              {scale !== 1 && <span className="text-[10px]">{Math.round(scale * 100)}%</span>}
             </button>
 
             {/* Device Mode Button */}
@@ -966,54 +1022,51 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
                     value={deviceMode}
                     onValueChange={(value) => {
                       if (value) {
-                        setDeviceMode(value as DeviceMode);
+                        setDeviceMode(value as typeof deviceMode);
                         setIsDevicePopoverOpen(false);
                       }
                     }}
                     variant="outline"
+                    className="flex flex-col gap-1 items-start"
                   >
-                    {/* Tooltips placed inside items instead of wrapping 
-                    to avoid asChild prop merging that breaks highlighting */}
-                    <ToggleGroupItem value="desktop" aria-label="Desktop view">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center justify-center">
-                            <Monitor size={16} />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Desktop</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="tablet" aria-label="Tablet view">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center justify-center">
-                            <Tablet size={16} className="scale-x-130" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Tablet</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="mobile" aria-label="Mobile view">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center justify-center">
-                            <Smartphone size={16} />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Mobile</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </ToggleGroupItem>
+                    {Object.entries(deviceConfig).map(([key, config]) => (
+                      <ToggleGroupItem
+                        key={key}
+                        value={key}
+                        aria-label={config.name}
+                        className="w-full justify-start gap-2 px-2"
+                      >
+                        {config.type === "desktop" ? (
+                          <Monitor size={16} />
+                        ) : config.type === "tablet" ? (
+                          <Tablet size={16} />
+                        ) : (
+                          <Smartphone size={16} />
+                        )}
+                        <span className="text-xs">{config.name}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">
+                          {config.width}x{config.height}
+                        </span>
+                      </ToggleGroupItem>
+                    ))}
                   </ToggleGroup>
                 </TooltipProvider>
               </PopoverContent>
             </Popover>
+
+            {/* Rotate Button */}
+            {deviceMode !== "desktop" && (
+              <button
+                onClick={() => setIsRotated(!isRotated)}
+                className={cn(
+                  "p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300",
+                  isRotated && "bg-gray-200 dark:bg-gray-700 text-blue-500"
+                )}
+                title="Rotate Device"
+              >
+                <RotateCw size={16} />
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1022,6 +1075,7 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
         <ErrorBanner
           error={errorMessage}
           onDismiss={() => setErrorMessage(undefined)}
+          onRestart={restartApp}
           onAIFix={() => {
             if (selectedChatId) {
               streamMessage({
@@ -1035,8 +1089,8 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
         {!appUrl ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 bg-gray-50 dark:bg-gray-950">
             <Loader2 className="w-8 h-8 animate-spin text-gray-400 dark:text-gray-500" />
-            <p className="text-gray-600 dark:text-gray-300">
-              Starting your app server...
+            <p className="text-gray-600 dark:text-gray-300 animate-pulse">
+              {previewStatus || "Starting your app server..."}
             </p>
           </div>
         ) : (
@@ -1048,11 +1102,19 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
           >
             {annotatorMode && screenshotDataUrl ? (
               <div
-                className="w-full h-full bg-white dark:bg-gray-950"
+                className="bg-white dark:bg-gray-950 shadow-2xl transition-all duration-300 relative"
                 style={
                   deviceMode == "desktop"
-                    ? {}
-                    : { width: `${deviceWidthConfig[deviceMode]}px` }
+                    ? { width: "100%", height: "100%" }
+                    : {
+                      width: `${isRotated ? deviceConfig[deviceMode].height : deviceConfig[deviceMode].width}px`,
+                      height: `${isRotated ? deviceConfig[deviceMode].width : deviceConfig[deviceMode].height}px`,
+                      marginTop: "20px",
+                      marginBottom: "20px",
+                      border: "12px solid #2d2d2d",
+                      borderRadius: "36px",
+                      overflow: "hidden"
+                    }
                 }
               >
                 {userBudget ? (
@@ -1078,11 +1140,30 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
                   ref={iframeRef}
                   key={reloadKey}
                   title={`Preview for App ${selectedAppId}`}
-                  className="w-full h-full border-none bg-white dark:bg-gray-950"
+                  className={cn(
+                    "bg-white dark:bg-gray-950 transition-all duration-300",
+                    deviceMode !== "desktop" && "shadow-2xl"
+                  )}
                   style={
                     deviceMode == "desktop"
-                      ? {}
-                      : { width: `${deviceWidthConfig[deviceMode]}px` }
+                      ? {
+                        width: `${100 / scale}%`,
+                        height: `${100 / scale}%`,
+                        transform: `scale(${scale})`,
+                        transformOrigin: "top left",
+                        border: "none",
+                      }
+                      : {
+                        width: `${isRotated ? deviceConfig[deviceMode].height : deviceConfig[deviceMode].width}px`,
+                        height: `${isRotated ? deviceConfig[deviceMode].width : deviceConfig[deviceMode].height}px`,
+                        transform: `scale(${scale})`,
+                        transformOrigin: "top center",
+                        marginTop: "20px",
+                        marginBottom: "20px",
+                        border: "12px solid #2d2d2d",
+                        borderRadius: "36px",
+                        boxSizing: "content-box" // Ensures border calculates outside width
+                      }
                   }
                   src={appUrl}
                   allow="clipboard-read; clipboard-write; fullscreen; microphone; camera; display-capture; geolocation; autoplay; picture-in-picture"

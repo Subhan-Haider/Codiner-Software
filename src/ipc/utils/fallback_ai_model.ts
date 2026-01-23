@@ -25,6 +25,7 @@ interface StreamResult {
 // Error classification
 const RETRYABLE_STATUS_CODES = new Set([
   401, // Unauthorized - wrong API key
+  402, // Payment Required - spend limit exceeded
   403, // Forbidden - permission error
   408, // Request Timeout
   409, // Conflict
@@ -54,6 +55,9 @@ const RETRYABLE_ERROR_PATTERNS = [
   "econnreset",
   "epipe",
   "etimedout",
+  "spend limit",
+  "quota",
+  "402",
 ];
 
 export function defaultShouldRetryThisError(error: any): boolean {
@@ -190,7 +194,7 @@ export class FallbackModel implements LanguageModelV2 {
             if (state.attemptNumber >= this.maxRetries) {
               throw new Error(
                 `All ${this.settings.models.length} models failed for ${operationName}. ` +
-                  `Last error: ${err.message}`,
+                `Last error: ${err.message}`,
               );
             }
           }
@@ -210,8 +214,14 @@ export class FallbackModel implements LanguageModelV2 {
     }
   }
 
-  async doGenerate(): Promise<any> {
-    throw new Error("doGenerate is not supported for fallback model");
+  async doGenerate(
+    options: LanguageModelV2CallOptions,
+  ): Promise<Awaited<ReturnType<LanguageModelV2["doGenerate"]>>> {
+    this.checkAndResetModel();
+
+    return this.retry(async (_retryState) => {
+      return await this.getCurrentModel().doGenerate(options);
+    }, "generate");
   }
 
   async doStream(options: LanguageModelV2CallOptions): Promise<StreamResult> {
@@ -308,7 +318,7 @@ export class FallbackModel implements LanguageModelV2 {
             // Check if we've tried all models
             if (
               retryState.modelsAttempted.size ===
-                fallbackModel.settings.models.length &&
+              fallbackModel.settings.models.length &&
               retryState.attemptNumber >= fallbackModel.maxRetries
             ) {
               controller.error(

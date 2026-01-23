@@ -8,6 +8,7 @@ import {
   previewPanelKeyAtom,
   previewErrorMessageAtom,
   selectedAppIdAtom,
+  previewStatusAtom,
 } from "@/atoms/appAtoms";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { AppOutput } from "@/ipc/ipc_types";
@@ -23,6 +24,7 @@ export function useRunApp() {
   const setPreviewPanelKey = useSetAtom(previewPanelKeyAtom);
   const appId = useAtomValue(selectedAppIdAtom);
   const setPreviewErrorMessage = useSetAtom(previewErrorMessageAtom);
+  const setPreviewStatus = useSetAtom(previewStatusAtom);
 
   const processProxyServerOutput = (output: AppOutput) => {
     const matchesProxyServerStart = output.message.includes(
@@ -43,12 +45,30 @@ export function useRunApp() {
           appId: output.appId,
           originalUrl: originalUrl!,
         });
+
+        // Proactively check if the app root is returning a 404
+        IpcClient.getInstance()
+          .fetchAppUrl(proxyUrl)
+          .catch((err) => {
+            if (err.message.includes("(404)")) {
+              setPreviewErrorMessage({
+                message: `App is running but the home page (/) returned a 404 error. This usually means your 'index.html' is missing or located in a subfolder that Vite isn't serving. Check your file structure.`,
+                source: "preview-app",
+              });
+            }
+          });
       }
     }
   };
 
   const processAppOutput = useCallback(
     (output: AppOutput) => {
+      // Handle status updates
+      if (output.type === "status") {
+        setPreviewStatus(output.message);
+        return;
+      }
+
       // Handle input requests specially
       if (output.type === "input-requested") {
         showInputRequest(output.message, async (response) => {
@@ -66,10 +86,15 @@ export function useRunApp() {
       }
 
       // Add to console entries
-      const level =
-        output.type === "stderr" || output.type === "client-error"
-          ? "error"
-          : "info";
+      let level: "error" | "warn" | "info" = "info";
+
+      if (output.type === "stderr" || output.type === "client-error") {
+        if (output.message.toLowerCase().includes("warn")) {
+          level = "warn";
+        } else {
+          level = "error";
+        }
+      }
       setConsoleEntries((prev) => [
         ...prev,
         {
@@ -81,6 +106,31 @@ export function useRunApp() {
         },
       ]);
 
+      // Heuristic to detect critical startup errors
+      const lowerMessage = output.message.toLowerCase();
+      const isCriticalError =
+        output.type === "stderr" ||
+        level === "error" ||
+        lowerMessage.includes("error:") ||
+        output.message.includes("(!)");
+
+      if (isCriticalError) {
+        if (
+          lowerMessage.includes("cannot find package") ||
+          lowerMessage.includes("not found") ||
+          lowerMessage.includes("could not auto-determine entry point") ||
+          lowerMessage.includes("failed to load config") ||
+          lowerMessage.includes("npm err!") ||
+          lowerMessage.includes("error:") ||
+          output.message.includes("(!)")
+        ) {
+          setPreviewErrorMessage({
+            message: output.message,
+            source: "preview-app",
+          });
+        }
+      }
+
       // Process proxy server output
       processProxyServerOutput(output);
     },
@@ -88,12 +138,13 @@ export function useRunApp() {
   );
   const runApp = useCallback(
     async (appId: number) => {
+      if (loading) return;
       setLoading(true);
       try {
         const ipcClient = IpcClient.getInstance();
         console.debug("Running app", appId);
 
-        // Clear the URL and add restart message
+        // Clear the URL and add start message
         setAppUrlObj((prevAppUrlObj) => {
           if (prevAppUrlObj?.appId !== appId) {
             return { appUrl: null, appId: null, originalUrl: null };
@@ -106,11 +157,12 @@ export function useRunApp() {
           {
             level: "info",
             type: "build-time",
-            message: "Trying to restart app...",
+            message: "Starting app...",
             timestamp: Date.now(),
             appId,
           },
         ]);
+        setPreviewStatus(null);
         const app = await ipcClient.getApp(appId);
         setApp(app);
         await ipcClient.runApp(appId, processAppOutput);
@@ -166,7 +218,7 @@ export function useRunApp() {
     async ({
       removeNodeModules = false,
     }: { removeNodeModules?: boolean } = {}) => {
-      if (appId === null) {
+      if (appId === null || loading) {
         return;
       }
       setLoading(true);
@@ -191,6 +243,7 @@ export function useRunApp() {
           },
         ]);
 
+        setPreviewStatus(null);
         const app = await ipcClient.getApp(appId);
         setApp(app);
         await ipcClient.restartApp(

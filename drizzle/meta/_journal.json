@@ -148,6 +148,41 @@
       "when": 1766619976318,
       "tag": "0020_nebulous_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1768142030437,
+      "tag": "0021_magical_queen_noir",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1768146484926,
+      "tag": "0022_unique_unus",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1768146560809,
+      "tag": "0023_redundant_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1768146717908,
+      "tag": "0024_numerous_nextwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1768149888558,
+      "tag": "0025_orange_gateway",
+      "breakpoints": true
     }
   ]
 }

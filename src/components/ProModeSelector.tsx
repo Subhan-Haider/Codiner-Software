@@ -94,7 +94,7 @@ export function ProModeSelector() {
                     className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                     onClick={() => {
                       IpcClient.getInstance().openExternalUrl(
-                        "https://codiner.sh/pro#ai",
+                        "https://codiner.online/pro#ai",
                       );
                     }}
                   >
@@ -102,7 +102,7 @@ export function ProModeSelector() {
                   </a>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Visit codiner.sh/pro to unlock Pro features
+                  Visit codiner.online/pro to unlock Pro features
                 </TooltipContent>
               </Tooltip>
             </div>

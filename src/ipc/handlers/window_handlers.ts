@@ -1,8 +1,10 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow } from "electron";
 import log from "electron-log";
 import { platform } from "os";
+import { createLoggedHandler } from "./safe_handle";
 
 const logger = log.scope("window-handlers");
+const handle = createLoggedHandler(logger);
 
 // Handler for minimizing the window
 const handleMinimize = (event: Electron.IpcMainInvokeEvent) => {
@@ -41,13 +43,13 @@ const handleClose = (event: Electron.IpcMainInvokeEvent) => {
 
 // Handler to get the current system platform
 const handleGetSystemPlatform = () => {
-  return platform();
+  return platform() as any;
 };
 
 export function registerWindowHandlers() {
   logger.debug("Registering window control handlers");
-  ipcMain.handle("window:minimize", handleMinimize);
-  ipcMain.handle("window:maximize", handleMaximize);
-  ipcMain.handle("window:close", handleClose);
-  ipcMain.handle("get-system-platform", handleGetSystemPlatform);
+  handle("window:minimize", async (event) => handleMinimize(event));
+  handle("window:maximize", async (event) => handleMaximize(event));
+  handle("window:close", async (event) => handleClose(event));
+  handle("get-system-platform", async () => handleGetSystemPlatform());
 }

@@ -36,6 +36,7 @@ import type {
   UserBudgetInfo,
   CopyAppParams,
   App,
+  AppAnalytics,
   ComponentSelection,
   AppUpgrade,
   ProblemReport,
@@ -49,6 +50,7 @@ import type {
   GetVercelDeploymentsParams,
   DisconnectVercelProjectParams,
   SecurityReviewResult,
+  SecurityFinding,
   IsVercelProjectAvailableParams,
   SaveVercelAccessTokenParams,
   VercelProject,
@@ -68,11 +70,6 @@ import type {
   CreateMcpServer,
   CloneRepoParams,
   ExportAppAsZipParams,
-  SupabaseBranch,
-  SetSupabaseAppProjectParams,
-  SupabaseOrganizationInfo,
-  SupabaseProject,
-  DeleteSupabaseOrganizationParams,
   SelectNodeFolderResult,
   ChangeAppLocationParams,
   ChangeAppLocationResult,
@@ -409,6 +406,10 @@ export class IpcClient {
     }
   }
 
+  public async fetchAppUrl(url: string): Promise<string> {
+    return this.ipcRenderer.invoke("app:fetch-url", url);
+  }
+
   public async readAppFile(appId: number, filePath: string): Promise<string> {
     return this.ipcRenderer.invoke("read-app-file", {
       appId,
@@ -564,6 +565,24 @@ export class IpcClient {
   // Stop a running app
   public async stopApp(appId: number): Promise<void> {
     await this.ipcRenderer.invoke("stop-app", { appId });
+  }
+
+  // Update app configuration
+  public async updateAppConfig(
+    appId: number,
+    config: Partial<App>,
+  ): Promise<void> {
+    await this.ipcRenderer.invoke("update-app-config", { appId, config });
+  }
+
+  // Run security audit
+  public async runSecurityAudit(appId: number): Promise<SecurityFinding[]> {
+    return this.ipcRenderer.invoke("app:run-security-audit", appId);
+  }
+
+  // Get app usage analytics
+  public async getAppAnalytics(appId: number): Promise<AppAnalytics> {
+    return this.ipcRenderer.invoke("app:get-analytics", appId);
   }
 
   // Restart a running app
@@ -741,11 +760,8 @@ export class IpcClient {
       console.log("github:flow-update", data);
       callback(data as GitHubDeviceFlowUpdateData);
     };
-    this.ipcRenderer.on("github:flow-update", listener);
-    // Return a function to remove the listener
-    return () => {
-      this.ipcRenderer.removeListener("github:flow-update", listener);
-    };
+    const unsubscribe = (this.ipcRenderer.on as any)("github:flow-update", listener);
+    return unsubscribe;
   }
 
   public onGithubDeviceFlowSuccess(
@@ -755,10 +771,8 @@ export class IpcClient {
       console.log("github:flow-success", data);
       callback(data as GitHubDeviceFlowSuccessData);
     };
-    this.ipcRenderer.on("github:flow-success", listener);
-    return () => {
-      this.ipcRenderer.removeListener("github:flow-success", listener);
-    };
+    const unsubscribe = (this.ipcRenderer.on as any)("github:flow-success", listener);
+    return unsubscribe;
   }
 
   public onGithubDeviceFlowError(
@@ -768,10 +782,8 @@ export class IpcClient {
       console.log("github:flow-error", data);
       callback(data as GitHubDeviceFlowErrorData);
     };
-    this.ipcRenderer.on("github:flow-error", listener);
-    return () => {
-      this.ipcRenderer.removeListener("github:flow-error", listener);
-    };
+    const unsubscribe = (this.ipcRenderer.on as any)("github:flow-error", listener);
+    return unsubscribe;
   }
   // --- End GitHub Device Flow ---
 
@@ -891,6 +903,13 @@ export class IpcClient {
   ): Promise<void> {
     await this.ipcRenderer.invoke("vercel:disconnect", params);
   }
+
+  public async deployToVercel(
+    params: { appId: number }
+  ): Promise<string> {
+    return this.ipcRenderer.invoke("vercel:deploy", params);
+  }
+
   // --- End Vercel Project Management ---
 
   // Get the main app version
@@ -1051,67 +1070,6 @@ export class IpcClient {
     });
   }
   // --- End Proposal Management ---
-
-  // --- Supabase Management ---
-
-  // List all connected Supabase organizations
-  public async listSupabaseOrganizations(): Promise<
-    SupabaseOrganizationInfo[]
-  > {
-    return this.ipcRenderer.invoke("supabase:list-organizations");
-  }
-
-  // Delete a Supabase organization connection
-  public async deleteSupabaseOrganization(
-    params: DeleteSupabaseOrganizationParams,
-  ): Promise<void> {
-    await this.ipcRenderer.invoke("supabase:delete-organization", params);
-  }
-
-  // List all projects from all connected organizations
-  public async listAllSupabaseProjects(): Promise<SupabaseProject[]> {
-    return this.ipcRenderer.invoke("supabase:list-all-projects");
-  }
-
-  public async listSupabaseBranches(params: {
-    projectId: string;
-    organizationSlug: string | null;
-  }): Promise<SupabaseBranch[]> {
-    return this.ipcRenderer.invoke("supabase:list-branches", params);
-  }
-
-  public async getSupabaseEdgeLogs(params: {
-    projectId: string;
-    timestampStart?: number;
-    appId: number;
-    organizationSlug: string | null;
-  }): Promise<Array<ConsoleEntry>> {
-    return this.ipcRenderer.invoke("supabase:get-edge-logs", params);
-  }
-
-  public async setSupabaseAppProject(
-    params: SetSupabaseAppProjectParams,
-  ): Promise<void> {
-    await this.ipcRenderer.invoke("supabase:set-app-project", params);
-  }
-
-  public async unsetSupabaseAppProject(app: number): Promise<void> {
-    await this.ipcRenderer.invoke("supabase:unset-app-project", {
-      app,
-    });
-  }
-
-  public async fakeHandleSupabaseConnect(params: {
-    appId: number;
-    fakeProjectId: string;
-  }): Promise<void> {
-    await this.ipcRenderer.invoke(
-      "supabase:fake-connect-and-set-project",
-      params,
-    );
-  }
-
-  // --- End Supabase Management ---
 
   // --- Neon Management ---
   public async fakeHandleNeonConnect(): Promise<void> {
@@ -1521,5 +1479,25 @@ export class IpcClient {
 
   public onUpdateDone(callback: (path: string) => void) {
     return (this.ipcRenderer as any).on("update-done", (path: string) => callback(path));
+  }
+
+  public async isFirebaseInstalled(): Promise<boolean> {
+    return this.ipcRenderer.invoke("firebase:is-installed");
+  }
+
+  public async getFirebaseAuthState(): Promise<{ loggedIn: boolean; email?: string | null }> {
+    return this.ipcRenderer.invoke("firebase:get-auth-state");
+  }
+
+  public async firebaseLogin(): Promise<boolean> {
+    return this.ipcRenderer.invoke("firebase:login");
+  }
+
+  public async firebaseLogout(): Promise<boolean> {
+    return this.ipcRenderer.invoke("firebase:logout");
+  }
+
+  public async aiTestConnectivity(providerId?: string): Promise<{ success: boolean; message: string; latency?: number; capabilities?: string[] }> {
+    return this.ipcRenderer.invoke("ai:test-connectivity", providerId);
   }
 }

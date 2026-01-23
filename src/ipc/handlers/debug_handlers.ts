@@ -1,9 +1,13 @@
-import { BrowserWindow, clipboard, ipcMain } from "electron";
+import { BrowserWindow, clipboard } from "electron";
+import { createLoggedHandler } from "./safe_handle";
 import { platform, arch } from "os";
 import { SystemDebugInfo, ChatLogsData } from "../ipc_types";
 import { readSettings } from "../../main/settings";
 
 import log from "electron-log";
+
+const logger = log.scope("debug_handlers");
+const handle = createLoggedHandler(logger);
 import path from "path";
 import fs from "fs";
 import { runShellCommand } from "../utils/runShellCommand";
@@ -115,7 +119,7 @@ async function getSystemDebugInfo({
 }
 
 export function registerDebugHandlers() {
-  ipcMain.handle(
+  handle(
     "get-system-debug-info",
     async (): Promise<SystemDebugInfo> => {
       console.log("IPC: get-system-debug-info called");
@@ -126,7 +130,7 @@ export function registerDebugHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "get-chat-logs",
     async (_, chatId: number): Promise<ChatLogsData> => {
       console.log(`IPC: get-chat-logs called for chat ${chatId}`);
@@ -197,7 +201,7 @@ export function registerDebugHandlers() {
 
   console.log("Registered debug IPC handlers");
 
-  ipcMain.handle("take-screenshot", async () => {
+  handle("take-screenshot", async () => {
     const win = BrowserWindow.getFocusedWindow();
     if (!win) throw new Error("No focused window to capture");
 

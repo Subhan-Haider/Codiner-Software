@@ -8,8 +8,11 @@ import { getTemplateOrThrow } from "../utils/template_utils";
 import log from "electron-log";
 
 const logger = log.scope("createFromTemplate");
+const GITHUB_CHECK_CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache
+const githubCheckCache = new Map<string, number>();
 
 export async function createFromTemplate({
+
   fullAppPath,
 }: {
   fullAppPath: string;
@@ -18,11 +21,26 @@ export async function createFromTemplate({
   const templateId = settings.selectedTemplateId;
 
   if (templateId === "react") {
+    const scaffoldPath = path.join(app.getAppPath(), "scaffold");
+    logger.info(`Copying from local scaffold at ${scaffoldPath} to ${fullAppPath}`);
     await copyDirectoryRecursive(
-      path.join(__dirname, "..", "..", "scaffold"),
+      scaffoldPath,
       fullAppPath,
     );
     return;
+  }
+
+  // Check if it's in community-templates first
+  const communityTemplatesDir = path.join(app.getAppPath(), "community-templates");
+  const possibleFolderNames = [templateId, `${templateId}-official`].filter(Boolean);
+
+  for (const folderName of possibleFolderNames) {
+    const communityPath = path.join(communityTemplatesDir, folderName);
+    if (fs.existsSync(communityPath)) {
+      logger.info(`Found local community template at ${communityPath}. Copying...`);
+      await copyDirectoryRecursive(communityPath, fullAppPath);
+      return;
+    }
   }
 
   const template = await getTemplateOrThrow(templateId);
@@ -34,6 +52,8 @@ export async function createFromTemplate({
 }
 
 async function cloneRepo(repoUrl: string): Promise<string> {
+  const settings = readSettings();
+  const accessToken = settings.githubAccessToken?.value;
   const url = new URL(repoUrl);
   if (url.protocol !== "https:") {
     throw new Error("Repository URL must use HTTPS.");
@@ -75,37 +95,76 @@ async function cloneRepo(repoUrl: string): Promise<string> {
         `Repo ${repoName} already exists in cache at ${cachePath}. Checking for updates.`,
       );
 
+      const lastChecked = githubCheckCache.get(repoUrl);
+      const now = Date.now();
+      if (lastChecked && now - lastChecked < GITHUB_CHECK_CACHE_TTL) {
+        // Verify the cache directory is actually inhabited
+        try {
+          const files = fs.readdirSync(cachePath);
+          if (files.length > 0) {
+            logger.info(
+              `Checked for updates for ${repoName} recently (${Math.round((now - lastChecked) / 1000)}s ago). Using existing cache.`,
+            );
+            return cachePath;
+          }
+          logger.warn(`Cache directory for ${repoName} is empty, re-checking GitHub...`);
+        } catch (e) {
+          logger.warn(`Failed to read cache directory for ${repoName}, re-checking GitHub...`);
+        }
+      }
+
+      // Update last checked time
+      githubCheckCache.set(repoUrl, now);
+
       // Construct GitHub API URL
       const apiUrl = `https://api.github.com/repos/${orgName}/${repoName}/commits/HEAD`;
       logger.info(`Fetching remote SHA from ${apiUrl}`);
 
       // Use native fetch instead of isomorphic-git http.request
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          "User-Agent": "Codiner", // GitHub API requires this
-          Accept: "application/vnd.github.v3+json",
-        },
-      });
+      const headers: Record<string, string> = {
+        "User-Agent": "Codiner", // GitHub API requires this
+        Accept: "application/vnd.github.v3+json",
+      };
+
+      if (accessToken) {
+        headers.Authorization = `token ${accessToken}`;
+      }
+
+      const response = await Promise.race([
+        fetch(apiUrl, {
+          method: "GET",
+          headers,
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`GitHub API request timed out for ${apiUrl}`)), 10000)
+        ),
+      ]);
       // Handle non-200 responses
       if (!response.ok) {
-        throw new Error(
-          `GitHub API request failed with status ${response.status}: ${response.statusText}`,
+        logger.warn(
+          `GitHub API request failed for ${apiUrl} with status ${response.status}: ${response.statusText}. Will attempt to clone the repository directly.`,
         );
+        // Skip to cloning by jumping out of the try block
+        throw new Error("API_CHECK_FAILED");
       }
       // Parse JSON directly (fetch handles streaming internally)
-      const commitData = await response.json();
+      const commitData = (await response.json()) as { sha: string };
       const remoteSha = commitData.sha;
       if (!remoteSha) {
-        throw new Error("SHA not found in GitHub API response.");
+        throw new Error(`SHA not found in GitHub API response for ${apiUrl}`);
       }
 
-      logger.info(`Successfully fetched remote SHA: ${remoteSha}`);
+      logger.info(`Successfully fetched remote SHA for ${repoName}: ${remoteSha}`);
 
       // Compare with local SHA
-      const localSha = await getCurrentCommitHash({ path: cachePath });
+      let localSha: string | null = null;
+      try {
+        localSha = await getCurrentCommitHash({ path: cachePath });
+      } catch (e) {
+        logger.warn(`Failed to get local SHA for ${repoName} at ${cachePath}, forcing re-clone.`);
+      }
 
-      if (remoteSha === localSha) {
+      if (remoteSha && localSha && remoteSha === localSha) {
         logger.info(
           `Local cache for ${repoName} is up to date (SHA: ${localSha}). Skipping clone.`,
         );
@@ -119,10 +178,15 @@ async function cloneRepo(repoUrl: string): Promise<string> {
       }
     } catch (err) {
       logger.warn(
-        `Error checking for updates or comparing SHAs for ${repoName} at ${cachePath}. Will attempt to re-clone. Error: `,
+        `Error checking for updates or comparing SHAs for ${repoName} at ${cachePath}. Forcing re-clone. Error: `,
         err,
       );
-      return cachePath;
+      try {
+        fs.rmSync(cachePath, { recursive: true, force: true });
+      } catch (rmErr) {
+        logger.error(`Failed to remove broken cache directory at ${cachePath}:`, rmErr);
+      }
+      // Continue to clone…
     }
   }
 
@@ -130,11 +194,12 @@ async function cloneRepo(repoUrl: string): Promise<string> {
 
   logger.info(`Cloning ${repoUrl} to ${cachePath}`);
   try {
-    await gitClone({ path: cachePath, url: repoUrl, depth: 1 });
+    await gitClone({ path: cachePath, url: repoUrl, accessToken, depth: 1 });
     logger.info(`Successfully cloned ${repoUrl} to ${cachePath}`);
-  } catch (err) {
-    logger.error(`Failed to clone ${repoUrl} to ${cachePath}: `, err);
-    throw err; // Re-throw the error after logging
+  } catch (err: any) {
+    const gitError = err?.message || String(err);
+    logger.error(`Failed to clone ${repoUrl} to ${cachePath}: `, gitError);
+    throw new Error(`Failed to clone template repository from ${repoUrl}. Original error: ${gitError}`);
   }
   return cachePath;
 }

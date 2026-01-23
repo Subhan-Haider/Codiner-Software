@@ -8,7 +8,7 @@ interface AnnotatorOnlyForProProps {
 
 export const AnnotatorOnlyForPro = ({ onGoBack }: AnnotatorOnlyForProProps) => {
   const handleGetPro = () => {
-    IpcClient.getInstance().openExternalUrl("https://codiner.sh/pro");
+    IpcClient.getInstance().openExternalUrl("https://codiner.online/pro");
   };
 
   return (

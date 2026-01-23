@@ -38,14 +38,14 @@ export async function fetchApiTemplates(): Promise<Template[]> {
   // Start new fetch
   apiTemplatesFetchPromise = (async (): Promise<Template[]> => {
     try {
-      const response = await fetch("https://api.codiner.sh/v1/templates");
+      const response = await fetch("https://api.codiner.online/v1/templates");
       if (!response.ok) {
         throw new Error(
           `Failed to fetch templates: ${response.status} ${response.statusText}`,
         );
       }
 
-      const apiTemplates: ApiTemplate[] = await response.json();
+      const apiTemplates = (await response.json()) as ApiTemplate[];
       const convertedTemplates = apiTemplates.map(convertApiTemplate);
 
       // Cache the result

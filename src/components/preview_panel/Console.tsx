@@ -1,5 +1,5 @@
 import { appConsoleEntriesAtom, type ConsoleEntry } from "@/atoms/appAtoms";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState, useMemo, useCallback, memo } from "react";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { ConsoleEntryComponent } from "./ConsoleEntry";
@@ -200,6 +200,12 @@ export const Console = () => {
 
   const listHeight = containerHeight - (showFilters ? 60 : 0);
 
+  const setConsoleEntries = useSetAtom(appConsoleEntriesAtom);
+
+  const handleClearConsole = useCallback(() => {
+    setConsoleEntries([]);
+  }, [setConsoleEntries]);
+
   // Disable virtualization in test mode for easier e2e testing
   // Virtualization only renders visible DOM elements, which creates issues for E2E tests:
   // 1. Off-screen logs don't exist in the DOM and can't be queried by test selectors
@@ -221,6 +227,7 @@ export const Console = () => {
         uniqueSources={uniqueSources}
         totalLogs={filteredEntries.length}
         showFilters={showFilters}
+        onClearConsole={handleClearConsole}
       />
 
       {/* Virtualized log area */}

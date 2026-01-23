@@ -9,7 +9,6 @@ import { registerVercelHandlers } from "./handlers/vercel_handlers";
 import { registerNodeHandlers } from "./handlers/node_handlers";
 import { registerProposalHandlers } from "./handlers/proposal_handlers";
 import { registerDebugHandlers } from "./handlers/debug_handlers";
-import { registerSupabaseHandlers } from "./handlers/supabase_handlers";
 import { registerNeonHandlers } from "./handlers/neon_handlers";
 import { registerLocalModelHandlers } from "./handlers/local_model_handlers";
 import { registerTokenCountHandlers } from "./handlers/token_count_handlers";
@@ -35,6 +34,8 @@ import { registerSecurityHandlers } from "./handlers/security_handlers";
 import { registerUpdateHandlers } from "./handlers/update_handlers";
 import { registerVisualEditingHandlers } from "../pro/main/ipc/handlers/visual_editing_handlers";
 import { registerAgentToolHandlers } from "../pro/main/ipc/handlers/local_agent/agent_tool_handlers";
+import { registerFirebaseHandlers } from "./handlers/firebase_handlers";
+import { registerAiTestHandlers } from "./handlers/ai_test_handler";
 
 export function registerIpcHandlers() {
   // Register all IPC handlers by category
@@ -50,7 +51,6 @@ export function registerIpcHandlers() {
   registerProblemsHandlers();
   registerProposalHandlers();
   registerDebugHandlers();
-  registerSupabaseHandlers();
   registerNeonHandlers();
   registerLocalModelHandlers();
   registerTokenCountHandlers();
@@ -75,4 +75,6 @@ export function registerIpcHandlers() {
   registerVisualEditingHandlers();
   registerAgentToolHandlers();
   registerUpdateHandlers();
+  registerFirebaseHandlers();
+  registerAiTestHandlers();
 }

@@ -429,6 +429,29 @@ p {
     animation: marquee 2s linear infinite;
 }
 
+.animate-shimmer {
+    animation: shimmer 2s infinite linear;
+    background-size: 200% 100%;
+}
+
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 0.15;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: scale(1.05);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+}
+
 /* In-between text-xs and text-sm */
 .text-xs-sm {
     font-size: 0.82rem;

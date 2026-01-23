@@ -154,36 +154,10 @@ export type GitHubSecrets = z.infer<typeof GitHubSecretsSchema>;
 
 export const GithubUserSchema = z.object({
   email: z.string(),
+  login: z.string().optional(),
+  avatarUrl: z.string().optional(),
 });
 export type GithubUser = z.infer<typeof GithubUserSchema>;
-
-/**
- * Supabase organization credentials.
- * Each organization has its own OAuth tokens.
- */
-export const SupabaseOrganizationCredentialsSchema = z.object({
-  accessToken: SecretSchema,
-  refreshToken: SecretSchema,
-  expiresIn: z.number(),
-  tokenTimestamp: z.number(),
-});
-export type SupabaseOrganizationCredentials = z.infer<
-  typeof SupabaseOrganizationCredentialsSchema
->;
-
-export const SupabaseSchema = z.object({
-  // Map keyed by organizationSlug -> organization credentials
-  organizations: z
-    .record(z.string(), SupabaseOrganizationCredentialsSchema)
-    .optional(),
-
-  // Legacy fields - kept for backwards compat
-  accessToken: SecretSchema.optional(),
-  refreshToken: SecretSchema.optional(),
-  expiresIn: z.number().optional(),
-  tokenTimestamp: z.number().optional(),
-});
-export type Supabase = z.infer<typeof SupabaseSchema>;
 
 export const NeonSchema = z.object({
   accessToken: SecretSchema.optional(),
@@ -192,6 +166,33 @@ export const NeonSchema = z.object({
   tokenTimestamp: z.number().optional(),
 });
 export type Neon = z.infer<typeof NeonSchema>;
+
+
+export const FirebaseConfigSchema = z.object({
+  apiKey: SecretSchema.optional(),
+  authDomain: z.string().optional(),
+  projectId: z.string().optional(),
+  storageBucket: z.string().optional(),
+  messagingSenderId: z.string().optional(),
+  appId: z.string().optional(),
+  measurementId: z.string().optional(),
+});
+export type FirebaseConfig = z.infer<typeof FirebaseConfigSchema>;
+
+export const SupabaseConfigSchema = z.object({
+  projectId: z.string().optional(),
+  projectUrl: z.string().optional(),
+  anonKey: SecretSchema.optional(),
+  serviceRoleKey: SecretSchema.optional(),
+});
+export type SupabaseConfig = z.infer<typeof SupabaseConfigSchema>;
+
+export const SlackConfigSchema = z.object({
+  webhookUrl: SecretSchema.optional(),
+  channel: z.string().optional(),
+  botName: z.string().optional(),
+});
+export type SlackConfig = z.infer<typeof SlackConfigSchema>;
 
 export const ExperimentsSchema = z.object({
   enableLocalAgent: z.boolean().optional(),
@@ -211,7 +212,6 @@ export const ExperimentsSchema = z.object({
   enableGitLens: z.boolean().optional(),
   enableSnippetManager: z.boolean().optional(),
   // Deprecated
-  enableSupabaseIntegration: z.boolean().describe("DEPRECATED").optional(),
   enableFileEditing: z.boolean().describe("DEPRECATED").optional(),
 });
 export type Experiments = z.infer<typeof ExperimentsSchema>;
@@ -272,12 +272,15 @@ export const UserSettingsSchema = z.object({
   githubUser: GithubUserSchema.optional(),
   githubAccessToken: SecretSchema.optional(),
   vercelAccessToken: SecretSchema.optional(),
-  supabase: SupabaseSchema.optional(),
   neon: NeonSchema.optional(),
+  firebase: FirebaseConfigSchema.optional(),
+  supabase: SupabaseConfigSchema.optional(),
+  slack: SlackConfigSchema.optional(),
   autoApproveChanges: z.boolean().optional(),
   telemetryConsent: z.enum(["opted_in", "opted_out", "unset"]).optional(),
   telemetryUserId: z.string().optional(),
   hasRunBefore: z.boolean().optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
   enableCodinerPro: z.boolean().optional(),
   experiments: ExperimentsSchema.optional(),
   lastShownReleaseNotesVersion: z.string().optional(),
@@ -289,13 +292,20 @@ export const UserSettingsSchema = z.object({
   enableProWebSearch: z.boolean().optional(),
   proSmartContextOption: SmartContextModeSchema.optional(),
   selectedTemplateId: z.string(),
-  enableSupabaseWriteSqlMigration: z.boolean().optional(),
   selectedChatMode: ChatModeSchema.optional(),
   acceptedCommunityCode: z.boolean().optional(),
   zoomLevel: ZoomLevelSchema.optional(),
   userName: z.string().optional(),
   customSystemPrompt: z.string().optional(),
   accentColor: z.string().optional(),
+  enableGlassmorphism: z.boolean().optional(),
+  enableAnimations: z.boolean().optional(),
+  enableSidebarHover: z.boolean().optional(),
+  uiDensity: z.enum(["compact", "balanced", "spacious"]).optional(),
+  appFontFamily: z.enum(["inter", "system", "mono", "dyslexic"]).optional(),
+  appFontWeight: z.enum(["normal", "medium", "bold"]).optional(),
+  appFontSize: z.enum(["small", "normal", "large", "extra-large"]).optional(),
+  editorTheme: z.enum(["vs-dark", "vs-light", "hc-black", "monokai"]).optional(),
 
   enableAutoFixProblems: z.boolean().optional(),
   enableNativeGit: z.boolean().optional(),
@@ -313,6 +323,15 @@ export const UserSettingsSchema = z.object({
       systemMemoryUsageMB: z.number().optional(),
       systemMemoryTotalMB: z.number().optional(),
       systemCpuPercent: z.number().optional(),
+    })
+    .optional(),
+  lastAiTestResult: z
+    .object({
+      success: z.boolean(),
+      message: z.string(),
+      timestamp: z.number(),
+      latency: z.number().optional(),
+      capabilities: z.array(z.string()).optional(),
     })
     .optional(),
 
@@ -342,15 +361,8 @@ export function hasCodinerProKey(settings: UserSettings): boolean {
   return !!settings.providerSettings?.auto?.apiKey?.value;
 }
 
-export function isSupabaseConnected(settings: UserSettings | null): boolean {
-  if (!settings) {
-    return false;
-  }
-  return Boolean(
-    settings.supabase?.accessToken ||
-    (settings.supabase?.organizations &&
-      Object.keys(settings.supabase.organizations).length > 0),
-  );
+export function isSupabaseConnected(settings: UserSettings): boolean {
+  return !!settings.supabase?.projectUrl && !!settings.supabase?.anonKey?.value;
 }
 
 export function isTurboEditsV2Enabled(settings: UserSettings): boolean {

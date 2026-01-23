@@ -3,6 +3,7 @@ import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
@@ -60,6 +61,9 @@ const ignore = (file: string) => {
   if (file.startsWith("/scaffold")) {
     return false;
   }
+  if (file.startsWith("/community-templates")) {
+    return false;
+  }
 
   if (file.startsWith("/worker") && !file.startsWith("/workers")) {
     return false;
@@ -93,6 +97,7 @@ const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
 
 const config: ForgeConfig = {
   packagerConfig: {
+    arch: "x64", // Default to x64, can be overridden via CLI
     protocols: [
       {
         name: "Codiner",
@@ -104,15 +109,15 @@ const config: ForgeConfig = {
     osxSign: isEndToEndTestBuild
       ? undefined
       : {
-          identity: process.env.APPLE_TEAM_ID,
-        },
+        identity: process.env.APPLE_TEAM_ID,
+      },
     osxNotarize: isEndToEndTestBuild
       ? undefined
       : {
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
-        },
+        appleId: process.env.APPLE_ID!,
+        appleIdPassword: process.env.APPLE_PASSWORD!,
+        teamId: process.env.APPLE_TEAM_ID!,
+      },
     asar: true,
     ignore,
     extraResource: ["node_modules/dugite/git"],
@@ -120,7 +125,7 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {
     extraModules: ["better-sqlite3"],
-    force: true,
+    force: false,
   },
   hooks: {
     postMake: async (_forgeConfig, makeResults) => {
@@ -146,6 +151,9 @@ const config: ForgeConfig = {
   },
   makers: [
     new MakerSquirrel({}),
+    new MakerDMG({
+      format: "ULFO",
+    }),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({

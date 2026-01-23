@@ -6,29 +6,39 @@ export function createLoggedHandler(logger: log.LogFunctions) {
   return (
     channel: string,
     fn: (event: IpcMainInvokeEvent, ...args: any[]) => Promise<any>,
+    options: { logResult?: boolean; logArgs?: boolean } = { logResult: true, logArgs: true }
   ) => {
     // Remove existing handler to support HMR/reloads without error
-    if (ipcMain.eventNames().includes(channel) || true) {
-      // ipcMain.handle throws if duplicate, but doesn't provide a check method for 'handle' specifically
-      // removeHandler is safe to call even if no handler exists
-      ipcMain.removeHandler(channel);
-    }
+    ipcMain.removeHandler(channel);
 
     ipcMain.handle(
       channel,
       async (event: IpcMainInvokeEvent, ...args: any[]) => {
-        logger.log(`IPC: ${channel} called with args: ${JSON.stringify(args)}`);
+        if (options.logArgs !== false) {
+          logger.log(`IPC: ${channel} called with args: ${JSON.stringify(args)}`);
+        } else {
+          logger.log(`IPC: ${channel} called (args hidden for security)`);
+        }
+
         try {
           const result = await fn(event, ...args);
-          logger.log(
-            `IPC: ${channel} returned: ${JSON.stringify(result)?.slice(0, 100)}...`,
-          );
+          if (options.logResult !== false) {
+            logger.log(
+              `IPC: ${channel} returned: ${JSON.stringify(result)?.slice(0, 100)}...`,
+            );
+          } else {
+            logger.log(`IPC: ${channel} returned (result hidden for security)`);
+          }
           return result;
         } catch (error) {
-          logger.error(
-            `Error in ${fn.name}: args: ${JSON.stringify(args)}`,
-            error,
-          );
+          if (options.logArgs !== false) {
+            logger.error(
+              `Error in ${fn.name}: args: ${JSON.stringify(args)}`,
+              error,
+            );
+          } else {
+            logger.error(`Error in ${fn.name} (args hidden for security)`, error);
+          }
           throw new Error(`[${channel}] ${error}`);
         }
       },

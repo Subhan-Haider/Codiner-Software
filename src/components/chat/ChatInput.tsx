@@ -154,9 +154,9 @@ export function ChatInput({ chatId }: { chatId?: number }) {
       setInputValue(enhanced);
       toast.success("Prompt enhanced with AI ✨");
       posthog.capture("chat:prompt_enhanced");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to enhance prompt:", error);
-      toast.error("Failed to enhance prompt");
+      toast.error(error.message || "Failed to enhance prompt");
     } finally {
       setIsEnhancing(false);
     }
@@ -751,7 +751,9 @@ function ActionProposalActions({ proposal }: { proposal: ActionProposal }) {
   return (
     <div className="border-b border-border p-2 pb-0 flex items-center justify-between">
       <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-        {proposal.actions.map((action) => mapActionToButton(action))}
+        {proposal.actions.map((action) => (
+          <div key={action.id}>{mapActionToButton(action)}</div>
+        ))}
       </div>
     </div>
   );

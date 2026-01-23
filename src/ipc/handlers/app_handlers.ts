@@ -5,6 +5,7 @@ import { apps, chats, messages } from "../../db/schema";
 import { desc, eq, like } from "drizzle-orm";
 import type {
   App,
+  AppAnalytics,
   CreateAppParams,
   RenameBranchParams,
   CopyAppParams,
@@ -40,10 +41,6 @@ import fixPath from "fix-path";
 import killPort from "kill-port";
 import util from "util";
 import log from "electron-log";
-import {
-  deploySupabaseFunction,
-  getSupabaseProjectName,
-} from "../../supabase_admin/supabase_management_client";
 import { createLoggedHandler } from "./safe_handle";
 import { getLanguageModelProviders } from "../shared/language_model_helpers";
 import { generateText } from "ai";
@@ -60,13 +57,8 @@ import {
 } from "../utils/git_utils";
 import { safeSend } from "../utils/safe_sender";
 import { normalizePath } from "../../../shared/normalizePath";
-import {
-  isServerFunction,
-  isSharedServerModule,
-  deployAllSupabaseFunctions,
-  extractFunctionNameFromPath,
-} from "../../supabase_admin/supabase_utils";
 import { getVercelTeamSlug } from "../utils/vercel_utils";
+import { parseAiErrorMessage } from "../utils/errorMessage";
 import { storeDbTimestampAtCurrentVersion } from "../utils/neon_timestamp_utils";
 import { AppSearchResult } from "../../lib/schemas";
 
@@ -74,7 +66,9 @@ import { getAppPort } from "../../../shared/ports";
 
 function getDefaultCommand(appId: number): string {
   const port = getAppPort(appId);
-  return `(pnpm install && pnpm run dev --port ${port}) || (npm install --legacy-peer-deps && npm run dev -- --port ${port})`;
+  // Improved resilience: try running directly, but if it fails with 'command not found' or similar, 
+  // try to install and then run. Added 'npx vite' as a last resort.
+  return `(pnpm run dev --port ${port} || (pnpm install && pnpm run dev --port ${port})) || (npm run dev -- --port ${port} || (npm install --legacy-peer-deps && npm run dev -- --port ${port})) || npx vite --port ${port}`;
 }
 async function copyDir(
   source: string,
@@ -172,6 +166,7 @@ async function executeAppLocalNode({
     shell: true,
     stdio: "pipe", // Ensure stdio is piped so we can capture output/errors and detect close
     detached: false, // Ensure child process is attached to the main process lifecycle unless explicitly backgrounded
+    env: { ...process.env, HOST: "127.0.0.1", PORT: getAppPort(appId).toString() },
   });
 
   // Check if process spawned correctly
@@ -276,15 +271,30 @@ function listenToProcess({
       });
     } else {
       // Normal stdout handling
-      safeSend(event.sender, "app:output", {
-        type: "stdout",
-        message,
-        appId,
-      });
+      const urlMatch = message.match(/(https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|[\w.-]+):\d+\/?)/);
 
-      const urlMatch = message.match(/(https?:\/\/localhost:\d+\/?)/);
+      // Heuristic to detect dependency installation
+      let currentStatus: string | null = null;
+      if (message.toLowerCase().includes("resolving dependencies") || message.toLowerCase().includes("progress: resolved")) {
+        currentStatus = "Installing dependencies...";
+      } else if (message.toLowerCase().includes("building") || message.toLowerCase().includes("compiling")) {
+        currentStatus = "Compiling application...";
+      }
+
+      if (currentStatus) {
+        safeSend(event.sender, "app:output", {
+          type: "status",
+          message: currentStatus,
+          appId,
+        });
+      }
+
       if (urlMatch) {
-        proxyWorker = await startProxy(urlMatch[1], {
+        let targetUrl = urlMatch[1];
+        // Normalize 0.0.0.0 or [::] to localhost for the proxy client to connect reliably
+        targetUrl = targetUrl.replace("0.0.0.0", "localhost").replace("[::]", "localhost");
+
+        proxyWorker = await startProxy(targetUrl, {
           onStarted: (proxyUrl) => {
             safeSend(event.sender, "app:output", {
               type: "stdout",
@@ -293,12 +303,29 @@ function listenToProcess({
             });
           },
         });
+        proxyWorker.on("error", (err) => {
+          logger.error(`[App ${appId}] Proxy worker error:`, err);
+        });
+        proxyWorker.on("exit", (code) => {
+          logger.info(`[App ${appId}] Proxy worker exited with code ${code}`);
+        });
       }
     }
   });
 
   spawnedProcess.stderr?.on("data", (data) => {
     const message = util.stripVTControlCharacters(data.toString());
+
+    // Filter out noisy npm warnings that are not actionable for the user
+    // "Unknown env config" warnings are benign and related to npm internal config leakage
+    if (
+      message.includes('Unknown env config "npm-globalconfig"') ||
+      message.includes('Unknown env config "verify-deps-before-run"') ||
+      message.includes('Unknown env config "_jsr-registry"')
+    ) {
+      return;
+    }
+
     logger.error(
       `App ${appId} (PID: ${spawnedProcess.pid}) stderr: ${message}`,
     );
@@ -314,6 +341,21 @@ function listenToProcess({
     logger.log(
       `App ${appId} (PID: ${spawnedProcess.pid}) process closed with code ${code}, signal ${signal}.`,
     );
+
+    // Report crash if it's a non-zero exit code and not a normal shutdown signal
+    if (
+      code !== 0 &&
+      code !== null &&
+      signal !== "SIGTERM" &&
+      signal !== "SIGKILL"
+    ) {
+      safeSend(event.sender, "app:output", {
+        type: "stderr",
+        message: `App server crashed unexpectedly with exit code ${code}${signal ? ` and signal ${signal}` : ""}.`,
+        appId,
+      });
+    }
+
     removeAppIfCurrentProcess(appId, spawnedProcess);
   });
 
@@ -593,13 +635,25 @@ export function registerAppHandlers() {
             settings,
           );
 
-          const { text: suggestedName } = await generateText({
-            model: modelClient.model,
-            system: "You are an expert at naming apps. Provide only the name for the application described by the user, nothing else. The name should be professional, creative, and concise (1-3 words). No punctuation unless necessary.",
-            prompt: params.prompt,
-            // @ts-ignore
-            maxTokens: 10,
+          // Add a timeout to prevent AI name generation from taking too long
+          const suggestedName = await Promise.race([
+            generateText({
+              model: modelClient.model,
+              system: "You are an expert at naming apps. Provide only the name for the application described by the user, nothing else. The name should be professional, creative, and concise (1-3 words). No punctuation unless necessary.",
+              prompt: params.prompt,
+              // @ts-ignore
+              maxTokens: 10,
+            }).then((res: any): string => res.text),
+            new Promise<string>((_, reject: (reason?: any) => void): void => {
+              setTimeout(() => reject(new Error("Timeout")), 3000);
+            })
+
+          ]).catch((err: any): string | null => {
+            logger.warn("AI name generation failed or timed out:", err);
+            return null;
           });
+
+
 
           if (suggestedName && suggestedName.trim()) {
             const trimmedName = suggestedName.trim();
@@ -622,7 +676,10 @@ export function registerAppHandlers() {
         }
       }
 
-      const fullAppPath = getCodinerAppPath(appPath);
+      const fullAppPath = params.parentDirectory
+        ? path.join(params.parentDirectory, appPath)
+        : getCodinerAppPath(appPath);
+
       if (fs.existsSync(fullAppPath)) {
         throw new Error(`App already exists at: ${fullAppPath}`);
       }
@@ -631,8 +688,8 @@ export function registerAppHandlers() {
         .insert(apps)
         .values({
           name: appName,
-          // Use the name as the path for now
-          path: appPath,
+          // If a custom parentDirectory was used, store the absolute path
+          path: params.parentDirectory ? fullAppPath : appPath,
         })
         .returning();
 
@@ -644,9 +701,50 @@ export function registerAppHandlers() {
         })
         .returning();
 
-      await createFromTemplate({
-        fullAppPath,
-      });
+
+      try {
+        await createFromTemplate({
+          fullAppPath,
+        });
+      } catch (templateError: any) {
+        // Clean up the app directory if template creation failed
+        try {
+          if (fs.existsSync(fullAppPath)) {
+            fs.rmSync(fullAppPath, { recursive: true, force: true });
+          }
+        } catch (cleanupErr) {
+          logger.error(`Failed to clean up app directory after template error:`, cleanupErr);
+        }
+
+        // Clean up the database entries
+        try {
+          await db.delete(chats).where(eq(chats.id, chat.id));
+          await db.delete(apps).where(eq(apps.id, app.id));
+        } catch (dbCleanupErr) {
+          logger.error(`Failed to clean up database entries after template error:`, dbCleanupErr);
+        }
+
+        // Provide a user-friendly error message
+        const errorMessage = templateError?.message || String(templateError);
+        if (errorMessage.includes("404") || errorMessage.includes("Not Found")) {
+          throw new Error(
+            `Failed to create app: The template repository could not be found. This might be due to:\n` +
+            `1. The repository is private or doesn't exist\n` +
+            `2. Network connectivity issues\n` +
+            `3. GitHub API rate limiting\n\n` +
+            `Please try again or select a different template. Original error: ${errorMessage}`
+          );
+        } else if (errorMessage.includes("ENOTFOUND") || errorMessage.includes("ETIMEDOUT")) {
+          throw new Error(
+            `Failed to create app: Network error. Please check your internet connection and try again. Original error: ${errorMessage}`
+          );
+        } else {
+          throw new Error(
+            `Failed to create app from template: ${errorMessage}`
+          );
+        }
+      }
+
 
       // Initialize git repo and create first commit
 
@@ -744,7 +842,6 @@ export function registerAppHandlers() {
           // Explicitly set these to null because we don't want to copy them over.
           // Note: we could just leave them out since they're nullable field, but this
           // is to make it explicit we intentionally don't want to copy them over.
-          supabaseProjectId: null,
           githubOrg: null,
           githubRepo: null,
           installCommand: originalApp.installCommand,
@@ -779,36 +876,22 @@ export function registerAppHandlers() {
       // Return app even if files couldn't be read
     }
 
-    let supabaseProjectName: string | null = null;
-    const settings = readSettings();
-    // Check for multi-organization credentials or legacy single account
-    const hasSupabaseCredentials =
-      (app.supabaseOrganizationSlug &&
-        settings.supabase?.organizations?.[app.supabaseOrganizationSlug]
-          ?.accessToken?.value) ||
-      settings.supabase?.accessToken?.value;
-    if (app.supabaseProjectId && hasSupabaseCredentials) {
-      supabaseProjectName = await getSupabaseProjectName(
-        app.supabaseParentProjectId || app.supabaseProjectId,
-        app.supabaseOrganizationSlug ?? undefined,
-      );
-    }
+
 
     let vercelTeamSlug: string | null = null;
-    if (app.vercelTeamId) {
-      vercelTeamSlug = await getVercelTeamSlug(app.vercelTeamId);
+    if (app.vercelTeamSlug) {
+      vercelTeamSlug = await getVercelTeamSlug(app.vercelTeamSlug);
     }
 
     return {
       ...app,
       files,
       resolvedPath: appPath,
-      supabaseProjectName,
       vercelTeamSlug,
     };
   });
 
-  ipcMain.handle("list-apps", async () => {
+  handle("list-apps", async () => {
     const allApps = await db.query.apps.findMany({
       orderBy: [desc(apps.createdAt)],
     });
@@ -821,7 +904,7 @@ export function registerAppHandlers() {
     };
   });
 
-  ipcMain.handle(
+  handle(
     "read-app-file",
     async (_, { appId, filePath }: { appId: number; filePath: string }) => {
       const app = await db.query.apps.findFirst({
@@ -855,7 +938,7 @@ export function registerAppHandlers() {
   );
 
   // Do NOT use handle for this, it contains sensitive information.
-  ipcMain.handle("get-env-vars", async () => {
+  handle("get-env-vars", async () => {
     const envVars: Record<string, string | undefined> = {};
     const providers = await getLanguageModelProviders();
     for (const provider of providers) {
@@ -866,7 +949,7 @@ export function registerAppHandlers() {
     return envVars;
   });
 
-  ipcMain.handle(
+  handle(
     "run-app",
     async (
       event: Electron.IpcMainInvokeEvent,
@@ -918,7 +1001,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "stop-app",
     async (_, { appId }: { appId: number }): Promise<void> => {
       logger.log(
@@ -968,7 +1051,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "restart-app",
     async (
       event: Electron.IpcMainInvokeEvent,
@@ -1066,7 +1149,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "edit-app-file",
     async (
       _,
@@ -1132,58 +1215,11 @@ export function registerAppHandlers() {
         throw new Error(`Failed to write file: ${error.message}`);
       }
 
-      if (app.supabaseProjectId) {
-        // Check if shared module was modified - redeploy all functions
-        if (isSharedServerModule(filePath)) {
-          try {
-            logger.info(
-              `Shared module ${filePath} modified, redeploying all Supabase functions`,
-            );
-            const deployErrors = await deployAllSupabaseFunctions({
-              appPath,
-              supabaseProjectId: app.supabaseProjectId,
-              supabaseOrganizationSlug: app.supabaseOrganizationSlug ?? null,
-            });
-            if (deployErrors.length > 0) {
-              return {
-                warning: `File saved, but some Supabase functions failed to deploy: ${deployErrors.join(", ")}`,
-              };
-            }
-          } catch (error) {
-            logger.error(
-              `Error redeploying Supabase functions after shared module change:`,
-              error,
-            );
-            return {
-              warning: `File saved, but failed to redeploy Supabase functions: ${error}`,
-            };
-          }
-        } else if (isServerFunction(filePath)) {
-          // Regular function file - deploy just this function
-          try {
-            const functionName = extractFunctionNameFromPath(filePath);
-            await deploySupabaseFunction({
-              supabaseProjectId: app.supabaseProjectId,
-              functionName,
-              appPath,
-              organizationSlug: app.supabaseOrganizationSlug ?? null,
-            });
-          } catch (error) {
-            logger.error(
-              `Error deploying Supabase function ${filePath}:`,
-              error,
-            );
-            return {
-              warning: `File saved, but failed to deploy Supabase function: ${filePath}: ${error}`,
-            };
-          }
-        }
-      }
       return {};
     },
   );
 
-  ipcMain.handle(
+  handle(
     "delete-app",
     async (_, { appId }: { appId: number }): Promise<void> => {
       // Static server worker is NOT terminated here anymore
@@ -1235,7 +1271,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "export-app-as-zip",
     async (_, params: ExportAppAsZipParams): Promise<void> => {
       const { appId } = params;
@@ -1296,7 +1332,7 @@ export function registerAppHandlers() {
             origin: "codiner-autonomous-engine"
           },
           topology: {
-            infrastructure: appRecord.supabaseProjectId ? "supabase" : appRecord.neonProjectId ? "neon" : "local",
+            infrastructure: appRecord.neonProjectId ? "neon" : "local",
             hosting: appRecord.vercelProjectId ? "vercel" : "none"
           }
         };
@@ -1325,7 +1361,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "add-to-favorite",
     async (
       _,
@@ -1375,7 +1411,7 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle(
+  handle(
     "rename-app",
     async (
       _,
@@ -1563,7 +1599,64 @@ export function registerAppHandlers() {
     },
   );
 
-  ipcMain.handle("reset-all", async (): Promise<void> => {
+  handle(
+    "update-app-config",
+    async (
+      _,
+      { appId, config }: { appId: number; config: Partial<App> },
+    ): Promise<void> => {
+      return withLock(appId, async () => {
+        try {
+          await db
+            .update(apps)
+            .set({
+              ...config,
+              updatedAt: new Date(),
+            } as any)
+            .where(eq(apps.id, appId));
+          logger.info(`Updated config for app ${appId}:`, Object.keys(config));
+        } catch (error: any) {
+          logger.error(`Error updating app config ${appId}:`, error);
+          throw new Error(`Failed to update app config: ${error.message}`);
+        }
+      });
+    },
+  );
+
+  handle(
+    "app:get-analytics",
+    async (event, appId: number): Promise<AppAnalytics> => {
+      const appChats = await db.query.chats.findMany({
+        where: eq(chats.appId, appId),
+        with: {
+          messages: true,
+        },
+      });
+
+      let totalTokens = 0;
+      let messageCount = 0;
+      let lastActive: Date | null = null;
+
+      appChats.forEach((chat) => {
+        chat.messages.forEach((msg) => {
+          totalTokens += msg.maxTokensUsed || 0;
+          messageCount++;
+          if (!lastActive || (msg.createdAt && msg.createdAt > lastActive)) {
+            lastActive = msg.createdAt;
+          }
+        });
+      });
+
+      return {
+        totalTokensUsed: totalTokens,
+        chatCount: appChats.length,
+        messageCount,
+        lastActive,
+      };
+    },
+  );
+
+  handle("reset-all", async (): Promise<void> => {
     logger.log("start: resetting all apps and settings.");
     // Stop all running apps first
     logger.log("stopping all running apps...");
@@ -1630,7 +1723,7 @@ export function registerAppHandlers() {
     logger.log("reset all complete.");
   });
 
-  ipcMain.handle("get-app-version", async (): Promise<{ version: string }> => {
+  handle("get-app-version", async (): Promise<{ version: string }> => {
     // Read version from package.json at project root
     const packageJsonPath = path.resolve(__dirname, "..", "..", "package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
@@ -1998,77 +2091,14 @@ export function registerAppHandlers() {
         });
 
         return { enhancedPrompt: enhancedPrompt.trim() };
-      } catch (error) {
+      } catch (error: any) {
         logger.error("Failed to enhance prompt:", error);
-        throw error;
+        const errorMessage = parseAiErrorMessage(error);
+        throw new Error(`Failed to enhance prompt: ${errorMessage}`);
       }
     },
   );
 
-  handle(
-    "export-app-as-zip",
-    async (_, params: ExportAppAsZipParams): Promise<void> => {
-      const { appId } = params;
-      const appRecord = await db.query.apps.findFirst({
-        where: eq(apps.id, appId),
-      });
-
-      if (!appRecord) {
-        throw new Error("App not found");
-      }
-
-      const appPath = getCodinerAppPath(appRecord.path);
-      const { filePath } = await dialog.showSaveDialog({
-        title: "Export App as ZIP",
-        defaultPath: `${appRecord.name}.zip`,
-        filters: [{ name: "ZIP Files", extensions: ["zip"] }],
-      });
-
-      if (!filePath) {
-        return; // User cancelled
-      }
-
-      const output = fs.createWriteStream(filePath);
-      const archive = archiver("zip", {
-        zlib: { level: 9 }, // Sets the compression level.
-      });
-
-      return new Promise((resolve, reject) => {
-        output.on("close", () => {
-          logger.info(appId + " total bytes");
-          logger.info("archiver has been finalized and the output file descriptor has closed.");
-          resolve();
-        });
-
-        output.on("end", () => {
-          logger.info("Data has been drained");
-        });
-
-        archive.on("warning", (err) => {
-          if (err.code === "ENOENT") {
-            logger.warn(err);
-          } else {
-            reject(err);
-          }
-        });
-
-        archive.on("error", (err) => {
-          reject(err);
-        });
-
-        archive.pipe(output);
-
-        archive.directory(appPath, false, (entry) => {
-          if (entry.name.includes("node_modules") || entry.name.includes(".git")) {
-            return false;
-          }
-          return entry;
-        });
-
-        archive.finalize();
-      });
-    },
-  );
 }
 
 function getCommand({

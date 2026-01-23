@@ -169,7 +169,7 @@ export const ROADMAP_TIP: MessageConfig = {
   ],
 };
 
-// Like Codiner? Star it on GitHub https://github.com/codiner-sh/codiner/
+// Like Codiner? Star it on GitHub https://github.com/Subhan-Haider/Codiner-SH/
 export const GITHUB_TIP: MessageConfig = {
   spans: [
     {
@@ -179,7 +179,7 @@ export const GITHUB_TIP: MessageConfig = {
     {
       type: "link",
       content: "GitHub",
-      url: "https://github.com/codiner-sh/codiner",
+      url: "https://github.com/Subhan-Haider/Codiner-SH",
     },
   ],
 };

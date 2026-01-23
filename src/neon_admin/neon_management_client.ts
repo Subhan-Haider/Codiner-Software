@@ -41,7 +41,7 @@ export async function refreshNeonToken(): Promise<void> {
   try {
     // Make request to Neon refresh endpoint
     const response = await fetch(
-      "https://oauth.codiner.sh/api/integrations/neon/refresh",
+      "https://oauth.codiner.online/api/integrations/neon/refresh",
 
       {
         method: "POST",
@@ -56,11 +56,13 @@ export async function refreshNeonToken(): Promise<void> {
       throw new Error(`Token refresh failed: ${response.statusText}`);
     }
 
-    const {
-      accessToken,
-      refreshToken: newRefreshToken,
-      expiresIn,
-    } = await response.json();
+    const data = (await response.json()) as {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+    };
+
+    const { accessToken, refreshToken: newRefreshToken, expiresIn } = data;
 
     // Update settings with new tokens
     writeSettings({

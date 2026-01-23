@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ToolDefinition, AgentContext } from "./types";
-import { getSupabaseContext } from "../../../../../../supabase_admin/supabase_context";
 
 const getDatabaseSchemaSchema = z.object({});
 
@@ -10,28 +9,18 @@ export const getDatabaseSchemaTool: ToolDefinition<
   z.infer<typeof getDatabaseSchemaSchema>
 > = {
   name: "get_database_schema",
-  description: "Fetch the database schema from Supabase",
+  description: "Fetch the database schema (disabled - Supabase removed)",
   inputSchema: getDatabaseSchemaSchema,
   defaultConsent: "always",
-  isEnabled: (ctx) => !!ctx.supabaseProjectId,
+  isEnabled: () => false, // Disabled since Supabase was removed
 
-  getConsentPreview: () => "Get Supabase schema",
+  getConsentPreview: () => "Get database schema",
 
   buildXml: (_args, _isComplete) => {
-    // This tool has no inputs, so always return the same XML
     return XML_TAG;
   },
 
-  execute: async (_args, ctx: AgentContext) => {
-    if (!ctx.supabaseProjectId) {
-      throw new Error("Supabase is not connected to this app");
-    }
-
-    const schema = await getSupabaseContext({
-      supabaseProjectId: ctx.supabaseProjectId,
-      organizationSlug: ctx.supabaseOrganizationSlug ?? null,
-    });
-
-    return schema || "";
+  execute: async (_args, _ctx: AgentContext) => {
+    throw new Error("Database schema tool is disabled (Supabase integration removed)");
   },
 };

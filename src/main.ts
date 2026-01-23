@@ -9,7 +9,6 @@ import {
   readSettings,
   writeSettings,
 } from "./main/settings";
-import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
 import { handleCodinerProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
 import { BackupManager } from "./backup_manager";
@@ -332,24 +331,7 @@ async function handleDeepLinkReturn(url: string) {
     });
     return;
   }
-  if (parsed.hostname === "supabase-oauth-return") {
-    const token = parsed.searchParams.get("token");
-    const refreshToken = parsed.searchParams.get("refreshToken");
-    const expiresIn = Number(parsed.searchParams.get("expiresIn"));
-    if (!token || !refreshToken || !expiresIn) {
-      dialog.showErrorBox(
-        "Invalid URL",
-        "Expected token, refreshToken, and expiresIn",
-      );
-      return;
-    }
-    await handleSupabaseOAuthReturn({ token, refreshToken, expiresIn });
-    // Send message to renderer to trigger re-render
-    mainWindow?.webContents.send("deep-link-received", {
-      type: parsed.hostname,
-    });
-    return;
-  }
+
   // codiner://codiner-pro-return?key=123&budget_reset_at=2025-05-26T16:31:13.492000Z&max_budget=100
   if (parsed.hostname === "codiner-pro-return") {
     const apiKey = parsed.searchParams.get("key");

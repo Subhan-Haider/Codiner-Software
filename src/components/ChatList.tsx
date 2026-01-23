@@ -156,121 +156,114 @@ export function ChatList({ show }: { show?: boolean }) {
   return (
     <>
       <SidebarGroup
-        className="h-[calc(100vh-112px)] overflow-hidden flex flex-col"
+        className="h-[calc(100vh-112px)] overflow-hidden flex flex-col py-4"
         data-testid="chat-list-container"
       >
-        <SidebarGroupLabel className="shrink-0">Recent Chats</SidebarGroupLabel>
         <SidebarGroupContent className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex flex-col space-y-4 h-full">
-            <div className="shrink-0 space-y-4">
+          {/* Header Section */}
+          <div className="flex items-center justify-between px-4 py-2 mb-2 shrink-0">
+            <h2 className="text-sm font-semibold text-foreground tracking-tight">Chats</h2>
+            <div className="flex items-center gap-1">
               <Button
-                onClick={handleNewChat}
-                variant="outline"
-                className="flex items-center justify-start gap-2 mx-2 py-3 w-[calc(100%-16px)]"
-              >
-                <PlusCircle size={16} />
-                <span>New Chat</span>
-              </Button>
-              <Button
-                onClick={() => setIsSearchDialogOpen(!isSearchDialogOpen)}
-                variant="outline"
-                className="flex items-center justify-start gap-2 mx-2 py-3 w-[calc(100%-16px)]"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsSearchDialogOpen(true)}
                 data-testid="search-chats-button"
+                title="Search Chats"
               >
                 <Search size={16} />
-                <span>Search chats</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={handleNewChat}
+                title="New Chat"
+              >
+                <PlusCircle size={16} />
               </Button>
             </div>
+          </div>
 
-            <div className="overflow-y-auto flex-1 -mx-2 px-2 pb-2">
+          <div className="flex-1 overflow-y-auto px-2 pb-2">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/50 gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                <span className="text-xs">Loading chats...</span>
+              </div>
+            ) : chats.length === 0 ? (
+              <div className="py-8 px-4 text-sm text-muted-foreground text-center">
+                No chats found
+              </div>
+            ) : (
+              <SidebarMenu className="space-y-0.5">
+                {chats.map((chat) => (
+                  <SidebarMenuItem key={chat.id} className="mb-0.5 group/item">
+                    <div className={`
+                            flex w-full items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 relative
+                            ${selectedChatId === chat.id
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+                      }
+                        `}
+                      onClick={() => handleChatClick({ chatId: chat.id, appId: chat.appId })}
+                    >
+                      {/* Chat Icon/Status Indicator? Optional, maybe just text for chats to keep it dense */}
 
-              {loading ? (
-                <div className="py-3 px-4 text-sm text-gray-500">
-                  Loading chats...
-                </div>
-              ) : chats.length === 0 ? (
-                <div className="py-3 px-4 text-sm text-gray-500">
-                  No chats found
-                </div>
-              ) : (
-                <SidebarMenu className="space-y-1">
-                  {chats.map((chat) => (
-                    <SidebarMenuItem key={chat.id} className="mb-1">
-                      <div className="flex w-full items-center px-2">
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            handleChatClick({
-                              chatId: chat.id,
-                              appId: chat.appId,
-                            })
-                          }
-                          className={`justify-start w-full text-left py-3 pr-1 hover:bg-sidebar-accent/80 ${selectedChatId === chat.id
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : ""
-                            }`}
-                        >
-                          <div className="flex flex-col w-full">
-                            <span className="truncate">
-                              {chat.title || "New Chat"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {formatDistanceToNow(new Date(chat.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </span>
-                          </div>
-                        </Button>
-
-                        {selectedChatId === chat.id && (
-                          <DropdownMenu
-                            modal={false}
-                            onOpenChange={(open) => setIsDropdownOpen(open)}
-                          >
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="ml-1 w-4"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="space-y-1 p-2"
-                            >
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleRenameChat(chat.id, chat.title || "")
-                                }
-                                className="px-3 py-2"
-                              >
-                                <Edit3 className="mr-2 h-4 w-4" />
-                                <span>Rename Chat</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleDeleteChatClick(
-                                    chat.id,
-                                    chat.title || "New Chat",
-                                  )
-                                }
-                                className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 focus:bg-red-50 dark:focus:bg-red-950/50"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span>Delete Chat</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-sm font-medium truncate leading-none mb-1">
+                          {chat.title || "New Chat"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/70 truncate">
+                          {formatDistanceToNow(new Date(chat.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
                       </div>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              )}
-            </div>
+
+                      {/* Options Menu - Visible on hover or selected */}
+                      <div className={`
+                            absolute right-1 top-1/2 -translate-y-1/2
+                            ${selectedChatId === chat.id ? "opacity-100" : "opacity-0 group-hover/item:opacity-100"}
+                            transition-opacity duration-200
+                        `}>
+                        <DropdownMenu
+                          modal={false}
+                          onOpenChange={(open) => setIsDropdownOpen(open)}
+                        >
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="p-1">
+                            <DropdownMenuItem
+                              onClick={() => handleRenameChat(chat.id, chat.title || "")}
+                            >
+                              <Edit3 className="mr-2 h-3.5 w-3.5" />
+                              <span>Rename</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteChatClick(chat.id, chat.title || "New Chat")}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-3.5 w-3.5" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            )}
           </div>
         </SidebarGroupContent>
       </SidebarGroup>

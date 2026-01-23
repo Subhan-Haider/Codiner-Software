@@ -13,6 +13,10 @@ import {
   Pencil,
   Folder,
   Download,
+  Bot,
+  ShieldCheck,
+  BarChart3,
+  Smartphone,
 } from "lucide-react";
 import {
   Popover,
@@ -29,7 +33,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { GitHubConnector } from "@/components/GitHubConnector";
-import { SupabaseConnector } from "@/components/SupabaseConnector";
 import { showError, showSuccess } from "@/lib/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
@@ -39,6 +42,16 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useCheckName } from "@/hooks/useCheckName";
 import { AppUpgrades } from "@/components/AppUpgrades";
 import { CapacitorControls } from "@/components/CapacitorControls";
+import { AppIntegrationConfig } from "@/components/AppIntegrationConfig";
+import { SecurityAuditDialog } from "@/components/SecurityAuditDialog";
+import { UsageAnalyticsDialog } from "@/components/UsageAnalyticsDialog";
+import { EnvVarsDialog } from "@/components/EnvVarsDialog";
+import { NeonIntegrationDialog } from "@/components/NeonIntegrationDialog";
+import { VercelIntegrationDialog } from "@/components/VercelIntegrationDialog";
+import { FirebaseIntegrationDialog } from "@/components/FirebaseIntegrationDialog";
+
+
+
 
 export default function AppDetailsPage() {
   const navigate = useNavigate();
@@ -63,6 +76,23 @@ export default function AppDetailsPage() {
   const [isChangeLocationDialogOpen, setIsChangeLocationDialogOpen] =
     useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Integration Config Dialogs State
+  const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
+  const [isSupabaseConfigOpen, setIsSupabaseConfigOpen] = useState(false);
+  const [isSlackConfigOpen, setIsSlackConfigOpen] = useState(false);
+  const [isVercelConfigOpen, setIsVercelConfigOpen] = useState(false);
+  const [isNeonConfigOpen, setIsNeonConfigOpen] = useState(false);
+  const [isModelConfigOpen, setIsModelConfigOpen] = useState(false);
+  const [isPwaConfigOpen, setIsPwaConfigOpen] = useState(false);
+
+
+
+  // New Feature Implementation Dialogs
+  const [isSecurityAuditOpen, setIsSecurityAuditOpen] = useState(false);
+  const [isUsageAnalyticsOpen, setIsUsageAnalyticsOpen] = useState(false);
+  const [isEnvVarsOpen, setIsEnvVarsOpen] = useState(false);
+
 
   const queryClient = useQueryClient();
   const setSelectedAppId = useSetAtom(selectedAppIdAtom);
@@ -417,6 +447,15 @@ export default function AppDetailsPage() {
                   >
                     <Folder className="h-4 w-4" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 hover:bg-primary/10"
+                    onClick={() => setIsChangeLocationDialogOpen(true)}
+                    title="Change location"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <span className="text-sm truncate flex-1" title={currentAppPath}>
                     {currentAppPath}
                   </span>
@@ -458,19 +497,180 @@ export default function AppDetailsPage() {
             <GitHubConnector appId={appId} folderName={selectedApp.path} />
           </div>
 
-          {appId && (
-            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M11.9 1.9c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" />
-                  </svg>
-                </div>
-                Supabase Integration
-              </h3>
-              <SupabaseConnector appId={appId} />
-            </div>
-          )}
+          {/* Vercel Integration */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
+                <svg className="w-5 h-5 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 22h20L12 2z" />
+                </svg>
+              </div>
+              Vercel Deployment
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Deploy your app to Vercel with automatic builds and previews.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsVercelConfigOpen(true)}>
+              Configure Vercel
+            </Button>
+          </div>
+
+          {/* Neon Database */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+              </div>
+              Neon Database
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Serverless Postgres database with branching for development.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsNeonConfigOpen(true)}>
+              Configure Neon
+            </Button>
+          </div>
+
+          {/* Environment Variables */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+              Environment Variables
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Manage API keys and environment-specific configuration.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsEnvVarsOpen(true)}>
+              Manage Environment Variables
+            </Button>
+          </div>
+
+          {/* Firebase Integration */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3.89 15.672L6.255.461A.542.542 0 017.27.288l2.543 4.771zm16.794 3.692l-2.25-14a.54.54 0 00-.919-.295L3.316 19.365l7.856 4.427a1.621 1.621 0 001.588 0zM14.3 7.147l-1.82-3.482a.542.542 0 00-.96 0L3.53 17.984z" />
+                </svg>
+              </div>
+              Firebase
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Connect Firebase for authentication, database, and storage.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsFirebaseConfigOpen(true)}>
+              Configure Firebase
+            </Button>
+          </div>
+
+          {/* Supabase Integration */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                </svg>
+              </div>
+              Supabase
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Open source Firebase alternative with PostgreSQL backend.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsSupabaseConfigOpen(true)}>
+              Configure Supabase
+            </Button>
+          </div>
+
+          {/* Slack Integration */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" />
+                </svg>
+              </div>
+              Slack Notifications
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Receive deployment and build notifications in Slack.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsSlackConfigOpen(true)}>
+              Configure Slack
+            </Button>
+          </div>
+
+          {/* AI Model Optimization */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-blue-600" />
+              </div>
+              AI Model Optimization
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select the best AI model for this project's specific needs and complexity.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsModelConfigOpen(true)}>
+              Select Model
+            </Button>
+          </div>
+
+          {/* Security & Privacy Audit */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-red-600" />
+              </div>
+              Security & Privacy Audit
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Scan your app for potential security vulnerabilities and privacy leaks.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsSecurityAuditOpen(true)}>
+              Run Security Audit
+            </Button>
+          </div>
+
+          {/* Usage Analytics */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-indigo-600" />
+              </div>
+              Usage Analytics
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Monitor token consumption, build frequency, and developer efficiency.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsUsageAnalyticsOpen(true)}>
+              View Metrics
+            </Button>
+          </div>
+
+          {/* PWA & Mobile Appearance */}
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-fuchsia-600" />
+              </div>
+              PWA & Mobile Appearance
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Configure icons, theme colors, and offline support for mobile users.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => setIsPwaConfigOpen(true)}>
+              Configure PWA
+            </Button>
+          </div>
+
+
+
 
           {appId && (
             <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-all">
@@ -671,7 +871,7 @@ export default function AppDetailsPage() {
               <DialogDescription className="text-sm">
                 <p>Create a copy of this app.</p>
                 <p>
-                  Note: this does not copy over the Supabase project or GitHub
+                  Note: this does not copy over the GitHub
                   project.
                 </p>
               </DialogDescription>
@@ -876,6 +1076,96 @@ export default function AppDetailsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Integration Config Dialogs */}
+      {appId && selectedApp && (
+        <>
+          <FirebaseIntegrationDialog
+            appId={appId}
+            appName={selectedApp.name}
+            isOpen={isFirebaseConfigOpen}
+            onOpenChange={setIsFirebaseConfigOpen}
+            currentProjectId={selectedApp.firebaseProjectId}
+          />
+
+          <AppIntegrationConfig
+            appId={appId}
+            isOpen={isSupabaseConfigOpen}
+            onOpenChange={setIsSupabaseConfigOpen}
+            title="Supabase Configuration"
+            description="Enter your Supabase Project URL to link this app."
+            fieldName="supabaseProjectUrl"
+            label="Supabase Project URL"
+            placeholder="https://xyz.supabase.co"
+            initialValue={selectedApp.supabaseProjectUrl}
+          />
+          <AppIntegrationConfig
+            appId={appId}
+            isOpen={isSlackConfigOpen}
+            onOpenChange={setIsSlackConfigOpen}
+            title="Slack Configuration"
+            description="Enter your Slack Webhook URL to receive notifications."
+            fieldName="slackWebhookUrl"
+            label="Webhook URL"
+            placeholder="https://hooks.slack.com/services/..."
+            initialValue={selectedApp.slackWebhookUrl}
+          />
+          <VercelIntegrationDialog
+            appId={appId}
+            appName={selectedApp.name}
+            isOpen={isVercelConfigOpen}
+            onOpenChange={setIsVercelConfigOpen}
+            currentProjectId={selectedApp.vercelProjectId}
+          />
+          <NeonIntegrationDialog
+            appId={appId}
+            appName={selectedApp.name}
+            isOpen={isNeonConfigOpen}
+            onOpenChange={setIsNeonConfigOpen}
+            currentProjectId={selectedApp.neonProjectId}
+          />
+
+          <AppIntegrationConfig
+            appId={appId}
+            isOpen={isModelConfigOpen}
+            onOpenChange={setIsModelConfigOpen}
+            title="AI Model Configuration"
+            description="Select the default AI model for this project."
+            fieldName="defaultModel"
+            label="Model Name/ID"
+            placeholder="e.g. claude-3-5-sonnet"
+            initialValue={selectedApp.defaultModel}
+          />
+          <AppIntegrationConfig
+            appId={appId}
+            isOpen={isPwaConfigOpen}
+            onOpenChange={setIsPwaConfigOpen}
+            title="PWA Configuration"
+            description="Enter the path or URL for your PWA icon."
+            fieldName="pwaIcon"
+            label="PWA Icon Path"
+            placeholder="/icons/icon-512x512.png"
+            initialValue={selectedApp.pwaIcon}
+          />
+
+          <SecurityAuditDialog
+            appId={appId}
+            isOpen={isSecurityAuditOpen}
+            onOpenChange={setIsSecurityAuditOpen}
+          />
+          <UsageAnalyticsDialog
+            appId={appId}
+            isOpen={isUsageAnalyticsOpen}
+            onOpenChange={setIsUsageAnalyticsOpen}
+          />
+
+          <EnvVarsDialog
+            appId={appId}
+            isOpen={isEnvVarsOpen}
+            onOpenChange={setIsEnvVarsOpen}
+          />
+        </>
+      )}
     </div>
   );
 }

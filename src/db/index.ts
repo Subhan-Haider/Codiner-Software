@@ -53,6 +53,30 @@ export function initializeDatabase(): BetterSQLite3Database<typeof schema> & {
   const sqlite = new Database(dbPath, { timeout: 10000 });
   sqlite.pragma("foreign_keys = ON");
 
+  // Emergency patch for missing columns that cause crashes
+  try {
+    const tableInfo = sqlite.prepare("PRAGMA table_info(apps)").all() as any[];
+    const columns = (tableInfo as { name: string }[]).map((c) => c.name);
+
+    if (!columns.includes("vercel_team_slug")) {
+      logger.log("Emergency patch: Adding vercel_team_slug to apps table");
+      sqlite.prepare("ALTER TABLE apps ADD COLUMN vercel_team_slug TEXT").run();
+    }
+    if (!columns.includes("firebase_api_key")) {
+      logger.log("Emergency patch: Adding firebase_api_key to apps table");
+      sqlite.prepare("ALTER TABLE apps ADD COLUMN firebase_api_key TEXT").run();
+    }
+    // Also check for other recently added columns to be safe
+    if (!columns.includes("docker_config")) {
+      sqlite.prepare("ALTER TABLE apps ADD COLUMN docker_config TEXT").run();
+    }
+    if (!columns.includes("seo_metadata")) {
+      sqlite.prepare("ALTER TABLE apps ADD COLUMN seo_metadata TEXT").run();
+    }
+  } catch (error) {
+    logger.error("Failed to run emergency column patch:", error);
+  }
+
   _db = drizzle(sqlite, { schema });
 
   try {

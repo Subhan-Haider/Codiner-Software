@@ -182,3 +182,34 @@ export function getCodinerSearchReplaceTags(fullResponse: string): {
     }
     return tags;
 }
+
+export function getCodinerGenerateImageTags(fullResponse: string): {
+    path: string;
+    prompt: string;
+    description?: string;
+}[] {
+    const codinerGenerateImageRegex = /<codiner-generate-image([^>]*)>([\s\S]*?)<\/codiner-generate-image>/gi;
+    const pathRegex = /path\s*=\s*["']([^"']+)["']/;
+    const promptRegex = /prompt\s*=\s*["']([^"']+)["']/;
+    const descriptionRegex = /description\s*=\s*["']([^"']+)["']/;
+
+    let match;
+    const tags: { path: string; prompt: string; description?: string }[] = [];
+
+    while ((match = codinerGenerateImageRegex.exec(fullResponse)) !== null) {
+        const attributesString = match[1];
+        const pathMatch = pathRegex.exec(attributesString);
+        const promptMatch = promptRegex.exec(attributesString);
+        const descriptionMatch = descriptionRegex.exec(attributesString);
+
+        if (pathMatch && pathMatch[1] && promptMatch && promptMatch[1]) {
+            tags.push({
+                path: normalizePath(pathMatch[1]),
+                prompt: promptMatch[1],
+                description: descriptionMatch?.[1],
+            });
+        }
+    }
+    return tags;
+}
+

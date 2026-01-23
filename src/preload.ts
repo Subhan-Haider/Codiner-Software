@@ -72,19 +72,13 @@ const validInvokeChannels = [
   "vercel:connect-existing-project",
   "vercel:get-deployments",
   "vercel:disconnect",
+  "vercel:deploy",
   "get-app-version",
   "reload-env-path",
   "get-proposal",
   "approve-proposal",
   "reject-proposal",
   "get-system-debug-info",
-  "supabase:list-organizations",
-  "supabase:delete-organization",
-  "supabase:list-all-projects",
-  "supabase:list-branches",
-  "supabase:get-edge-logs",
-  "supabase:set-app-project",
-  "supabase:unset-app-project",
   "local-models:list-ollama",
   "local-models:list-lmstudio",
   "window:minimize",
@@ -150,10 +144,11 @@ const validInvokeChannels = [
   // These should ALWAYS be guarded with IS_TEST_BUILD in the main process.
   // We can't detect with IS_TEST_BUILD in the preload script because
   // it's a separate process from the main process.
-  "supabase:fake-connect-and-set-project",
   "get-latest-release",
   "download-update",
   "export-app-as-zip",
+  "enhance-prompt",
+  "update-app-config",
 ];
 
 // Add valid receive channels

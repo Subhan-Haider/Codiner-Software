@@ -70,7 +70,7 @@ export function NeonConnector() {
               await IpcClient.getInstance().fakeHandleNeonConnect();
             } else {
               await IpcClient.getInstance().openExternalUrl(
-                "https://oauth.codiner.sh/api/integrations/neon/login",
+                "https://oauth.codiner.online/api/integrations/neon/login",
               );
             }
           }}

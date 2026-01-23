@@ -21,3 +21,8 @@ export const screenshotDataUrlAtom = atom<string | null>(null);
 export const pendingVisualChangesAtom = atom<Map<string, VisualEditingChange>>(
   new Map(),
 );
+
+// Device Simulation Atoms
+export const deviceTypeAtom = atom<"desktop" | "iphone-14-pro" | "pixel-7" | "ipad-air" | "galaxy-s22">("desktop");
+export const isLandscapeAtom = atom<boolean>(false);
+export const networkThrottlingAtom = atom<"none" | "3g" | "4g" | "offline">("none");

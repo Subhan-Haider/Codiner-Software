@@ -68,8 +68,11 @@ export function AutoUpdateSwitch() {
       }
     } catch (error) {
       console.error("Update check failed:", error);
-      toast.error("Nexus sync failed", {
-        description: "Could not reach the update server. Check your connection."
+      // Only show error toast if this was a manual check (isChecking was set)
+      // This prevents annoying errors during development or when offline
+      toast.error("Could not check for updates", {
+        description: "Unable to reach update server. You can try again later or check manually on GitHub.",
+        duration: 3000,
       });
     } finally {
       setIsChecking(false);
