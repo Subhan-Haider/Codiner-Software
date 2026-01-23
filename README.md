@@ -175,20 +175,43 @@ npm install && npm start
 - **Disk**: 2GB of free space for the application and templates
 - **OS**: Windows 10+, macOS Monterey+, or a modern Linux distro (Ubuntu 22.04+)
 
-### ⚡ Visual Flow
+### ⚡ Visual Flow: The Production Lifecycle
 
 ```mermaid
-graph LR
-    A[🌐 Clone Repo] --> B[📦 Install Deps]
-    B --> C[🚀 Launch App]
-    C --> D{✨ What Next?}
-    D -- "Project" --> E[🎨 Select Template]
-    D -- "Verify" --> F[🧠 Neural Pulse]
-    D -- "Ship" --> G[🚢 Vercel / Docker]
+graph TD
+    subgraph "Phase 1: Setup"
+        A[🌐 Clone Repo] --> B[📦 npm install]
+        B --> C[🚀 npm start]
+    end
 
-    classDef default fill:#f9f9ff,stroke:#8b5cf6,stroke-width:2px,color:#1e1b4b;
-    classDef decision fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a;
-    class D decision;
+    subgraph "Phase 2: Configuration"
+        C --> D{🧠 Neural Pulse}
+        D -- "Ollama" --> D1[🏠 Local Inference]
+        D -- "Cloud" --> D2[☁️ API Handshake]
+        D1 & D2 --> E[✅ System Ready]
+    end
+
+    subgraph "Phase 3: Development Loop"
+        E --> F[🏗️ Pick Template]
+        F --> G[💬 Prompt AI Agent]
+        G --> H[🔍 File System Guard]
+        H -- "Buffer" --> I[🧪 Syntactic Check]
+        I -- "Pass" --> J[💾 Atomic Write]
+        I -- "Fail" --> G
+        J --> K{🔄 Iterative Loop}
+        K -- "Refine" --> G
+    end
+
+    subgraph "Phase 4: Deployment"
+        K -- "Production" --> L[🚢 Infrastructure Foundry]
+        L -- "Web" --> M[🌐 Vercel Deployment]
+        L -- "Container" --> N[📦 Docker Build]
+    end
+
+    style D fill:#eff6ff,stroke:#3b82f6
+    style K fill:#eff6ff,stroke:#3b82f6
+    classDef step fill:#f9f9ff,stroke:#8b5cf6,stroke-width:2px,color:#1e1b4b;
+    class A,B,C,E,F,G,H,I,J,L,M,N step;
 ```
 
 ---
