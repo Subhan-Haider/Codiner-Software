@@ -9,6 +9,8 @@ import {
   Loader2,
   Settings,
   Folder,
+  Download,
+  Activity,
 } from "lucide-react";
 import { providerSettingsRoute } from "@/routes/settings/providers/$provider";
 
@@ -29,8 +31,9 @@ import { usePostHog } from "posthog-js/react";
 import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
 import { useScrollAndNavigateTo } from "@/hooks/useScrollAndNavigateTo";
 import logo from "../../assets/new-logo.png";
-import { showError } from "@/lib/toast";
+import { showError, showSuccess } from "@/lib/toast";
 import { useSettings } from "@/hooks/useSettings";
+import { useQueryClient } from "@tanstack/react-query";
 
 type NodeInstallStep =
   | "install"
@@ -63,7 +66,89 @@ export function SetupBanner() {
   }, [setNodeSystemInfo, setNodeCheckError]);
   const [showManualConfig, setShowManualConfig] = useState(false);
   const [isSelectingPath, setIsSelectingPath] = useState(false);
-  const { updateSettings } = useSettings();
+  const { updateSettings, settings } = useSettings();
+  const queryClient = useQueryClient();
+
+  const [isOllamaSetupOpen, setIsOllamaSetupOpen] = useState(false);
+  const [ollamaInstalled, setOllamaInstalled] = useState<boolean | null>(null);
+  const [ollamaRunning, setOllamaRunning] = useState<boolean | null>(null);
+  const [isInstallingOllama, setIsInstallingOllama] = useState(false);
+  const [isStartingOllama, setIsStartingOllama] = useState(false);
+
+  const checkOllamaStatus = useCallback(async () => {
+    try {
+      const installed = await IpcClient.getInstance().checkOllamaInstalled();
+      setOllamaInstalled(installed);
+      if (installed) {
+        const running = await IpcClient.getInstance().checkOllamaRunning();
+        setOllamaRunning(running);
+        if (running) {
+          queryClient.invalidateQueries({ queryKey: ["ollamaStatus"] });
+          queryClient.invalidateQueries({ queryKey: ["languageModelProviders"] });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to check Ollama status:", error);
+    }
+  }, [queryClient]);
+
+  useEffect(() => {
+    checkOllamaStatus();
+  }, [checkOllamaStatus]);
+
+  // Polling for Ollama when setup is open and not yet installed
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isOllamaSetupOpen && !ollamaInstalled) {
+      interval = setInterval(() => {
+        checkOllamaStatus();
+      }, 3000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isOllamaSetupOpen, ollamaInstalled, checkOllamaStatus]);
+
+  // Success notification for Ollama
+  useEffect(() => {
+    if (ollamaRunning && isOllamaSetupOpen) {
+      showSuccess("Ollama is ready! You can now use local models.");
+      // Automatically close the setup sub-section after a short delay
+      const timer = setTimeout(() => setIsOllamaSetupOpen(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [ollamaRunning, isOllamaSetupOpen]);
+
+  const handleOllamaSetupClick = () => {
+    posthog.capture("setup-flow:ai-provider-setup:ollama:click");
+    setIsOllamaSetupOpen(true);
+  };
+
+  const handleDownloadOllama = () => {
+    posthog.capture("setup-flow:ollama-download:click");
+    IpcClient.getInstance().openExternalUrl("https://ollama.com/download");
+  };
+
+  const handleStartOllama = async () => {
+    setIsStartingOllama(true);
+    posthog.capture("setup-flow:ollama-start:click");
+    try {
+      await IpcClient.getInstance().startOllamaService();
+      // Poll several times for startup
+      for (let i = 0; i < 5; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        const running = await IpcClient.getInstance().checkOllamaRunning();
+        if (running) {
+          await checkOllamaStatus();
+          break;
+        }
+      }
+    } finally {
+      setIsStartingOllama(false);
+    }
+  };
 
   // Add handler for manual path selection
   const handleManualNodeConfig = useCallback(async () => {
@@ -87,6 +172,33 @@ export function SetupBanner() {
       setIsSelectingPath(false);
     }
   }, [checkNode]);
+
+  const [showManualOllamaConfig, setShowManualOllamaConfig] = useState(false);
+  const handleManualOllamaConfig = useCallback(async () => {
+    setIsSelectingPath(true);
+    try {
+      const result = await IpcClient.getInstance().selectNodeFolder(); // Reusing folder selector, strictly we might want file selector but this often works for containing folder too or we need a new IPC
+      // Actually, we usually want the executable file for Ollama.
+      // Let's assume selectNodeFolder returns a folder path and we assume ollama.exe is inside.
+      // Or better, stick to the folder containing the executable.
+      if (result.path) {
+        // We'll store the full path to executable if possible, or just folder.
+        // But selectNodeFolder returns a string path.
+        // Let's blindly trust it for now and append ollama.exe if on windows in the backend logic,
+        // OR the backend logic for customPath already handles it if it's a file path?
+        // The getOllamaCommand update I made checks if it's absolute.
+        // If user selects folder "C:\Programs\Ollama", we might need to append "ollama.exe".
+        // Let's update settings.
+        await updateSettings({ customOllamaPath: result.path });
+        await checkOllamaStatus();
+        setShowManualOllamaConfig(false);
+      }
+    } catch (error) {
+      showError("Error setting Ollama path: " + error);
+    } finally {
+      setIsSelectingPath(false);
+    }
+  }, [checkOllamaStatus]);
 
   useEffect(() => {
     checkNode();
@@ -145,22 +257,12 @@ export function SetupBanner() {
   if (!isNodeSetupComplete && nodeSystemInfo) {
     itemsNeedAction.push("node-setup");
   }
-  if (!isAnyProviderSetup() && !loading) {
+  if (!isAnyProviderSetup() && !loading && !settings?.hasSkippedAiSetup) {
     itemsNeedAction.push("ai-setup");
   }
 
   if (itemsNeedAction.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center mb-10 mt-6 animate-float">
-        <img src={logo} alt="Codiner" className="h-16 w-auto mb-4 drop-shadow-2xl" />
-        <h1 className="text-center text-6xl font-extrabold tracking-tight">
-          <span className="text-gradient">Build your dream app</span>
-        </h1>
-        <p className="text-muted-foreground mt-3 text-lg font-medium opacity-80">
-          The most powerful AI coding assistant on your machine.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   const bannerClasses = cn(
@@ -192,7 +294,7 @@ export function SetupBanner() {
         <Accordion
           type="multiple"
           className="w-full"
-          defaultValue={[...itemsNeedAction, "ai-setup"]}
+          defaultValue={itemsNeedAction}
         >
           <AccordionItem
             value="node-setup"
@@ -367,6 +469,139 @@ export function SetupBanner() {
                 chip={<>Recommended</>}
               />
 
+              {/* Ollama option */}
+              <div className="mb-4">
+                <SetupProviderCard
+                  variant="ollama"
+                  onClick={handleOllamaSetupClick}
+                  tabIndex={isNodeSetupComplete ? 0 : -1}
+                  leadingIcon={
+                    <Download className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  }
+                  title="Run Local Models (Ollama)"
+                  subtitle="Privacy-focused, 100% local AI"
+                  chip={<>Private</>}
+                />
+
+                {isOllamaSetupOpen && (
+                  <div className="mt-4 p-6 bg-orange-500/5 border border-orange-200 dark:border-orange-800/50 rounded-xl space-y-4 animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-lg text-orange-800 dark:text-orange-300">Ollama Setup</h3>
+                      <button
+                        onClick={() => setIsOllamaSetupOpen(false)}
+                        className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200"
+                      >
+                        <XCircle size={20} />
+                      </button>
+                    </div>
+
+                    {!ollamaInstalled ? (
+                      <div className="space-y-4">
+                        <p className="text-sm text-orange-800/80 dark:text-orange-300/80">
+                          Ollama allows you to run powerful models like Qwen 2.5 and Llama 3.2 locally on your machine.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex gap-3">
+                            <Button onClick={handleDownloadOllama} className="bg-orange-600 hover:bg-orange-700 text-white">
+                              <Download className="mr-2 h-4 w-4" />
+                              Download Ollama
+                            </Button>
+                            <Button variant="outline" onClick={checkOllamaStatus} className="border-orange-200 dark:border-orange-800">
+                              I've installed it
+                            </Button>
+                          </div>
+                          {ollamaInstalled === false && (
+                            <div className="flex flex-col gap-2">
+                              <p className="text-xs text-orange-700/70 dark:text-orange-400/70 italic">
+                                Still not detected? Try restarting Codiner to refresh system paths.
+                              </p>
+                              <button
+                                onClick={() => setShowManualOllamaConfig(!showManualOllamaConfig)}
+                                className="text-xs text-left text-orange-600 dark:text-orange-400 hover:underline"
+                              >
+                                Or configure path manually →
+                              </button>
+
+                              {showManualOllamaConfig && (
+                                <div className="mt-2 p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-100 dark:border-orange-900/50">
+                                  <Button
+                                    onClick={handleManualOllamaConfig}
+                                    disabled={isSelectingPath}
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full border-orange-200 hover:bg-orange-100 dark:border-orange-800 dark:hover:bg-orange-900/50"
+                                  >
+                                    {isSelectingPath ? (
+                                      <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Selecting...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Folder className="mr-2 h-4 w-4" />
+                                        Select Ollama executable/folder
+                                      </>
+                                    )}
+                                  </Button>
+                                  <p className="mt-2 text-[10px] text-orange-600/60 dark:text-orange-400/60">
+                                    Select the folder containing "ollama" or "ollama.exe".
+                                    (e.g., C:\Users\Username\AppData\Local\Programs\Ollama)
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : !ollamaRunning ? (
+                      <div className="space-y-4">
+                        <p className="text-sm text-orange-800/80 dark:text-orange-300/80">
+                          Ollama is installed but not running.
+                        </p>
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={handleStartOllama}
+                            disabled={isStartingOllama}
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            {isStartingOllama ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Starting Ollama...
+                              </>
+                            ) : (
+                              <>
+                                <Activity className="mr-2 h-4 w-4" />
+                                Start Ollama Service
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                          <CheckCircle size={18} />
+                          <span className="font-semibold">Ollama is ready!</span>
+                        </div>
+                        <p className="text-sm text-orange-800/80 dark:text-orange-300/80">
+                          You can now use local models for your projects.
+                        </p>
+                        <Button
+                          onClick={() => {
+                            posthog.capture("setup-flow:ollama-complete:click");
+                            settingsScrollAndNavigateTo("provider-settings");
+                          }}
+                          className="bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                          Configure Models <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Other providers */}
               <div
                 className="p-5 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200"
@@ -390,6 +625,15 @@ export function SetupBanner() {
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                 </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateSettings({ hasSkippedAiSetup: true })}
+                >
+                  Setup AI later
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>

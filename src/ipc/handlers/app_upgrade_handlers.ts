@@ -16,13 +16,6 @@ const handle = createLoggedHandler(logger);
 
 const availableUpgrades: Omit<AppUpgrade, "isNeeded">[] = [
   {
-    id: "component-tagger",
-    title: "Enable select component to edit",
-    description:
-      "Installs the Codiner component tagger Vite plugin and its dependencies.",
-    manualUpgradeUrl: "https://codiner.online/docs/upgrades/select-component",
-  },
-  {
     id: "capacitor",
     title: "Upgrade to hybrid mobile app with Capacitor",
     description:
@@ -48,27 +41,6 @@ function isViteApp(appPath: string): boolean {
   return fs.existsSync(viteConfigPathTs) || fs.existsSync(viteConfigPathJs);
 }
 
-function isComponentTaggerUpgradeNeeded(appPath: string): boolean {
-  const viteConfigPathJs = path.join(appPath, "vite.config.js");
-  const viteConfigPathTs = path.join(appPath, "vite.config.ts");
-
-  let viteConfigPath;
-  if (fs.existsSync(viteConfigPathTs)) {
-    viteConfigPath = viteConfigPathTs;
-  } else if (fs.existsSync(viteConfigPathJs)) {
-    viteConfigPath = viteConfigPathJs;
-  } else {
-    return false;
-  }
-
-  try {
-    const viteConfigContent = fs.readFileSync(viteConfigPath, "utf-8");
-    return !viteConfigContent.includes("@codiner-sh/react-vite-component-tagger");
-  } catch (e) {
-    logger.error("Error reading vite config", e);
-    return false;
-  }
-}
 
 function isCapacitorUpgradeNeeded(appPath: string): boolean {
   // Check if it's a Vite app first
@@ -93,107 +65,6 @@ function isCapacitorUpgradeNeeded(appPath: string): boolean {
   return true;
 }
 
-async function applyComponentTagger(appPath: string) {
-  const viteConfigPathJs = path.join(appPath, "vite.config.js");
-  const viteConfigPathTs = path.join(appPath, "vite.config.ts");
-
-  let viteConfigPath;
-  if (fs.existsSync(viteConfigPathTs)) {
-    viteConfigPath = viteConfigPathTs;
-  } else if (fs.existsSync(viteConfigPathJs)) {
-    viteConfigPath = viteConfigPathJs;
-  } else {
-    throw new Error("Could not find vite.config.js or vite.config.ts");
-  }
-
-  let content = await fs.promises.readFile(viteConfigPath, "utf-8");
-
-  // Add import statement if not present
-  if (
-    !content.includes(
-      "import codinerComponentTagger from '@codiner-sh/react-vite-component-tagger';",
-    )
-  ) {
-    // Add it after the last import statement
-    const lines = content.split("\n");
-    let lastImportIndex = -1;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      if (lines[i].startsWith("import ")) {
-        lastImportIndex = i;
-        break;
-      }
-    }
-    lines.splice(
-      lastImportIndex + 1,
-      0,
-      "import codinerComponentTagger from '@codiner-sh/react-vite-component-tagger';",
-    );
-    content = lines.join("\n");
-  }
-
-  // Add plugin to plugins array
-  if (content.includes("plugins: [")) {
-    if (!content.includes("codinerComponentTagger()")) {
-      content = content.replace(
-        "plugins: [",
-        "plugins: [codinerComponentTagger(), ",
-      );
-    }
-  } else {
-    throw new Error(
-      "Could not find `plugins: [` in vite.config.ts. Manual installation required.",
-    );
-  }
-
-  await fs.promises.writeFile(viteConfigPath, content);
-
-  // Install the dependency
-  await new Promise<void>((resolve, reject) => {
-    logger.info("Installing component-tagger dependency");
-    const process = spawn(
-      "pnpm add -D @codiner-sh/react-vite-component-tagger || npm install --save-dev --legacy-peer-deps @codiner-sh/react-vite-component-tagger",
-      {
-        cwd: appPath,
-        shell: true,
-        stdio: "pipe",
-      },
-    );
-
-    process.stdout?.on("data", (data) => logger.info(data.toString()));
-    process.stderr?.on("data", (data) => logger.error(data.toString()));
-
-    process.on("close", (code) => {
-      if (code === 0) {
-        logger.info("component-tagger dependency installed successfully");
-        resolve();
-      } else {
-        logger.error(`Failed to install dependency, exit code ${code}`);
-        reject(new Error("Failed to install dependency"));
-      }
-    });
-
-    process.on("error", (err) => {
-      logger.error("Failed to spawn pnpm", err);
-      reject(err);
-    });
-  });
-
-  // Commit changes
-  try {
-    logger.info("Staging and committing changes");
-    await gitAddAll({ path: appPath });
-    await gitCommit({
-      path: appPath,
-      message: "[codiner] add Codiner component tagger",
-    });
-    logger.info("Successfully committed changes");
-  } catch (err) {
-    logger.warn(
-      `Failed to commit changes. This may happen if the project is not in a git repository, or if there are no changes to commit.`,
-      err,
-    );
-  }
-}
 
 async function applyCapacitor({
   appName,
@@ -257,9 +128,7 @@ export function registerAppUpgradeHandlers() {
 
       const upgradesWithStatus = availableUpgrades.map((upgrade) => {
         let isNeeded = false;
-        if (upgrade.id === "component-tagger") {
-          isNeeded = isComponentTaggerUpgradeNeeded(appPath);
-        } else if (upgrade.id === "capacitor") {
+        if (upgrade.id === "capacitor") {
           isNeeded = isCapacitorUpgradeNeeded(appPath);
         }
         return { ...upgrade, isNeeded };
@@ -279,9 +148,7 @@ export function registerAppUpgradeHandlers() {
       const app = await getApp(appId);
       const appPath = getCodinerAppPath(app.path);
 
-      if (upgradeId === "component-tagger") {
-        await applyComponentTagger(appPath);
-      } else if (upgradeId === "capacitor") {
+      if (upgradeId === "capacitor") {
         await applyCapacitor({ appName: app.name, appPath });
       } else {
         throw new Error(`Unknown upgrade id: ${upgradeId}`);

@@ -281,6 +281,7 @@ export const UserSettingsSchema = z.object({
   telemetryUserId: z.string().optional(),
   hasRunBefore: z.boolean().optional(),
   hasCompletedOnboarding: z.boolean().optional(),
+  hasSkippedAiSetup: z.boolean().optional(),
   enableCodinerPro: z.boolean().optional(),
   experiments: ExperimentsSchema.optional(),
   lastShownReleaseNotesVersion: z.string().optional(),
@@ -314,6 +315,7 @@ export const UserSettingsSchema = z.object({
   releaseChannel: ReleaseChannelSchema,
   runtimeMode2: RuntimeMode2Schema.optional(),
   customNodePath: z.string().optional().nullable(),
+  customOllamaPath: z.string().optional().nullable(),
   isRunning: z.boolean().optional(),
   lastKnownPerformance: z
     .object({

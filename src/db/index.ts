@@ -4,7 +4,9 @@ import {
   drizzle,
 } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
-import * as schema from "./schema";
+import * as baseSchema from "./schema";
+import * as paikeSchema from "./schema-paike";
+const schema = { ...baseSchema, ...paikeSchema };
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import path from "node:path";
 import fs from "node:fs";
@@ -95,23 +97,35 @@ export function initializeDatabase(): BetterSQLite3Database<typeof schema> & {
 }
 
 /**
- * Get the database instance (throws if not initialized)
+ * Get the database instance (auto-initializes if needed)
  */
 export function getDb(): BetterSQLite3Database<typeof schema> & {
   $client: Database.Database;
 } {
   if (!_db) {
-    throw new Error(
-      "Database not initialized. Call initializeDatabase() first.",
-    );
+    logger.log("Database not initialized, auto-initializing...");
+    initializeDatabase();
   }
+
+  const sqlite = (_db as any).$client || (_db as any).session?.client;
+  if (sqlite && !sqlite.open) {
+    logger.error("Database connection is closed. Re-initializing...");
+    _db = null;
+    return initializeDatabase();
+  }
+
   return _db as any;
 }
 
 export const db = new Proxy({} as any, {
   get(target, prop) {
-    const database = getDb();
-    return database[prop as keyof typeof database];
+    try {
+      const database = getDb();
+      return database[prop as keyof typeof database];
+    } catch (error) {
+      logger.error(`Error accessing database property "${String(prop)}":`, error);
+      throw error;
+    }
   },
 }) as BetterSQLite3Database<typeof schema> & {
   $client: Database.Database;

@@ -13,6 +13,7 @@ import {
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { AppOutput } from "@/ipc/ipc_types";
 import { showInputRequest } from "@/lib/toast";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 const useRunAppLoadingAtom = atom(false);
 
@@ -25,6 +26,8 @@ export function useRunApp() {
   const appId = useAtomValue(selectedAppIdAtom);
   const setPreviewErrorMessage = useSetAtom(previewErrorMessageAtom);
   const setPreviewStatus = useSetAtom(previewStatusAtom);
+
+  const { addNotification } = useNotifications();
 
   const processProxyServerOutput = (output: AppOutput) => {
     const matchesProxyServerStart = output.message.includes(
@@ -44,6 +47,14 @@ export function useRunApp() {
           appUrl: proxyUrl,
           appId: output.appId,
           originalUrl: originalUrl!,
+        });
+
+        // Add Notification
+        addNotification({
+          type: "success",
+          title: "App Ready",
+          message: `Your app is now running at ${proxyUrl}`,
+          metadata: { appId: output.appId, url: proxyUrl }
         });
 
         // Proactively check if the app root is returning a 404

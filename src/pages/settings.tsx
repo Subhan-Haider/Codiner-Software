@@ -675,7 +675,7 @@ function SupportSection() {
       <Section title="Knowledge Nexus" icon={HelpCircle}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <a
-            href="https://github.com/Subhan-Haider/Codiner_Windows/issues"
+            href="https://github.com/Subhan-Haider/Codiner-Software/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative flex flex-col p-8 rounded-[2.5rem] bg-card border border-primary/5 hover:border-primary/20 hover:bg-primary/5 transition-all shadow-xl overflow-hidden"

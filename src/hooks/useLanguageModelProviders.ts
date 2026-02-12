@@ -19,11 +19,35 @@ export function useLanguageModelProviders() {
     },
   });
 
+  const { data: ollamaStatus, isLoading: isOllamaLoading } = useQuery({
+    queryKey: ["ollamaStatus", settings?.customOllamaPath],
+    queryFn: async () => {
+      try {
+        const installed = await ipcClient.checkOllamaInstalled(settings?.customOllamaPath || undefined);
+        if (!installed) return { installed: false, running: false };
+        const running = await ipcClient.checkOllamaRunning();
+        return { installed, running };
+      } catch (error) {
+        console.warn("Failed to check Ollama status:", error);
+        return { installed: false, running: false };
+      }
+    },
+    refetchInterval: 10000, // Poll every 10s
+    enabled: !!settings,
+  });
+
   const isProviderSetup = (provider: string) => {
     const providerSettings = settings?.providerSettings[provider];
-    if (queryResult.isLoading) {
+    const isLoading = queryResult.isLoading || isOllamaLoading;
+
+    if (isLoading) {
       return false;
     }
+
+    if (provider === "ollama") {
+      return !!(ollamaStatus?.installed && ollamaStatus?.running);
+    }
+
     // Vertex uses service account credentials instead of an API key
     if (provider === "vertex") {
       const vertexSettings = providerSettings as VertexProviderSetting;
@@ -40,7 +64,7 @@ export function useLanguageModelProviders() {
       const azureSettings = providerSettings as AzureProviderSetting;
       const hasSavedSettings = Boolean(
         (azureSettings?.apiKey?.value ?? "").trim() &&
-          (azureSettings?.resourceName ?? "").trim(),
+        (azureSettings?.resourceName ?? "").trim(),
       );
       if (hasSavedSettings) {
         return true;
@@ -66,6 +90,11 @@ export function useLanguageModelProviders() {
       return true;
     }
 
+    // Check Ollama
+    if (isProviderSetup("ollama")) {
+      return true;
+    }
+
     // Check custom providers
     const customProviders = queryResult.data?.filter(
       (provider) => provider.type === "custom",
@@ -77,6 +106,7 @@ export function useLanguageModelProviders() {
 
   return {
     ...queryResult,
+    isLoading: queryResult.isLoading || isOllamaLoading,
     isProviderSetup,
     isAnyProviderSetup,
   };

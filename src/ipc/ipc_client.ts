@@ -1500,4 +1500,29 @@ export class IpcClient {
   public async aiTestConnectivity(providerId?: string): Promise<{ success: boolean; message: string; latency?: number; capabilities?: string[] }> {
     return this.ipcRenderer.invoke("ai:test-connectivity", providerId);
   }
+
+  // Ollama methods
+  public async checkOllamaInstalled(customPath?: string): Promise<boolean> {
+    return this.ipcRenderer.invoke("ollama:check-installed", customPath);
+  }
+
+  public async checkOllamaRunning(): Promise<boolean> {
+    return this.ipcRenderer.invoke("ollama:check-running");
+  }
+
+  public async startOllamaService(customPath?: string): Promise<{ success: boolean; error?: string }> {
+    return this.ipcRenderer.invoke("ollama:start-service", customPath);
+  }
+
+  public async getOllamaInstalledModels(): Promise<any[]> {
+    return this.ipcRenderer.invoke("ollama:get-installed-models");
+  }
+
+  public async installOllamaModel(modelName: string, customPath?: string): Promise<{ success: boolean; error?: string }> {
+    return this.ipcRenderer.invoke("ollama:install-model", modelName, customPath);
+  }
+
+  public onOllamaInstallProgress(callback: (data: { model: string; progress: string }) => void) {
+    return (this.ipcRenderer as any).on("ollama:install-progress", (data: any) => callback(data));
+  }
 }

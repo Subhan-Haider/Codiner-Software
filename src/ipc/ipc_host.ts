@@ -36,6 +36,9 @@ import { registerVisualEditingHandlers } from "../pro/main/ipc/handlers/visual_e
 import { registerAgentToolHandlers } from "../pro/main/ipc/handlers/local_agent/agent_tool_handlers";
 import { registerFirebaseHandlers } from "./handlers/firebase_handlers";
 import { registerAiTestHandlers } from "./handlers/ai_test_handler";
+import { registerPaikeHandlers } from "./handlers/paike-handlers";
+import { registerNotificationHandlers } from "./handlers/notification_handlers";
+import { registerOllamaManagementHandlers } from "./handlers/ollama_management_handler";
 
 export function registerIpcHandlers() {
   // Register all IPC handlers by category
@@ -77,4 +80,7 @@ export function registerIpcHandlers() {
   registerUpdateHandlers();
   registerFirebaseHandlers();
   registerAiTestHandlers();
+  registerPaikeHandlers();
+  registerNotificationHandlers();
+  registerOllamaManagementHandlers();
 }

@@ -5,7 +5,7 @@ import { getUserDataPath } from "./src/paths/paths";
 const dbPath = path.join(getUserDataPath(), "sqlite.db");
 
 export default {
-  schema: "./src/db/schema.ts",
+  schema: ["./src/db/schema.ts", "./src/db/schema-paike.ts"],
   out: "./drizzle",
   dialect: "sqlite",
   dbCredentials: {

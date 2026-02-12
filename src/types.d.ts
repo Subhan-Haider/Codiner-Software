@@ -40,3 +40,14 @@ declare module "electron-squirrel-startup" {
     const value: boolean;
     export default value;
 }
+
+interface Window {
+    electron: {
+        ipcRenderer: {
+            invoke(channel: string, ...args: any[]): Promise<any>;
+            on(channel: string, func: (...args: any[]) => void): void;
+            removeListener(channel: string, func: (...args: any[]) => void): void;
+            send(channel: string, ...args: any[]): void;
+        };
+    };
+}

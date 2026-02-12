@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
-type SetupProviderVariant = "google" | "openrouter" | "codiner";
+type SetupProviderVariant = "google" | "openrouter" | "codiner" | "ollama";
 
 export function SetupProviderCard({
   variant,
@@ -102,6 +102,15 @@ function getVariantStyles(variant: SetupProviderVariant) {
         titleColor: "text-indigo-800 dark:text-indigo-300",
         subtitleColor: "text-indigo-600 dark:text-indigo-400",
         chevronColor: "text-indigo-600 dark:text-indigo-400",
+      } as const;
+    case "ollama":
+      return {
+        container:
+          "bg-orange-500/5 border-orange-200 dark:border-orange-700/50 hover:bg-orange-500/10 backdrop-blur-sm",
+        iconWrapper: "bg-orange-100 dark:bg-orange-800/50",
+        titleColor: "text-orange-800 dark:text-orange-300",
+        subtitleColor: "text-orange-600 dark:text-orange-400",
+        chevronColor: "text-orange-600 dark:text-orange-400",
       } as const;
   }
 }

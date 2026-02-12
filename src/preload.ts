@@ -140,6 +140,7 @@ const validInvokeChannels = [
   "add-to-favorite",
   "github:clone-repo-from-url",
   "get-latest-security-review",
+  "ai:test-connectivity",
   // Test-only channels
   // These should ALWAYS be guarded with IS_TEST_BUILD in the main process.
   // We can't detect with IS_TEST_BUILD in the preload script because
@@ -149,6 +150,32 @@ const validInvokeChannels = [
   "export-app-as-zip",
   "enhance-prompt",
   "update-app-config",
+  // PAIKE
+  "paike:analyze-patterns",
+  "paike:get-recommendations",
+  "paike:learn-decision",
+  "paike:get-personalization-score",
+  "paike:generate-seo",
+  "paike:inject-seo",
+  "paike:generate-og-tags",
+  "paike:generate-schema",
+  "paike:get-project-seo",
+  "paike:update-seo",
+  "paike:generate-sitemap",
+  "paike:export-sitemap",
+  "paike:write-sitemap",
+  "paike:get-project-sitemap",
+  "paike:get-stats",
+  "paike:clear-data",
+  "paike:export-data",
+  // Notifications
+  "notification:create",
+  "notification:get-all",
+  "notification:get-unread-count",
+  "notification:mark-as-read",
+  "notification:mark-all-as-read",
+  "notification:delete",
+  "notification:clear-all",
 ];
 
 // Add valid receive channels

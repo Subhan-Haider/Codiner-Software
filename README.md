@@ -11,7 +11,7 @@
 
 *Build full-stack modern web applications in seconds using local AI, powerful templates, and real-time neural diagnostics.*
 
-[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🏙️ Liberty](https://github.com/setupg963-spec/Codiner-Liberty)
+[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🏙️ Liberty](https://github.com/Subhan-Haider/Codiner-Liberty)
 
 <img src="assets/promo-banner.png" alt="Codiner Promo Banner" width="100%" style="border-radius: 10px; margin: 20px 0;" />
 
@@ -162,7 +162,7 @@ Codiner's internal agent can intelligently decide which model to use based on th
 
 ```bash
 # Clone the repository
-git clone https://github.com/setupg963-spec/Codiner-Software.git
+git clone https://github.com/Subhan-Haider/Codiner-Software.git
 cd Codiner-Software
 
 # Install and Ignition
@@ -233,6 +233,6 @@ By using Codiner, you agree to our [Terms of Service](TERMS.md). The application
 
 *Empowering developers and security researchers worldwide*
 
-[⭐ Star this repo](https://github.com/haider-subhan/Codiner-Software) • [🐛 Report Bug](https://github.com/haider-subhan/Codiner-Software/issues) • [✨ Request Feature](https://github.com/haider-subhan/Codiner-Software/issues)
+[⭐ Star this repo](https://github.com/Subhan-Haider/Codiner-Software) • [🐛 Report Bug](https://github.com/Subhan-Haider/Codiner-Software/issues) • [✨ Request Feature](https://github.com/Subhan-Haider/Codiner-Software/issues)
 
 </div>

@@ -19,6 +19,7 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Toaster } from "sonner";
 import "./styles/globals.css";
+import { NotificationProvider, useNotifications } from "@/contexts/NotificationContext";
 
 console.log("Running in mode:", import.meta.env.MODE);
 
@@ -169,6 +170,21 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const { addNotification } = useNotifications();
+
+  useEffect(() => {
+    const sessionKey = "codiner-welcome-shown";
+    if (!sessionStorage.getItem(sessionKey)) {
+      addNotification({
+        type: "system",
+        title: "Welcome to Codiner",
+        message: "Your Personal AI Knowledge Engine and Notification System are ready.",
+        metadata: { version: "0.32.0" }
+      });
+      sessionStorage.setItem(sessionKey, "true");
+    }
+  }, [addNotification]);
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
@@ -194,12 +210,21 @@ function App() {
   return <RouterProvider router={router} />;
 }
 
-createRoot(document.getElementById("root")!).render(
+const container = document.getElementById("root");
+if (!container) throw new Error("Root element not found");
+
+// Store the root on the window to prevent multiple createRoot calls during HMR
+const root = (window as any).reactRoot || createRoot(container);
+if (!(window as any).reactRoot) (window as any).reactRoot = root;
+
+root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <PostHogProvider client={posthogClient}>
-        <App />
-        <Toaster richColors position="top-right" />
+        <NotificationProvider>
+          <App />
+          <Toaster richColors position="top-right" />
+        </NotificationProvider>
       </PostHogProvider>
     </QueryClientProvider>
   </StrictMode>,
