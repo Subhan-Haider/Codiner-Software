@@ -4,6 +4,7 @@ import {
   appConsoleEntriesAtom,
   previewErrorMessageAtom,
   previewStatusAtom,
+  previewPanelKeyAtom,
 } from "@/atoms/appAtoms";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -192,6 +193,7 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
   const [errorMessage, setErrorMessage] = useAtom(previewErrorMessageAtom);
   const previewStatus = useAtomValue(previewStatusAtom);
   const selectedChatId = useAtomValue(selectedChatIdAtom);
+  const externalKey = useAtomValue(previewPanelKeyAtom);
   const { streamMessage } = useStreamChat();
   const { routes: availableRoutes } = useParseRouter(selectedAppId);
   const { restartApp } = useRunApp();
@@ -1138,7 +1140,7 @@ export const PreviewIframe = ({ loading }: { loading: boolean }) => {
                     setErrorMessage(undefined);
                   }}
                   ref={iframeRef}
-                  key={reloadKey}
+                  key={`${reloadKey}-${externalKey}`}
                   title={`Preview for App ${selectedAppId}`}
                   className={cn(
                     "bg-white dark:bg-gray-950 transition-all duration-300",

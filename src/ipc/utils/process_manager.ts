@@ -7,6 +7,9 @@ export interface RunningAppInfo {
   processId: number;
   isDocker: boolean;
   containerName?: string;
+  proxyUrl?: string;
+  originalUrl?: string;
+  event?: any;
 }
 
 // Store running app processes

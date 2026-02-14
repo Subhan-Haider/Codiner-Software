@@ -218,6 +218,7 @@ Details: ${details || "n/a"}
     process: spawnedProcess,
     processId: currentProcessId,
     isDocker: false,
+    event,
   });
 
   listenToProcess({
@@ -232,7 +233,6 @@ function listenToProcess({
   process: spawnedProcess,
   appId,
   isNeon,
-  event,
 }: {
   process: ChildProcess;
   appId: number;
@@ -242,6 +242,7 @@ function listenToProcess({
   // Log output
   spawnedProcess.stdout?.on("data", async (data) => {
     const message = util.stripVTControlCharacters(data.toString());
+    const event = runningApps.get(appId)?.event;
     logger.debug(
       `App ${appId} (PID: ${spawnedProcess.pid}) stdout: ${message}`,
     );
@@ -262,7 +263,7 @@ function listenToProcess({
     // Check if this is an interactive prompt requiring user input
     const inputRequestPattern = /\s*›\s*\([yY]\/[nN]\)\s*$/;
     const isInputRequest = inputRequestPattern.test(message);
-    if (isInputRequest) {
+    if (isInputRequest && event) {
       // Send special input-requested event for interactive prompts
       safeSend(event.sender, "app:output", {
         type: "input-requested",
@@ -281,7 +282,7 @@ function listenToProcess({
         currentStatus = "Compiling application...";
       }
 
-      if (currentStatus) {
+      if (currentStatus && event) {
         safeSend(event.sender, "app:output", {
           type: "status",
           message: currentStatus,
@@ -296,11 +297,18 @@ function listenToProcess({
 
         proxyWorker = await startProxy(targetUrl, {
           onStarted: (proxyUrl) => {
-            safeSend(event.sender, "app:output", {
-              type: "stdout",
-              message: `[codiner-proxy-server]started=[${proxyUrl}] original=[${urlMatch[1]}]`,
-              appId,
-            });
+            const appInfo = runningApps.get(appId);
+            if (appInfo && appInfo.process === spawnedProcess) {
+              appInfo.proxyUrl = proxyUrl;
+              appInfo.originalUrl = urlMatch[1];
+            }
+            if (event) {
+              safeSend(event.sender, "app:output", {
+                type: "stdout",
+                message: `[codiner-proxy-server]started=[${proxyUrl}] original=[${urlMatch[1]}]`,
+                appId,
+              });
+            }
           },
         });
         proxyWorker.on("error", (err) => {
@@ -315,6 +323,7 @@ function listenToProcess({
 
   spawnedProcess.stderr?.on("data", (data) => {
     const message = util.stripVTControlCharacters(data.toString());
+    const event = runningApps.get(appId)?.event;
 
     // Filter out noisy npm warnings that are not actionable for the user
     // "Unknown env config" warnings are benign and related to npm internal config leakage
@@ -329,11 +338,13 @@ function listenToProcess({
     logger.error(
       `App ${appId} (PID: ${spawnedProcess.pid}) stderr: ${message}`,
     );
-    safeSend(event.sender, "app:output", {
-      type: "stderr",
-      message,
-      appId,
-    });
+    if (event) {
+      safeSend(event.sender, "app:output", {
+        type: "stderr",
+        message,
+        appId,
+      });
+    }
   });
 
   // Handle process exit/close
@@ -341,6 +352,7 @@ function listenToProcess({
     logger.log(
       `App ${appId} (PID: ${spawnedProcess.pid}) process closed with code ${code}, signal ${signal}.`,
     );
+    const event = runningApps.get(appId)?.event;
 
     // Report crash if it's a non-zero exit code and not a normal shutdown signal
     if (
@@ -349,11 +361,13 @@ function listenToProcess({
       signal !== "SIGTERM" &&
       signal !== "SIGKILL"
     ) {
-      safeSend(event.sender, "app:output", {
-        type: "stderr",
-        message: `App server crashed unexpectedly with exit code ${code}${signal ? ` and signal ${signal}` : ""}.`,
-        appId,
-      });
+      if (event) {
+        safeSend(event.sender, "app:output", {
+          type: "stderr",
+          message: `App server crashed unexpectedly with exit code ${code}${signal ? ` and signal ${signal}` : ""}.`,
+          appId,
+        });
+      }
     }
 
     removeAppIfCurrentProcess(appId, spawnedProcess);
@@ -550,6 +564,7 @@ ${errorOutput || "(empty)"}`,
     processId: currentProcessId,
     isDocker: true,
     containerName,
+    event,
   });
 
   listenToProcess({
@@ -959,6 +974,20 @@ export function registerAppHandlers() {
         // Check if app is already running
         if (runningApps.has(appId)) {
           logger.debug(`App ${appId} is already running.`);
+          const appInfo = runningApps.get(appId);
+          if (appInfo) {
+            appInfo.event = event;
+            if (appInfo.proxyUrl) {
+              logger.info(
+                `Re-sending existing proxy URL for app ${appId}: ${appInfo.proxyUrl}`,
+              );
+              safeSend(event.sender, "app:output", {
+                type: "stdout",
+                message: `[codiner-proxy-server]started=[${appInfo.proxyUrl}] original=[${appInfo.originalUrl}]`,
+                appId,
+              });
+            }
+          }
           return;
         }
 
