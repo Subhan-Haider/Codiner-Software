@@ -129,10 +129,15 @@ export default function Home() {
                 {/* Mockup Window */}
                 <div className="relative bg-[#0d1117] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden aspect-video transform-gpu border-b-4 border-white/5">
                   <div className="h-10 border-b border-white/10 bg-black/40 flex items-center px-6 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/50" />
-                    <div className="ml-4 text-xs text-white/30 font-mono italic">projects/my-new-app/src/page.tsx</div>
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                    </div>
+                    <div className="ml-4 flex items-center gap-2">
+                      <img src="/logo.png" className="w-4 h-4 opacity-50" alt="" />
+                      <div className="text-xs text-white/30 font-mono italic">projects/my-new-app/src/page.tsx</div>
+                    </div>
                   </div>
                   <div className="p-8 font-mono text-sm leading-relaxed space-y-4">
                     <div className="flex gap-4">
