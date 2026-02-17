@@ -13,7 +13,7 @@
 
 [🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🏙️ Liberty](https://github.com/Subhan-Haider/Codiner-Liberty)
 
-<img src="assets/promo-banner.png" alt="Codiner Promo Banner" width="100%" style="border-radius: 10px; margin: 20px 0;" />
+<img src="assets/promo-banner-new.svg" alt="Codiner Promo Banner" width="100%" style="border-radius: 10px; margin: 20px 0;" />
 
 </div>
 
