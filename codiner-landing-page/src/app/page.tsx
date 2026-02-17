@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Github, Sparkles, Zap, Code2, Rocket, Shield, Lock, EyeOff, Terminal, Cpu, MessageSquare, ChevronDown, Globe, Layers, Monitor, HardDrive, Layout, CheckCircle2 } from "lucide-react";
+import { Download, Github, Sparkles, Zap, Code2, Rocket, Shield, Lock, EyeOff, Terminal, Cpu, MessageSquare, ChevronDown, ChevronRight, Globe, Layers, Monitor, HardDrive, Layout, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -720,6 +721,77 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Latest from Blog (NEW) */}
+      <section className="py-32 bg-background border-t border-border">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+            <div className="max-w-xl">
+              <h2 className="text-5xl font-black italic tracking-tighter mb-4 lowercase text-center md:text-left">Latest <span className="text-gradient">Insights</span></h2>
+              <p className="text-xl text-muted-foreground font-medium text-center md:text-left italic lowercase tracking-tight">Inside the AI foundry: news, updates, and deep dives.</p>
+            </div>
+            <Link href="/blog" className="px-8 py-4 rounded-2xl border border-border font-black italic lowercase tracking-wider hover:border-primary/50 transition-all flex items-center gap-2 group w-full md:w-auto justify-center">
+              view all articles <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <Link href="/blog" className="group">
+              <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                🚀
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-primary/10 border border-primary/20">Release</span>
+                  <span className="text-xs font-bold text-muted-foreground">Feb 14, 2026</span>
+                </div>
+                <h3 className="text-2xl font-black italic tracking-tighter group-hover:text-primary transition-colors leading-tight lowercase">Introducing Codiner v0.32.0</h3>
+                <p className="text-muted-foreground font-medium line-clamp-2 leading-relaxed">AI-Powered Development Reimagined. Enhanced capabilities and a completely redesigned user interface.</p>
+                <div className="pt-4 text-primary font-black italic uppercase text-xs tracking-[0.3em] flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                  read more <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/blog" className="group">
+              <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden text-blue-400">
+                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                💡
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">Tutorial</span>
+                  <span className="text-xs font-bold text-muted-foreground">Feb 12, 2026</span>
+                </div>
+                <h3 className="text-2xl font-black italic tracking-tighter group-hover:text-primary transition-colors leading-tight lowercase">10 Tips for AI Apps</h3>
+                <p className="text-muted-foreground font-medium line-clamp-2 leading-relaxed">Learn how to leverage AI effectively in your development workflow with these strategies.</p>
+                <div className="pt-4 text-primary font-black italic uppercase text-xs tracking-[0.3em] flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                  read more <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/blog" className="group md:hidden lg:block">
+              <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden text-purple-400">
+                <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                🗓️
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">Roadmap</span>
+                  <span className="text-xs font-bold text-muted-foreground">Feb 1, 2026</span>
+                </div>
+                <h3 className="text-2xl font-black italic tracking-tighter group-hover:text-primary transition-colors leading-tight lowercase">2026 Roadmap Plans</h3>
+                <p className="text-muted-foreground font-medium line-clamp-2 leading-relaxed">A look at our plans for Codiner in the coming year, including exciting new features.</p>
+                <div className="pt-4 text-primary font-black italic uppercase text-xs tracking-[0.3em] flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                  read more <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
