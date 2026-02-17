@@ -55,7 +55,7 @@ export default function TemplatesPage() {
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
-                                        className="p-10 rounded-[3rem] bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 flex gap-8 items-center group cursor-pointer hover:border-primary transition-all shadow-2xl h-full"
+                                        className="p-10 rounded-[3rem] bg-linear-to-br from-primary/10 to-blue-600/10 border border-primary/20 flex gap-8 items-center group cursor-pointer hover:border-primary transition-all shadow-2xl h-full"
                                     >
                                         <div className="text-6xl group-hover:scale-110 transition-transform">{trending.img}</div>
                                         <div>
@@ -93,7 +93,7 @@ export default function TemplatesPage() {
                                 transition={{ delay: index * 0.1 }}
                                 className="group p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary transition-all duration-300 shadow-lg"
                             >
-                                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <div className="w-16 h-16 rounded-lg bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                     <template.icon className="w-8 h-8 text-primary" />
                                 </div>
 
@@ -148,7 +148,7 @@ export default function TemplatesPage() {
                         </p>
                         <Link
                             href="/download"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                         >
                             Get Started with AI
                         </Link>

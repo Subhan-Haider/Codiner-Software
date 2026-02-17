@@ -63,7 +63,7 @@ export default function Home() {
                 <a
                   href="/download"
                   className={cn(
-                    "group relative px-10 py-5 rounded-[2rem] font-black text-lg",
+                    "group relative px-10 py-5 rounded-4xl font-black text-lg",
                     "bg-primary text-primary-foreground",
                     "transform hover:scale-105 transition-all duration-300",
                     "shadow-[0_0_50px_-10px_rgba(var(--primary),0.5)] flex items-center gap-3"
@@ -79,9 +79,8 @@ export default function Home() {
                 <a
                   href="https://github.com/Subhan-Haider/Codiner-Software"
                   target="_blank"
-                  rel="noopener noreferrer"
                   className={cn(
-                    "px-10 py-5 rounded-[2rem] font-bold text-lg",
+                    "px-10 py-5 rounded-4xl font-bold text-lg",
                     "border-2 border-border hover:border-primary bg-card/50 backdrop-blur-sm",
                     "transform hover:scale-105 transition-all duration-300",
                     "flex items-center gap-3"
@@ -125,10 +124,10 @@ export default function Home() {
             >
               <div className="relative group">
                 {/* Glow Effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/30 to-blue-600/30 blur-2xl rounded-[3rem] group-hover:blur-3xl transition-all opacity-50" />
+                <div className="absolute -inset-4 bg-linear-to-r from-purple-600/30 to-blue-600/30 blur-2xl rounded-4xl group-hover:blur-3xl transition-all opacity-50" />
 
                 {/* Mockup Window */}
-                <div className="relative bg-white border border-border rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.05)] overflow-hidden aspect-video transform-gpu">
+                <div className="relative bg-white border border-border rounded-3xl shadow-[0_0_100px_rgba(0,0,0,0.05)] overflow-hidden aspect-video transform-gpu">
                   <div className="h-10 border-b border-border bg-muted/30 flex items-center px-6 gap-2">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-red-400/40" />
@@ -238,7 +237,7 @@ export default function Home() {
                 )}
               >
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all">
                   <feature.icon className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
@@ -248,8 +247,8 @@ export default function Home() {
           </div>
 
           {/* PAIKE Cognitive Architecture Visual */}
-          <div className="max-w-6xl mx-auto p-12 rounded-[4rem] bg-background border border-border/50 relative overflow-hidden shadow-3xl">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="max-w-6xl mx-auto p-12 rounded-4xl bg-background border border-border/50 relative overflow-hidden shadow-3xl">
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
             <div className="flex flex-col lg:flex-row items-center gap-16">
               <div className="flex-1 space-y-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
@@ -440,7 +439,7 @@ export default function Home() {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-12 rounded-[3.5rem] bg-primary/10 border-2 border-primary/30 shadow-[0_0_50px_rgba(var(--primary),0.1)] relative overflow-hidden group"
+              className="p-12 rounded-4xl bg-primary/10 border-2 border-primary/30 shadow-[0_0_50px_rgba(var(--primary),0.1)] relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-24 h-24 text-primary" />
@@ -496,7 +495,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="flex-1 w-full max-w-xl p-1 rounded-[3.5rem] bg-gradient-to-br from-primary/30 to-blue-600/30">
+            <div className="flex-1 w-full max-w-xl p-1 rounded-4xl bg-linear-to-br from-primary/30 to-blue-600/30">
               <div className="bg-background rounded-[3.4rem] p-12 text-center overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                   <Lock className="w-64 h-64 -mr-20 -mt-20 transform rotate-12" />
@@ -582,7 +581,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="p-10 rounded-[3rem] bg-gradient-to-br from-primary to-blue-600 text-white shadow-2xl relative overflow-hidden"
+              className="p-10 rounded-4xl bg-linear-to-br from-primary to-blue-600 text-white shadow-2xl relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-6 opacity-20">
                 <CheckCircle2 className="w-32 h-32 -mr-12 -mt-12" />
@@ -659,7 +658,7 @@ export default function Home() {
       {/* Neural Pulse: Global Activity */}
       <section className="py-24 border-t border-border bg-background overflow-hidden relative">
         <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
+          <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary to-transparent animate-scan" />
         </div>
 
         <div className="container mx-auto px-6">
@@ -684,7 +683,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex-1 w-full max-w-2xl bg-card/30 border border-border p-8 rounded-[2.5rem] backdrop-blur-xl relative shadow-2xl overflow-hidden font-mono text-sm">
+            <div className="flex-1 w-full max-w-2xl bg-card/30 border border-border p-8 rounded-4xl backdrop-blur-xl relative shadow-2xl overflow-hidden font-mono text-sm">
               <div className="flex items-center justify-between mb-6 border-b border-border/50 pb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -805,7 +804,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 border-t border-border bg-gradient-to-b from-transparent to-primary/5">
+      <section className="py-24 border-t border-border bg-linear-to-b from-transparent to-primary/5">
         <div className="container mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -822,7 +821,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <a
                 href="/download"
-                className="px-12 py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
+                className="px-12 py-6 rounded-4xl bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
               >
                 Download Now
               </a>
@@ -833,7 +832,7 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-    </main>
+    </main >
   );
 }
 

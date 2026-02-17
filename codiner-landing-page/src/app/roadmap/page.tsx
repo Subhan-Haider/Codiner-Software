@@ -42,7 +42,7 @@ export default function RoadmapPage() {
 
                                 <div className="flex gap-6">
                                     {/* Status Icon */}
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div
                                             className={`w-12 h-12 rounded-full flex items-center justify-center ${item.status === "completed"
                                                 ? "bg-green-600/10 border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
@@ -121,7 +121,7 @@ export default function RoadmapPage() {
                             href="https://github.com/Subhan-Haider/Codiner-Software/issues"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                         >
                             Request a Feature
                         </a>

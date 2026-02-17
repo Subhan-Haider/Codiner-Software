@@ -46,7 +46,7 @@ export default function DocsPage() {
                                 placeholder="Search documentation... (e.g. 'How to use PAIKE')"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-16 pr-8 py-6 rounded-[2rem] bg-card border border-border focus:border-primary focus:outline-none transition-all shadow-2xl text-xl font-medium"
+                                className="w-full pl-16 pr-8 py-6 rounded-4xl bg-card border border-border focus:border-primary focus:outline-none transition-all shadow-2xl text-xl font-medium"
                             />
                         </div>
                     </div>
@@ -69,7 +69,7 @@ export default function DocsPage() {
                             >
                                 <Link
                                     href={category.href}
-                                    className="p-10 rounded-[2.5rem] border border-border bg-card/30 backdrop-blur-xl hover:border-primary/50 transition-all cursor-pointer block h-full shadow-xl"
+                                    className="p-10 rounded-4xl border border-border bg-card/30 backdrop-blur-xl hover:border-primary/50 transition-all cursor-pointer block h-full shadow-xl"
                                 >
                                     <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                         <category.icon className="w-7 h-7 text-primary" />
@@ -114,7 +114,7 @@ export default function DocsPage() {
                                 initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="p-12 rounded-[3.5rem] border border-border bg-card/50 shadow-2xl relative overflow-hidden group"
+                                className="p-12 rounded-4xl border border-border bg-card/50 shadow-2xl relative overflow-hidden group"
                             >
                                 <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity">
                                     <section.icon className="w-40 h-40 text-primary" />
@@ -127,7 +127,7 @@ export default function DocsPage() {
                                     {section.topics.map(topic => (
                                         <Link
                                             key={topic}
-                                            href={topic === "Deployment Workflows" ? "/docs/installation" : "#"}
+                                            href={topic === "Deployment Workflows" ? "/docs/installation" : topic === "Ollama Integration" ? "/docs/local-setup" : "#"}
                                             className="flex items-center gap-3 text-sm font-bold text-primary/80 hover:text-primary cursor-pointer transition-colors"
                                         >
                                             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -135,9 +135,9 @@ export default function DocsPage() {
                                         </Link>
                                     ))}
                                     {section.title === "Architectural Foundations" && (
-                                        <Link href="/local-ai" className="flex items-center gap-3 text-sm font-black text-primary hover:scale-105 transition-transform col-span-2 mt-4 bg-primary/10 p-4 rounded-2xl border border-primary/20">
+                                        <Link href="/docs/local-setup" className="flex items-center gap-3 text-sm font-black text-primary hover:scale-105 transition-transform col-span-2 mt-4 bg-primary/10 p-4 rounded-2xl border border-primary/20">
                                             <Box className="w-5 h-5" />
-                                            Deep Dive: Local AI Stack & Ollama
+                                            Deep Dive: Local AI Setup (Ollama)
                                         </Link>
                                     )}
                                 </div>
@@ -150,17 +150,17 @@ export default function DocsPage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="p-16 rounded-[4rem] bg-gradient-to-br from-primary/5 to-blue-600/5 border border-primary/20 text-center max-w-5xl mx-auto shadow-2xl"
+                        className="p-16 rounded-4xl bg-linear-to-br from-primary/5 to-blue-600/5 border border-primary/20 text-center max-w-5xl mx-auto shadow-2xl"
                     >
                         <h2 className="text-5xl font-black italic tracking-tight mb-8">Can't find what you're looking for?</h2>
                         <p className="text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
                             Our community is always ready to help. Reach out on Discord or start a discussion on GitHub.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                            <a href="#" className="px-10 py-5 rounded-[2rem] bg-primary text-primary-foreground font-black text-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]">
+                            <a href="#" className="px-10 py-5 rounded-4xl bg-primary text-primary-foreground font-black text-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]">
                                 Ask the Community
                             </a>
-                            <a href="https://github.com/Subhan-Haider/Codiner-Software/issues" className="px-10 py-5 rounded-[2rem] border-2 border-border hover:border-primary font-bold text-lg hover:scale-105 transition-transform">
+                            <a href="https://github.com/Subhan-Haider/Codiner-Software/issues" className="px-10 py-5 rounded-4xl border-2 border-border hover:border-primary font-bold text-lg hover:scale-105 transition-transform">
                                 Report an Issue
                             </a>
                         </div>

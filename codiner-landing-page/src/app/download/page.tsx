@@ -61,7 +61,7 @@ export default function DownloadPage() {
                             <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-500" />
 
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center border border-primary/10 group-hover:scale-110 group-hover:rotate-3 transition-all">
+                                <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center border border-primary/10 group-hover:scale-110 group-hover:rotate-3 transition-all">
                                     <Monitor className="w-10 h-10 text-primary" />
                                 </div>
                                 <div>
@@ -70,7 +70,7 @@ export default function DownloadPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mb-12 flex-grow">
+                            <div className="space-y-4 mb-12 grow">
                                 <FeatureItem text="Windows 10/11 Compatible" />
                                 <FeatureItem text="Automatic Updates" />
                                 <FeatureItem text="Desktop Integration" />
@@ -105,7 +105,7 @@ export default function DownloadPage() {
                             <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all duration-500" />
 
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-700/20 to-gray-800/20 flex items-center justify-center border border-white/5 group-hover:scale-110 group-hover:-rotate-3 transition-all">
+                                <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-gray-700/20 to-gray-800/20 flex items-center justify-center border border-white/5 group-hover:scale-110 group-hover:-rotate-3 transition-all">
                                     <Apple className="w-10 h-10 text-primary" />
                                 </div>
                                 <div>
@@ -114,7 +114,7 @@ export default function DownloadPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mb-12 flex-grow">
+                            <div className="space-y-4 mb-12 grow">
                                 <FeatureItem text="Intel & Apple Silicon" />
                                 <FeatureItem text="Optimized Performance" />
                                 <FeatureItem text="Native Experience" />
@@ -149,7 +149,7 @@ export default function DownloadPage() {
                             <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-600/5 rounded-full blur-3xl group-hover:bg-orange-600/10 transition-all duration-500" />
 
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-600/10 to-red-600/10 flex items-center justify-center border border-orange-500/10 group-hover:scale-110 group-hover:rotate-3 transition-all">
+                                <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-orange-600/10 to-red-600/10 flex items-center justify-center border border-orange-500/10 group-hover:scale-110 group-hover:rotate-3 transition-all">
                                     <Terminal className="w-10 h-10 text-primary" />
                                 </div>
                                 <div>
@@ -158,7 +158,7 @@ export default function DownloadPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mb-12 flex-grow">
+                            <div className="space-y-4 mb-12 grow">
                                 <FeatureItem text="Portable ZIP Bundle" />
                                 <FeatureItem text="Works on any Distro" />
                                 <FeatureItem text="Open Source Core" />
@@ -186,7 +186,7 @@ export default function DownloadPage() {
                         whileInView={{ opacity: 1 }}
                         className="mt-32 flex flex-col items-center gap-8"
                     >
-                        <div className="h-px w-24 bg-gradient-to-r from-transparent via-border to-transparent" />
+                        <div className="h-px w-24 bg-linear-to-r from-transparent via-border to-transparent" />
                         <div className="flex flex-wrap justify-center gap-8">
                             <a
                                 href="https://github.com/Subhan-Haider/Codiner-Software/releases"
@@ -240,7 +240,7 @@ export default function DownloadPage() {
 function FeatureItem({ text }: { text: string }) {
     return (
         <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
                 <Check className="w-3.5 h-3.5 text-green-500" />
             </div>
             <span className="text-muted-foreground font-medium">{text}</span>

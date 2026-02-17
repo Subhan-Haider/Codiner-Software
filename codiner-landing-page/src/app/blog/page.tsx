@@ -71,7 +71,7 @@ export default function BlogPage() {
                                     </div>
                                 </div>
                                 <Link href="/blog/v0-32-0-release" className="flex-1 w-full">
-                                    <div className="relative aspect-video w-full rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-blue-600/20 border border-primary/10 group-hover:scale-[1.02] transition-transform duration-700 shadow-2xl">
+                                    <div className="relative aspect-video w-full rounded-3xl overflow-hidden bg-linear-to-br from-primary/20 to-blue-600/20 border border-primary/10 group-hover:scale-[1.02] transition-transform duration-700 shadow-2xl">
                                         <div className="absolute inset-0 flex items-center justify-center text-9xl">🚀</div>
                                     </div>
                                 </Link>
@@ -147,7 +147,7 @@ function BlogCard({ date, category, title, desc, icon, href }: { date: string, c
                 viewport={{ once: true }}
                 className="h-full"
             >
-                <div className="relative aspect-video w-full rounded-[2rem] bg-card border border-border mb-8 overflow-hidden group-hover:border-primary/50 transition-all shadow-xl">
+                <div className="relative aspect-video w-full rounded-4xl bg-card border border-border mb-8 overflow-hidden group-hover:border-primary/50 transition-all shadow-xl">
                     <div className="absolute inset-0 flex items-center justify-center text-6xl group-hover:scale-125 transition-transform duration-500">{icon}</div>
                     <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>

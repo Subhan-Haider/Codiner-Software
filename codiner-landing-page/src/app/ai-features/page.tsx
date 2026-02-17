@@ -35,7 +35,7 @@ export default function AIFeaturesPage() {
                                 transition={{ delay: index * 0.1 }}
                                 className="p-8 rounded-xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary transition-all duration-300 group shadow-lg"
                             >
-                                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <div className="w-16 h-16 rounded-lg bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <feature.icon className="w-8 h-8 text-primary" />
                                 </div>
 
@@ -136,7 +136,7 @@ export default function AIFeaturesPage() {
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="p-10 rounded-[3rem] bg-gradient-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl flex flex-col justify-center"
+                            className="p-10 rounded-4xl bg-linear-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl flex flex-col justify-center"
                         >
                             <h3 className="text-2xl font-black italic mb-6 tracking-tight uppercase">AI Assistance Workflow</h3>
                             <div className="space-y-6">
@@ -145,7 +145,7 @@ export default function AIFeaturesPage() {
                                         key={step.title}
                                         className="flex gap-6 p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-sm group hover:bg-card transition-colors"
                                     >
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+                                        <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
                                             {index + 1}
                                         </div>
                                         <div>

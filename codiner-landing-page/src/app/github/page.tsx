@@ -37,7 +37,7 @@ export default function GitHubPage() {
                             href="https://github.com/Subhan-Haider/Codiner-Software"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                         >
                             <Star className="w-5 h-5" />
                             Star on GitHub

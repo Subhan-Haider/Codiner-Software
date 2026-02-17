@@ -65,7 +65,7 @@ export default function FAQPage() {
                                     <span className="text-lg font-semibold pr-8">{faq.question}</span>
                                     <ChevronDown
                                         className={cn(
-                                            "w-5 h-5 text-primary flex-shrink-0 transition-transform",
+                                            "w-5 h-5 text-primary shrink-0 transition-transform",
                                             openIndex === index && "rotate-180"
                                         )}
                                     />
@@ -101,7 +101,7 @@ export default function FAQPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="mt-16 text-center max-w-2xl mx-auto p-8 rounded-xl border border-purple-500/50 bg-gradient-to-br from-purple-900/20 to-blue-900/20"
+                        className="mt-16 text-center max-w-2xl mx-auto p-8 rounded-xl border border-purple-500/50 bg-linear-to-br from-purple-900/20 to-blue-900/20"
                     >
                         <h2 className="text-2xl font-bold mb-4">Still have questions?</h2>
                         <p className="text-muted-foreground mb-6">
@@ -111,7 +111,7 @@ export default function FAQPage() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a
                                 href="/contact"
-                                className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                                className="px-6 py-3 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                             >
                                 Contact Support
                             </a>

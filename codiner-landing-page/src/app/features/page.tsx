@@ -158,13 +158,13 @@ export default function FeaturesPage() {
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <a
                                 href="/download"
-                                className="px-12 py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
+                                className="px-12 py-6 rounded-4xl bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
                             >
                                 Download Now
                             </a>
                             <a
                                 href="/docs"
-                                className="px-12 py-6 rounded-[2rem] border border-border bg-card/50 backdrop-blur-xl font-black text-xl hover:border-primary/50 transition-all italic text-foreground"
+                                className="px-12 py-6 rounded-4xl border border-border bg-card/50 backdrop-blur-xl font-black text-xl hover:border-primary/50 transition-all italic text-foreground"
                             >
                                 View Docs
                             </a>

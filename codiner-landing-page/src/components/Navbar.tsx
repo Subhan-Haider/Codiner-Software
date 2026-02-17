@@ -2,13 +2,16 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Download, Github, Menu, X } from "lucide-react";
+import { Download, Github, Menu, X, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { user, profile, loading } = useAuth();
 
     return (
         <motion.nav
@@ -79,32 +82,80 @@ export default function Navbar() {
                         >
                             About
                         </Link>
+                        <Link
+                            href="/admin"
+                            className="text-primary/70 hover:text-primary transition-colors font-bold text-sm uppercase tracking-widest border border-primary/20 px-2 py-1 rounded-md bg-primary/5"
+                        >
+                            Admin
+                        </Link>
                     </div>
 
                     {/* CTA Buttons */}
-                    <div className="hidden md:flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-6">
                         <ThemeToggle />
+                        {loading ? (
+                            <div className="w-24 h-10 bg-muted animate-pulse rounded-xl" />
+                        ) : user ? (
+                            <div className="flex items-center gap-4">
+                                <Link
+                                    href="/dashboard"
+                                    className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black italic lowercase tracking-tight hover:text-primary transition-colors"
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href="/profile"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border hover:border-primary transition-all group relative"
+                                >
+                                    <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center font-bold text-[10px] text-primary transition-transform group-hover:scale-110">
+                                        {profile?.name?.charAt(0) || user.email?.charAt(0)}
+                                    </div>
+                                    <span className="text-sm font-black italic lowercase">{profile?.name || "node"}</span>
+                                    {!user.emailVerified && user.providerData.some(p => p.providerId === 'password') && (
+                                        <div className="absolute -top-1 -right-1">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-amber-500 animate-ping rounded-full opacity-75" />
+                                                <ShieldAlert className="w-3 h-3 text-amber-500 relative bg-background rounded-full" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </Link>
+                                <Link
+                                    href="/download"
+                                    className={cn(
+                                        "flex items-center gap-2 px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-sm",
+                                        "bg-primary text-primary-foreground shadow-lg shadow-primary/20",
+                                        "hover:scale-105 transition-all duration-200"
+                                    )}
+                                >
+                                    <Download className="w-5 h-5" />
+                                    Download
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="text-sm font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    Log In
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    className="px-6 py-2.5 rounded-xl border border-primary/20 bg-primary/10 text-primary font-black text-sm uppercase tracking-widest hover:bg-primary/20 transition-all"
+                                >
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                         <a
                             href="https://github.com/Subhan-Haider/Codiner-Software"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-primary transition-colors hover:bg-accent"
+                            className="p-2.5 rounded-xl border border-border hover:border-primary transition-colors hover:bg-accent group"
                         >
-                            <Github className="w-5 h-5 text-foreground" />
-                            <span className="text-foreground">GitHub</span>
+                            <Github className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                         </a>
-                        <Link
-                            href="/download"
-                            className={cn(
-                                "flex items-center gap-2 px-6 py-2 rounded-lg font-semibold",
-                                "bg-gradient-to-r from-purple-600 to-blue-600",
-                                "hover:from-purple-500 hover:to-blue-500",
-                                "transform hover:scale-105 transition-all duration-200"
-                            )}
-                        >
-                            <Download className="w-5 h-5" />
-                            Download
-                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -197,7 +248,7 @@ export default function Navbar() {
                                 href="/download"
                                 className={cn(
                                     "flex items-center justify-center gap-2 px-6 py-2 rounded-lg font-semibold",
-                                    "bg-gradient-to-r from-purple-600 to-blue-600",
+                                    "bg-linear-to-r from-purple-600 to-blue-600",
                                     "hover:from-purple-500 hover:to-blue-500"
                                 )}
                                 onClick={() => setIsOpen(false)}

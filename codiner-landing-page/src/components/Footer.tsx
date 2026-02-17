@@ -11,7 +11,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="lg:col-span-1">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center">
                                 <svg
                                     className="w-6 h-6"
                                     fill="none"

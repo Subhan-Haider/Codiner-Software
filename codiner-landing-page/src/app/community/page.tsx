@@ -144,7 +144,7 @@ export default function CommunityPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-center p-16 rounded-[4rem] bg-gradient-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl max-w-5xl mx-auto"
+                        className="text-center p-16 rounded-[4rem] bg-linear-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl max-w-5xl mx-auto"
                     >
                         <UserPlus className="w-16 h-16 text-primary mx-auto mb-8" />
                         <h2 className="text-5xl font-black italic tracking-tighter mb-8">Ready to Join the Revolution?</h2>
@@ -154,7 +154,7 @@ export default function CommunityPage() {
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <a
                                 href="#"
-                                className="px-12 py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
+                                className="px-12 py-6 rounded-4xl bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)]"
                             >
                                 Join our Discord
                             </a>

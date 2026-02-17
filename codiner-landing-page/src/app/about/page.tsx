@@ -54,7 +54,7 @@ export default function AboutPage() {
                                 transition={{ delay: 0.3 + index * 0.1 }}
                                 className="text-center"
                             >
-                                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mx-auto mb-4">
+                                <div className="w-16 h-16 rounded-lg bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center mx-auto mb-4">
                                     <value.icon className="w-8 h-8 text-primary" />
                                 </div>
                                 <h3 className="text-xl font-semibold mb-2">{value.title}</h3>

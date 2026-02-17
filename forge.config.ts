@@ -26,10 +26,10 @@ const SIGNTOOL_PATH = path.join(
  * Signs a Windows executable using DigiCert's signtool.
  */
 function signWindowsExecutable(filePath: string): void {
-  const certHash = process.env.SM_CODE_SIGNING_CERT_SHA1_HASH;
+  const certHash = process.env.SM_CODE_SIGNING_CERT_SHA1;
   if (!certHash) {
     console.log(
-      `[postMake] SM_CODE_SIGNING_CERT_SHA1_HASH not set, skipping signing`,
+      `[postMake] SM_CODE_SIGNING_CERT_SHA1 not set, skipping signing`,
     );
     return;
   }

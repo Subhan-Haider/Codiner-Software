@@ -37,14 +37,14 @@ export default function ShowcasePage() {
                                 className="group relative p-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl"
                             >
                                 {project.featured && (
-                                    <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full text-xs font-semibold flex items-center gap-1">
+                                    <div className="absolute top-4 right-4 px-3 py-1 bg-linear-to-r from-purple-600 to-blue-600 rounded-full text-xs font-semibold flex items-center gap-1">
                                         <Award className="w-3 h-3" />
                                         Featured
                                     </div>
                                 )}
 
                                 {/* Project Image Placeholder */}
-                                <div className="w-full h-48 rounded-lg bg-gradient-to-br from-purple-600/10 to-blue-600/10 mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                <div className="w-full h-48 rounded-lg bg-linear-to-br from-purple-600/10 to-blue-600/10 mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
                                     <div className="text-6xl">{project.icon}</div>
                                 </div>
 
@@ -102,7 +102,7 @@ export default function ShowcasePage() {
                             href="https://github.com/Subhan-Haider/Codiner-Software/issues"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                         >
                             Submit Your Project (via Issues)
                         </a>

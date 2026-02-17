@@ -63,11 +63,11 @@ export default function LocalAIPage() {
 
             {/* Ollama Integration Section */}
             <section className="py-32 border-t border-border/50 bg-background/50 relative">
-                <div className="absolute inset-0 bg-primary/[0.02] pointer-events-none" />
+                <div className="absolute inset-0 bg-primary/2 pointer-events-none" />
                 <div className="container mx-auto px-6 relative">
                     <div className="flex flex-col lg:flex-row items-center gap-24">
                         <div className="flex-1 space-y-10">
-                            <div className="w-24 h-24 rounded-[2rem] bg-linear-to-br from-orange-500 to-primary flex items-center justify-center shadow-2xl group animate-bounce-slow">
+                            <div className="w-24 h-24 rounded-4xl bg-linear-to-br from-orange-500 to-primary flex items-center justify-center shadow-2xl group animate-bounce-slow">
                                 <Box className="w-12 h-12 text-white group-hover:rotate-12 transition-transform" />
                             </div>
                             <h2 className="text-6xl font-black italic tracking-tighter lowercase">the <span className="text-gradient">Ollama</span> stack</h2>
@@ -223,17 +223,17 @@ export default function LocalAIPage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="max-w-4xl mx-auto p-24 rounded-[4rem] border border-primary/20 bg-card/30 backdrop-blur-3xl shadow-3xl"
+                        className="max-w-4xl mx-auto p-24 rounded-4xl border border-primary/20 bg-card/30 backdrop-blur-3xl shadow-3xl"
                     >
                         <h2 className="text-7xl font-black italic tracking-tighter mb-10 lowercase">Ready to unlock <br /> <span className="text-gradient">Local Power</span>?</h2>
                         <p className="text-2xl text-muted-foreground mb-16 font-medium italic lowercase tracking-tight">
                             Join the hundreds of thousands of developers reclaiming their privacy and speed.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                            <a href="https://ollama.ai" target="_blank" className="px-12 py-6 rounded-[2rem] border-2 border-border hover:border-primary font-black text-xl transition-all lowercase italic tracking-tight">
+                            <a href="https://ollama.ai" target="_blank" className="px-12 py-6 rounded-4xl border-2 border-border hover:border-primary font-black text-xl transition-all lowercase italic tracking-tight">
                                 Get Ollama
                             </a>
-                            <a href="/docs" className="px-12 py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-3xl lowercase italic tracking-tight">
+                            <a href="/docs/local-setup" className="px-12 py-6 rounded-4xl bg-primary text-primary-foreground font-black text-xl hover:scale-105 transition-transform shadow-3xl lowercase italic tracking-tight text-center">
                                 Setup Guide
                             </a>
                         </div>

@@ -82,7 +82,7 @@ export default function PricingPage() {
                                 "relative"
                             )}
                         >
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full text-sm font-semibold">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-linear-to-r from-purple-600 to-blue-600 rounded-full text-sm font-semibold">
                                 Most Popular
                             </div>
                             <h3 className="text-2xl font-bold mb-2">Pro</h3>
@@ -113,7 +113,7 @@ export default function PricingPage() {
                                 href="/download"
                                 className={cn(
                                     "w-full block text-center px-6 py-3 rounded-lg font-semibold",
-                                    "bg-gradient-to-r from-purple-600 to-blue-600",
+                                    "bg-linear-to-r from-purple-600 to-blue-600",
                                     "hover:from-purple-500 hover:to-blue-500",
                                     "transition-all duration-200"
                                 )}
@@ -205,7 +205,7 @@ export default function PricingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="mt-20 text-center max-w-4xl mx-auto p-16 rounded-[3rem] bg-gradient-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl"
+                        className="mt-20 text-center max-w-4xl mx-auto p-16 rounded-4xl bg-linear-to-br from-primary/5 to-blue-600/5 border border-primary/20 shadow-2xl"
                     >
                         <h2 className="text-4xl font-bold mb-8 italic tracking-tight">Why is Codiner Free?</h2>
                         <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
@@ -217,7 +217,7 @@ export default function PricingPage() {
                             href="https://github.com/Subhan-Haider/Codiner-Software"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-10 py-5 rounded-[2rem] bg-primary text-primary-foreground font-black text-lg hover:scale-105 transition-transform"
+                            className="inline-flex items-center gap-2 px-10 py-5 rounded-4xl bg-primary text-primary-foreground font-black text-lg hover:scale-105 transition-transform"
                         >
                             Become a Sponsor
                         </a>

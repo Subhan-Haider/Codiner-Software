@@ -99,7 +99,7 @@ export default function ContactPage() {
                                 </div>
 
                                 <button
-                                    className="w-full py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-[1.02] transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)] flex items-center justify-center gap-3"
+                                    className="w-full py-6 rounded-4xl bg-primary text-primary-foreground font-black text-xl hover:scale-[1.02] transition-transform shadow-[0_0_30px_rgba(var(--primary),0.3)] flex items-center justify-center gap-3"
                                 >
                                     <Send className="w-6 h-6" />
                                     Send Message
@@ -136,7 +136,7 @@ export default function ContactPage() {
                                     }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-8 group">
-                                        <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                                        <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                                             <item.icon className="w-8 h-8" />
                                         </div>
                                         <div>
@@ -156,7 +156,7 @@ export default function ContactPage() {
                                         { icon: Twitter, link: "#" },
                                         { icon: Globe, link: "#" }
                                     ].map((social, i) => (
-                                        <a key={i} href={social.link} target="_blank" className="w-[4.5rem] h-[4.5rem] rounded-full border-2 border-border hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-card/30">
+                                        <a key={i} href={social.link} target="_blank" className="w-18 h-18 rounded-full border-2 border-border hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-card/30">
                                             <social.icon className="w-8 h-8" />
                                         </a>
                                     ))}

@@ -35,7 +35,7 @@ export default function IntegrationsPage() {
                             className="mb-16"
                         >
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-lg bg-linear-to-br from-purple-600/10 to-blue-600/10 flex items-center justify-center">
                                     <category.icon className="w-6 h-6 text-primary" />
                                 </div>
                                 <div>
@@ -99,7 +99,7 @@ export default function IntegrationsPage() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a
                                 href="/docs"
-                                className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
+                                className="px-6 py-3 rounded-lg bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 transition-all duration-200 font-semibold"
                             >
                                 View API Docs
                             </a>

@@ -124,12 +124,17 @@ export default function InstallationPage() {
                             <p className="text-lg text-muted-foreground mb-8 font-medium">
                                 Upon first launch, Codiner will help you set up <strong>Ollama</strong> or connect to your preferred AI provider.
                             </p>
-                            <div className="p-6 rounded-2xl bg-white border border-border font-mono text-sm text-slate-900 shadow-inner">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Terminal className="w-4 h-4 text-primary" />
-                                    <span className="font-bold">$ codiner --init-paike</span>
+                            <div className="flex flex-col gap-6">
+                                <div className="p-6 rounded-2xl bg-white border border-border font-mono text-sm text-slate-900 shadow-inner">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Terminal className="w-4 h-4 text-primary" />
+                                        <span className="font-bold">$ codiner --init-paike</span>
+                                    </div>
+                                    <div className="text-slate-500">Initializing neural project graph... Done.</div>
                                 </div>
-                                <div className="text-slate-500">Initializing neural project graph... Done.</div>
+                                <a href="/docs/local-setup" className="flex items-center gap-2 text-primary font-black hover:underline underline-offset-4">
+                                    View Full Ollama & Model Setup Guide →
+                                </a>
                             </div>
                         </motion.div>
                     </div>
