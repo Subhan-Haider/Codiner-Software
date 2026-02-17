@@ -191,7 +191,7 @@ export default function Home() {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 border-y border-border bg-muted/30">
+      <section className="py-20 border-y border-border bg-background">
         <div className="container mx-auto px-6">
           <p className="text-center text-sm font-bold text-muted-foreground uppercase tracking-[0.3em] mb-12">
             Trusted by developers from
@@ -465,7 +465,7 @@ export default function Home() {
       </section>
 
       {/* Security Section (NEW) */}
-      <section className="py-32 border-t border-border bg-black/40">
+      <section className="py-32 border-t border-border bg-background">
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-20">
             <div className="flex-1">
@@ -612,7 +612,7 @@ export default function Home() {
       </section>
 
       {/* Ecosystem Marquee */}
-      <section className="py-24 border-t border-border bg-black/20 overflow-hidden">
+      <section className="py-24 border-t border-border bg-background overflow-hidden">
         <div className="container mx-auto px-6 mb-16">
           <div className="flex items-center gap-4 mb-4">
             <div className="h-px flex-1 bg-border" />
@@ -648,7 +648,7 @@ export default function Home() {
       </section>
 
       {/* Neural Pulse: Global Activity */}
-      <section className="py-24 border-t border-border bg-black/40 overflow-hidden relative">
+      <section className="py-24 border-t border-border bg-background overflow-hidden relative">
         <div className="absolute inset-0 opacity-20 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
         </div>
