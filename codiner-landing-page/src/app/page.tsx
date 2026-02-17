@@ -145,8 +145,37 @@ export default function Home() {
                       {"// PAIKE: Architecting neural code flows..."}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="h-32 bg-white/5 rounded-xl border border-white/10 animate-pulse" />
-                      <div className="h-32 bg-white/5 rounded-xl border border-white/10 animate-pulse delay-500" />
+                      {/* Box 1: Neural Graph */}
+                      <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <div className="w-12 h-1 bg-primary/30 rounded-full" />
+                          <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="w-full h-1 bg-white/10 rounded-full" />
+                          <div className="w-3/4 h-1 bg-white/10 rounded-full" />
+                          <div className="w-1/2 h-1 bg-primary/40 rounded-full" />
+                        </div>
+                        <div className="text-[10px] text-primary/60 font-mono">Neural-AST Graphing...</div>
+                      </div>
+
+                      {/* Box 2: Model Status */}
+                      <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Cpu className="w-3 h-3 text-blue-400" />
+                          <div className="text-[10px] text-blue-400 font-bold">Llama-3 (Local)</div>
+                        </div>
+                        <div className="flex items-end gap-1 h-8">
+                          {[40, 70, 45, 90, 65].map((h, i) => (
+                            <div
+                              key={i}
+                              className="flex-1 bg-blue-400/30 rounded-t-sm animate-pulse"
+                              style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}
+                            />
+                          ))}
+                        </div>
+                        <div className="text-[10px] text-blue-400/60 font-mono">Optimizing... 98%</div>
+                      </div>
                     </div>
                   </div>
                 </div>
