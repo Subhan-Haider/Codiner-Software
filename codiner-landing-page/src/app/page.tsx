@@ -247,8 +247,8 @@ export default function Home() {
                       key={i}
                       className="absolute w-4 h-4 rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]"
                       style={{
-                        top: `${50 + 45 * Math.sin(angle * Math.PI / 180)}%`,
-                        left: `${50 + 45 * Math.cos(angle * Math.PI / 180)}%`,
+                        top: `${(50 + 45 * Math.sin(angle * Math.PI / 180)).toFixed(2)}%`,
+                        left: `${(50 + 45 * Math.cos(angle * Math.PI / 180)).toFixed(2)}%`,
                       }}
                       animate={{ scale: [1, 1.5, 1] }}
                       transition={{ repeat: Infinity, duration: 2, delay: i * 0.4 }}
