@@ -502,9 +502,12 @@ export default function Home() {
                   <p className="text-lg font-bold mb-10 leading-relaxed italic">
                     The only AI developer tool trusted by government contractors and fintech giants around the globe.
                   </p>
-                  <button className="px-8 py-4 rounded-full border-2 border-primary text-primary font-black uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all">
+                  <Link
+                    href="/blog/security-best-practices"
+                    className="px-8 py-4 rounded-full border-2 border-primary text-primary font-black uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all inline-block"
+                  >
                     Security Whitepaper
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
