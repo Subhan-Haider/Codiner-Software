@@ -54,10 +54,10 @@ export default function DocsPage() {
                     {/* Quick Start Grid */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
                         {[
-                            { title: "Getting Started", icon: Compass, count: "12 articles" },
-                            { title: "PAIKE Engine", icon: Zap, count: "8 articles" },
-                            { title: "Foundry CLI", icon: Terminal, count: "15 articles" },
-                            { title: "API Reference", icon: Code, count: "142 endpoints" }
+                            { title: "Getting Started", icon: Compass, count: "12 articles", href: "/docs/getting-started" },
+                            { title: "PAIKE Engine", icon: Zap, count: "8 articles", href: "/docs/paike-engine" },
+                            { title: "Foundry CLI", icon: Terminal, count: "15 articles", href: "/docs/foundry-cli" },
+                            { title: "API Reference", icon: Code, count: "142 endpoints", href: "/docs/api-reference" }
                         ].map((category, i) => (
                             <motion.div
                                 key={i}
@@ -65,13 +65,18 @@ export default function DocsPage() {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="p-10 rounded-[2.5rem] border border-border bg-card/30 backdrop-blur-xl hover:border-primary/50 transition-all cursor-pointer group"
+                                className="group h-full"
                             >
-                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                    <category.icon className="w-7 h-7 text-primary" />
-                                </div>
-                                <h3 className="text-2xl font-black italic mb-2">{category.title}</h3>
-                                <p className="text-muted-foreground font-bold uppercase text-xs tracking-widest">{category.count}</p>
+                                <Link
+                                    href={category.href}
+                                    className="p-10 rounded-[2.5rem] border border-border bg-card/30 backdrop-blur-xl hover:border-primary/50 transition-all cursor-pointer block h-full shadow-xl"
+                                >
+                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <category.icon className="w-7 h-7 text-primary" />
+                                    </div>
+                                    <h3 className="text-2xl font-black italic mb-2">{category.title}</h3>
+                                    <p className="text-muted-foreground font-bold uppercase text-xs tracking-widest">{category.count}</p>
+                                </Link>
                             </motion.div>
                         ))}
                     </div>
