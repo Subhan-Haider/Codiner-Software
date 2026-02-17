@@ -1,0 +1,29 @@
+# Add 'frontend' label to any changes in 'src/renderer' or 'web'
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: ['src/renderer/**/*', 'web/**/*']
+
+# Add 'backend' label to any changes in 'src/main' or 'src/ipc'
+backend:
+  - changed-files:
+    - any-glob-to-any-file: ['src/main/**/*', 'src/ipc/**/*']
+
+# Add 'workspace' label to any changes in '.vscode' or '.cursor'
+workspace:
+  - changed-files:
+    - any-glob-to-any-file: ['.vscode/**/*', '.cursor/**/*']
+
+# Add 'cicd' label to any changes in '.github/workflows'
+cicd:
+  - changed-files:
+    - any-glob-to-any-file: ['.github/workflows/**/*']
+
+# Add 'documentation' label to any changes in md files
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md']
+
+# Add 'dependencies' label to any changes in lock files
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: ['package-lock.json']
