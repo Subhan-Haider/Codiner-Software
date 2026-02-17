@@ -739,7 +739,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-            <Link href="/blog" className="group">
+            <Link href="/blog/v0-32-0-release" className="group">
               <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden">
                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 🚀
@@ -757,7 +757,7 @@ export default function Home() {
               </div>
             </Link>
 
-            <Link href="/blog" className="group">
+            <Link href="/blog/10-tips-ai-apps" className="group">
               <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden text-blue-400">
                 <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 💡
@@ -775,7 +775,7 @@ export default function Home() {
               </div>
             </Link>
 
-            <Link href="/blog" className="group md:hidden lg:block">
+            <Link href="/blog/roadmap-2026" className="group md:hidden lg:block">
               <div className="aspect-video rounded-[2.5rem] bg-card border border-border mb-8 flex items-center justify-center text-7xl group-hover:scale-[1.02] transition-transform shadow-lg group-hover:border-primary/50 relative overflow-hidden text-purple-400">
                 <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 🗓️
