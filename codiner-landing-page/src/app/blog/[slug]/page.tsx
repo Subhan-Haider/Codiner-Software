@@ -1,7 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Calendar, ChevronLeft, Share2, Bookmark, MessageSquare } from "lucide-react";
+import { Calendar, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import BlogActions from "@/components/BlogActions";
 
 const posts: Record<string, any> = {
     "v0-32-0-release": {
@@ -167,17 +168,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 </div>
 
                 <div className="mt-20 pt-12 border-t border-border flex flex-wrap gap-8 items-center justify-between">
-                    <div className="flex items-center gap-8">
-                        <button className="flex items-center gap-2 font-bold hover:text-primary transition-colors group">
-                            <Share2 className="w-5 h-5 group-hover:animate-bounce" /> share
-                        </button>
-                        <button className="flex items-center gap-2 font-bold hover:text-primary transition-colors group">
-                            <Bookmark className="w-5 h-5 group-hover:fill-primary" /> save
-                        </button>
-                        <button className="flex items-center gap-2 font-bold hover:text-primary transition-colors group">
-                            <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" /> 12 comments
-                        </button>
-                    </div>
+                    <BlogActions postTitle={post.title} />
                     <Link
                         href="/blog"
                         className="px-8 py-3 rounded-xl bg-card border border-border font-bold hover:border-primary/50 transition-all text-sm italic"
