@@ -86,6 +86,24 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/file-uri-to-path")) {
     return false;
   }
+  if (file.startsWith("/node_modules/electron-updater")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/fs-extra")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/builder-util-runtime")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/semver")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/electron-log")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/electron-squirrel-startup")) {
+    return false;
+  }
   if (file.startsWith("/.vite")) {
     return false;
   }
@@ -154,7 +172,7 @@ const config: ForgeConfig = {
     new MakerDMG({
       format: "ULFO",
     }),
-    new MakerZIP({}, ["darwin"]),
+    new MakerZIP({}, ["darwin", "linux"]),
     new MakerRpm({}),
     new MakerDeb({
       options: {
@@ -168,7 +186,7 @@ const config: ForgeConfig = {
       config: {
         repository: {
           owner: "Subhan-Haider",
-          name: "Codiner_Windows",
+          name: "Codiner-Software",
         },
         draft: true,
         force: true,
