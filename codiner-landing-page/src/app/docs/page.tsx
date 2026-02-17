@@ -14,11 +14,14 @@ export default function DocsPage() {
         <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
             <Navbar />
 
+            {/* Premium Background Glows */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 -left-1/4 w-[1000px] h-[1000px] bg-primary/10 blur-[150px] rounded-full animate-pulse" />
+                <div className="absolute bottom-0 -right-1/4 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full animate-pulse delay-1000" />
+            </div>
+
             {/* Hero Section */}
-            <section className="relative pt-32 pb-20 overflow-hidden">
-                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                    <Book className="w-[500px] h-[500px] text-primary" />
-                </div>
+            <section className="relative pt-40 pb-20 overflow-hidden">
 
                 <div className="container mx-auto px-6 relative">
                     <motion.div
