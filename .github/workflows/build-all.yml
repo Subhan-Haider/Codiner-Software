@@ -56,7 +56,14 @@ jobs:
       - name: Prepare Assets
         run: |
           mkdir release-assets
-          find artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" \) -exec cp {} release-assets/ \;
+          # Windows
+          find artifacts/build-windows-latest -type f -name "*.exe" -exec cp {} release-assets/Codiner-Windows-Setup.exe \; || true
+          # macOS
+          find artifacts/build-macos-latest -type f -name "*.dmg" -exec cp {} release-assets/Codiner-Mac-Universal.dmg \; || true
+          find artifacts/build-macos-latest -type f -name "*.zip" -exec cp {} release-assets/Codiner-Mac-Portable.zip \; || true
+          # Linux
+          find artifacts/build-ubuntu-latest -type f -name "*.deb" -exec cp {} release-assets/Codiner-Linux.deb \; || true
+          find artifacts/build-ubuntu-latest -type f -name "*.zip" -exec cp {} release-assets/Codiner-Linux-Portable.zip \; || true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
