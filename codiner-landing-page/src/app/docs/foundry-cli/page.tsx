@@ -37,7 +37,7 @@ export default function FoundryCliPage() {
 
                     <div className="max-w-4xl mx-auto space-y-20">
                         {/* Terminal Mockup */}
-                        <div className="p-8 rounded-[3rem] bg-black/60 border border-border shadow-3xl font-mono text-sm">
+                        <div className="p-8 rounded-[3rem] bg-white border border-border shadow-xl font-mono text-sm relative overflow-hidden">
                             <div className="flex gap-2 mb-6">
                                 <div className="w-3 h-3 rounded-full bg-red-500/40" />
                                 <div className="w-3 h-3 rounded-full bg-yellow-500/40" />

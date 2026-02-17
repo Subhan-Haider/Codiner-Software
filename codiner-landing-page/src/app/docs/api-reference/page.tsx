@@ -84,10 +84,10 @@ export default function ApiReferencePage() {
                                     Triggers a deep neural scan of the target repository and populates the local vector store.
                                 </p>
 
-                                <div className="p-8 rounded-[2.5rem] bg-black/60 border border-border font-mono text-sm">
+                                <div className="p-8 rounded-[2.5rem] bg-white border border-border shadow-xl font-mono text-sm relative overflow-hidden">
                                     <div className="flex justify-between items-center mb-6">
-                                        <span className="text-white/40 uppercase tracking-widest text-xs">Request Body</span>
-                                        <span className="text-primary hover:text-primary/70 cursor-pointer">Copy JSON</span>
+                                        <span className="text-muted-foreground/60 uppercase tracking-widest text-xs">Request Body</span>
+                                        <span className="text-primary hover:text-primary/70 cursor-pointer text-xs font-black uppercase tracking-widest">Copy JSON</span>
                                     </div>
                                     <pre className="text-purple-400">
                                         {`{
@@ -135,7 +135,7 @@ function ParamRow({ name, type, desc }: { name: string, type: string, desc: stri
                 <code className="text-primary font-bold">{name}</code>
                 <p className="text-sm text-muted-foreground font-medium">{desc}</p>
             </div>
-            <span className="text-xs font-black uppercase tracking-widest text-white/30">{type}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/40">{type}</span>
         </div>
     );
 }

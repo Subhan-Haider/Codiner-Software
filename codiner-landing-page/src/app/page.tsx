@@ -128,26 +128,26 @@ export default function Home() {
                 <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/30 to-blue-600/30 blur-2xl rounded-[3rem] group-hover:blur-3xl transition-all opacity-50" />
 
                 {/* Mockup Window */}
-                <div className="relative bg-[#0d1117] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden aspect-video transform-gpu border-b-4 border-white/5">
-                  <div className="h-10 border-b border-white/10 bg-black/40 flex items-center px-6 gap-2">
+                <div className="relative bg-white border border-border rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.05)] overflow-hidden aspect-video transform-gpu">
+                  <div className="h-10 border-b border-border bg-muted/30 flex items-center px-6 gap-2">
                     <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-red-400/40" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-400/40" />
+                      <div className="w-3 h-3 rounded-full bg-green-400/40" />
                     </div>
                     <div className="ml-4 flex items-center gap-2">
-                      <img src="/logo.png" className="w-4 h-4 opacity-50" alt="" />
-                      <div className="text-xs text-white/30 font-mono italic">projects/my-new-app/src/page.tsx</div>
+                      <img src="/logo.png" className="w-4 h-4 opacity-30" alt="" />
+                      <div className="text-xs text-muted-foreground font-mono italic">projects/my-new-app/src/page.tsx</div>
                     </div>
                   </div>
                   <div className="p-8 font-mono text-sm leading-relaxed space-y-4">
                     <div className="flex gap-4">
-                      <span className="text-purple-400">const</span>
-                      <span className="text-blue-400">app</span>
-                      <span className="text-white">=</span>
-                      <span className="text-yellow-400">"Codiner PAIKE Interface"</span>
+                      <span className="text-purple-600">const</span>
+                      <span className="text-blue-600">app</span>
+                      <span className="text-foreground">=</span>
+                      <span className="text-orange-600">"Codiner PAIKE Interface"</span>
                     </div>
-                    <div className="text-white/60 pl-4 border-l-2 border-primary/20 bg-primary/5 py-4 my-6 italic">
+                    <div className="text-muted-foreground/60 pl-4 border-l-2 border-primary/20 bg-primary/5 py-4 my-6 italic">
                       {"// PAIKE: Architecting neural code flows..."}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -162,7 +162,7 @@ export default function Home() {
                           <div className="w-3/4 h-1 bg-white/10 rounded-full" />
                           <div className="w-1/2 h-1 bg-primary/40 rounded-full" />
                         </div>
-                        <div className="text-[10px] text-primary/60 font-mono">Neural-AST Graphing...</div>
+                        <div className="text-[10px] text-primary/60 font-mono font-bold">Neural-AST Graphing...</div>
                       </div>
 
                       {/* Box 2: Model Status */}

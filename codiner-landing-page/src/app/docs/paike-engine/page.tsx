@@ -50,7 +50,7 @@ export default function PaikeEnginePage() {
                                     <FeatureItem icon={Boxes} title="Neural Stitching" text="Predicts where new code blocks should live." />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-6 p-8 rounded-[3rem] bg-black/40 border border-border shadow-inner">
+                            <div className="grid grid-cols-2 gap-6 p-8 rounded-[3rem] bg-white border border-border shadow-xl">
                                 <div className="p-6 rounded-2xl bg-card border border-border flex flex-col items-center text-center">
                                     <Cpu className="w-8 h-8 text-primary mb-4" />
                                     <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Local Inference</span>
