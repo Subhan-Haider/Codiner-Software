@@ -19,15 +19,14 @@ export default function Navbar() {
             <div className="container mx-auto px-6 py-4">
                 <div className="flex justify-between items-center">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-110 transition-transform">
+                    <Link href="/" className="group flex items-center">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden group-hover:scale-110 transition-transform">
                             <img
                                 src="/logo.png"
                                 alt="Codiner Logo"
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <span className="text-2xl font-bold">Codiner</span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -49,6 +48,12 @@ export default function Navbar() {
                             className="text-muted-foreground hover:text-foreground transition-colors"
                         >
                             Documentation
+                        </Link>
+                        <Link
+                            href="/blog"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            Blog
                         </Link>
                         <Link
                             href="/paike"
@@ -142,6 +147,13 @@ export default function Navbar() {
                             onClick={() => setIsOpen(false)}
                         >
                             Documentation
+                        </Link>
+                        <Link
+                            href="/blog"
+                            className="block text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            Blog
                         </Link>
                         <Link
                             href="/paike"
