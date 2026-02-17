@@ -308,17 +308,20 @@ export default function Home() {
               {
                 quote: "Codiner PAIKE has completely changed how I architect my Next.js apps. It's like having a brilliant co-pilot that lives on my SSD.",
                 author: "Alex Rivers",
-                role: "Frontend Architect"
+                role: "Frontend Architect",
+                avatar: "https://i.pravatar.cc/150?u=alex"
               },
               {
                 quote: "Finally, an AI tool that doesn't sacrifice privacy for power. Local-first is the only way forward for enterprise development.",
                 author: "Sarah Jenkins",
-                role: "Security Lead"
+                role: "Security Lead",
+                avatar: "https://i.pravatar.cc/150?u=sarah"
               },
               {
                 quote: "The one-click deployment to Vercel and AWS makes the transition from dev to prod feel like magic. Best tool of 2026.",
                 author: "Marcus Thorne",
-                role: "Fullstack Developer"
+                role: "Fullstack Developer",
+                avatar: "https://i.pravatar.cc/150?u=marcus"
               }
             ].map((t, i) => (
               <motion.div
@@ -331,10 +334,12 @@ export default function Home() {
               >
                 <p className="text-lg mb-6">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/20" />
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+                    <img src={t.avatar} alt={t.author} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
+                  </div>
                   <div>
-                    <div className="font-bold">{t.author}</div>
-                    <div className="text-sm text-muted-foreground">{t.role}</div>
+                    <div className="font-bold tracking-tight">{t.author}</div>
+                    <div className="text-sm text-muted-foreground font-medium">{t.role}</div>
                   </div>
                 </div>
               </motion.div>
