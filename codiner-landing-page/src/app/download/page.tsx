@@ -71,7 +71,7 @@ export default function DownloadPage() {
                             </ul>
 
                             <a
-                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-Setup-0.32.0.exe"
+                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-Windows-Setup.exe"
                                 className={cn(
                                     "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-semibold",
                                     "bg-gradient-to-r from-purple-600 to-blue-600",
@@ -122,7 +122,7 @@ export default function DownloadPage() {
                             </ul>
 
                             <a
-                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-0.32.0.dmg"
+                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-Mac-Universal.dmg"
                                 className={cn(
                                     "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-semibold",
                                     "bg-gradient-to-r from-purple-600 to-blue-600",
@@ -173,7 +173,7 @@ export default function DownloadPage() {
                             </ul>
 
                             <a
-                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-linux-x64-0.32.0.zip"
+                                href="https://github.com/Subhan-Haider/Codiner-Software/releases/latest/download/Codiner-Linux-Portable.zip"
                                 className={cn(
                                     "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-semibold",
                                     "bg-gradient-to-r from-purple-600 to-blue-600",
