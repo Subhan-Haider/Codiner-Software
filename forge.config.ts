@@ -115,7 +115,6 @@ const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    arch: "x64", // Default to x64, can be overridden via CLI
     protocols: [
       {
         name: "Codiner",
