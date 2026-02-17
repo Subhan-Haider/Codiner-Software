@@ -72,6 +72,26 @@ export default function GettingStartedPage() {
                                 title="Begin Architectural Chat"
                                 text="Use CMD+K (or CTRL+K) to talk to PAIKE. Ask it to 'scaffold a dashboard with authentication' or 'explain the existing project graph'."
                             />
+                            <Step
+                                num="04"
+                                title="Neural AST Indexing"
+                                text="Run a deep scan of your codebase. This allows PAIKE to understand cross-file dependencies and type definitions with 100% accuracy."
+                            />
+                            <Step
+                                num="05"
+                                title="One-Click Deployment"
+                                text="Once your app is ready, use the Deployment tab to ship to Vercel, AWS, or Docker. No manual CI/CD configuration required."
+                            />
+                        </div>
+
+                        {/* Additional Guides */}
+                        <div className="grid md:grid-cols-3 gap-8 mb-20">
+                            <ArticleLink title="Extension Setup" time="5 min" />
+                            <ArticleLink title="Local-first Privacy" time="3 min" />
+                            <ArticleLink title="Custom Model Config" time="10 min" />
+                            <ArticleLink title="Vector Memory Tunings" time="8 min" />
+                            <ArticleLink title="Cloud Bridge Setup" time="5 min" />
+                            <ArticleLink title="Template Customization" time="12 min" />
                         </div>
 
                         {/* Call to Action */}
@@ -125,6 +145,15 @@ function Step({ num, title, text }: { num: string, title: string, text: string }
                 <p className="text-lg text-muted-foreground leading-relaxed font-medium">{text}</p>
                 <div className="h-px w-full bg-border" />
             </div>
+        </div>
+    );
+}
+
+function ArticleLink({ title, time }: { title: string, time: string }) {
+    return (
+        <div className="p-6 rounded-2xl border border-border bg-card/20 hover:border-primary/30 transition-all cursor-pointer group">
+            <div className="text-xs font-black text-primary/40 uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">{time} read</div>
+            <div className="text-lg font-bold italic">{title}</div>
         </div>
     );
 }

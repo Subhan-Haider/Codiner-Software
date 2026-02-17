@@ -51,12 +51,26 @@ export default function FoundryCliPage() {
                         </div>
 
                         {/* Commands Reference */}
-                        <div className="grid gap-6">
-                            <h2 className="text-4xl font-black italic tracking-tighter mb-4">Core Commands</h2>
-                            <CommandRow cmd="foundry init [name]" desc="Initialize a new AI-native project from a template." />
-                            <CommandRow cmd="foundry paike --scan" desc="Manually trigger a deep neural scan of your directory." />
-                            <CommandRow cmd="foundry login" desc="Authenticates with your cloud providers for model access." />
-                            <CommandRow cmd="foundry deploy" desc="Orchestrate one-click deployment to Vercel or AWS." />
+                        <div className="grid gap-12">
+                            <div>
+                                <h2 className="text-4xl font-black italic tracking-tighter mb-8">Core Commands</h2>
+                                <div className="space-y-4">
+                                    <CommandRow cmd="foundry init [name]" desc="Initialize a new AI-native project from a template." />
+                                    <CommandRow cmd="foundry paike --scan" desc="Manually trigger a deep neural scan of your directory." />
+                                    <CommandRow cmd="foundry login" desc="Authenticates with your cloud providers for model access." />
+                                    <CommandRow cmd="foundry deploy" desc="Orchestrate one-click deployment to Vercel or AWS." />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 className="text-4xl font-black italic tracking-tighter mb-8">Advanced Workflows</h2>
+                                <div className="space-y-4">
+                                    <CommandRow cmd="foundry release --patch" desc="Automate semantic versioning and changelog generation." />
+                                    <CommandRow cmd="foundry env sync" desc="Synchronize environment variables across your team securely." />
+                                    <CommandRow cmd="foundry logs --tail" desc="Real-time spectral analysis of your running PAIKE instance." />
+                                    <CommandRow cmd="foundry doctor" desc="Deep diagnostic scan of your local AST and vector stores." />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Global Flags */}

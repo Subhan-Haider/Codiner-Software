@@ -47,11 +47,27 @@ export default function ApiReferencePage() {
                                 </ul>
                             </div>
                             <div>
+                                <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6">Workspace</h3>
+                                <ul className="space-y-4 font-bold text-muted-foreground">
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Project Init (12)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Template Config (8)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Team Synch (15)</li>
+                                </ul>
+                            </div>
+                            <div>
                                 <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6">Orchestration</h3>
                                 <ul className="space-y-4 font-bold text-muted-foreground">
-                                    <li className="hover:text-primary transition-colors cursor-pointer">Start Synch</li>
-                                    <li className="hover:text-primary transition-colors cursor-pointer">Query Graph</li>
-                                    <li className="hover:text-primary transition-colors cursor-pointer">Apply Patch</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Start Synch (5)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Query Graph (24)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Apply Patch (12)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6">Neural Engine</h3>
+                                <ul className="space-y-4 font-bold text-muted-foreground">
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Inference (42)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Vector Ops (18)</li>
+                                    <li className="hover:text-primary transition-colors cursor-pointer">Model Tuning (6)</li>
                                 </ul>
                             </div>
                         </aside>
