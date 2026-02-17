@@ -46,7 +46,7 @@ export default function TemplatesPage() {
                             ].map((trending, i) => (
                                 <a
                                     key={i}
-                                    href="https://github.com/Subhan-Haider/Codiner-Software"
+                                    href="https://github.com/Subhan-Haider/Codiner-Template"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="block"
@@ -122,7 +122,7 @@ export default function TemplatesPage() {
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">{template.downloads} downloads</span>
                                     <a
-                                        href="https://github.com/Subhan-Haider/Codiner-Software"
+                                        href="https://github.com/Subhan-Haider/Codiner-Template"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-primary hover:text-primary transition-colors font-semibold"
