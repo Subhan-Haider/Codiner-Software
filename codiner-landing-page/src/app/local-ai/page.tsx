@@ -97,17 +97,17 @@ export default function LocalAIPage() {
                                 <span className="font-mono text-sm font-bold uppercase tracking-widest">ollama list --local</span>
                             </div>
                             <div className="space-y-6 font-mono text-sm">
-                                <div className="flex justify-between items-center p-4 rounded-2xl bg-black/40 border border-primary/20">
-                                    <span className="text-green-400 font-bold">llama3:8b</span>
-                                    <span className="text-xs text-muted-foreground">READY</span>
+                                <div className="flex justify-between items-center p-4 rounded-2xl bg-white border border-primary/20 shadow-sm">
+                                    <span className="text-green-600 font-bold">llama3:8b</span>
+                                    <span className="text-xs text-muted-foreground font-black">READY</span>
                                 </div>
-                                <div className="flex justify-between items-center p-4 rounded-2xl bg-black/20 border border-border">
+                                <div className="flex justify-between items-center p-4 rounded-2xl bg-zinc-50 border border-border shadow-sm">
                                     <span className="text-primary font-bold">deepseek-coder:v2</span>
-                                    <span className="text-xs text-muted-foreground">CACHED</span>
+                                    <span className="text-xs text-muted-foreground font-black">CACHED</span>
                                 </div>
-                                <div className="flex justify-between items-center p-4 rounded-2xl bg-black/20 border border-border">
-                                    <span className="text-white">qwen2.5-coder:7b</span>
-                                    <span className="text-xs text-muted-foreground">DETECTED</span>
+                                <div className="flex justify-between items-center p-4 rounded-2xl bg-zinc-50 border border-border shadow-sm">
+                                    <span className="text-zinc-600 font-bold">qwen2.5-coder:7b</span>
+                                    <span className="text-xs text-muted-foreground font-black">DETECTED</span>
                                 </div>
                             </div>
                             <div className="mt-8 flex items-center gap-2 text-xs font-bold text-primary animate-pulse uppercase tracking-widest">
