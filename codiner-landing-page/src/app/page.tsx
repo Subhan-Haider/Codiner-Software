@@ -247,7 +247,7 @@ export default function Home() {
           </div>
 
           {/* PAIKE Cognitive Architecture Visual */}
-          <div className="max-w-6xl mx-auto p-12 rounded-[4rem] bg-black/40 border border-border/50 relative overflow-hidden shadow-3xl">
+          <div className="max-w-6xl mx-auto p-12 rounded-[4rem] bg-background border border-border/50 relative overflow-hidden shadow-3xl">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             <div className="flex flex-col lg:flex-row items-center gap-16">
               <div className="flex-1 space-y-8">
