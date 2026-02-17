@@ -1,24 +1,15 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Calendar, Clock, ChevronLeft, Share2, Bookmark, MessageSquare } from "lucide-react";
+import { Calendar, ChevronLeft, Share2, Bookmark, MessageSquare } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
-export default function BlogPostPage() {
-    const params = useParams();
-    const slug = params.slug as string;
-
-    // Comprehensive content library for blog posts
-    const posts: Record<string, any> = {
-        "v0-32-0-release": {
-            title: "Introducing Codiner v0.32.0: AI-Powered Development Reimagined",
-            date: "Feb 14, 2026",
-            category: "Release",
-            icon: "🚀",
-            content: `
+const posts: Record<string, any> = {
+    "v0-32-0-release": {
+        title: "Introducing Codiner v0.32.0: AI-Powered Development Reimagined",
+        date: "Feb 14, 2026",
+        category: "Release",
+        icon: "🚀",
+        content: `
 We're excited to announce the latest release of Codiner, featuring enhanced AI capabilities, improved performance, and a completely redesigned user interface. This release represents months of work and feedback from our amazing community.
 
 ### What's New?
@@ -30,14 +21,14 @@ We're excited to announce the latest release of Codiner, featuring enhanced AI c
 With v0.32.0, we're doubling down on our commitment to local-first development. By leveraging the latest optimizations in Apple Silicon and NVIDIA's Cuda cores, Codiner now runs Llama 3 models with sub-millisecond latency.
 
 This is just the beginning of our journey in 2026.
-            `
-        },
-        "10-tips-ai-apps": {
-            title: "10 Tips for Building Better Apps with AI",
-            date: "Feb 12, 2026",
-            category: "Tutorial",
-            icon: "💡",
-            content: `
+        `
+    },
+    "10-tips-ai-apps": {
+        title: "10 Tips for Building Better Apps with AI",
+        date: "Feb 12, 2026",
+        category: "Tutorial",
+        icon: "💡",
+        content: `
 Building applications with AI is a new paradigm that requires a shift in how we think about the development lifecycle. Here are 10 tips to help you master the AI-first workflow in Codiner.
 
 ### 1. Be Specific with Architecture
@@ -48,14 +39,14 @@ Codiner understands your entire directory. Mention specific files to get more co
 
 ### 3. Review, Don't Just Accept
 AI is a co-pilot, not the captain. Always review the generated logic to ensure it meets your specific security and performance standards.
-            `
-        },
-        "understanding-typescript": {
-            title: "Understanding TypeScript in Codiner",
-            date: "Feb 10, 2026",
-            category: "Technical",
-            icon: "🔷",
-            content: `
+        `
+    },
+    "understanding-typescript": {
+        title: "Understanding TypeScript in Codiner",
+        date: "Feb 10, 2026",
+        category: "Technical",
+        icon: "🔷",
+        content: `
 TypeScript is more than just types; it's the backbone of reliable AI-generated code. In this deep dive, we explore how Codiner leverages TypeScript's AST to generate superior code.
 
 ### The Power of Type Inference
@@ -63,14 +54,14 @@ When you use a local model through Codiner, it actively parses your Type definit
 
 ### Reducing Hallucinations
 By enforcing strict type checking during the generation phase, Codiner can self-correct when an AI attempts to use a non-existent method or property.
-            `
-        },
-        "community-spotlight": {
-            title: "Community Spotlight: Amazing Projects",
-            date: "Feb 8, 2026",
-            category: "Community",
-            icon: "🌟",
-            content: `
+        `
+    },
+    "community-spotlight": {
+        title: "Community Spotlight: Amazing Projects",
+        date: "Feb 8, 2026",
+        category: "Community",
+        icon: "🌟",
+        content: `
 Our community has been busy building incredible things with the Codiner AI Foundry. This month, we're highlighting standout projects that showcase the power of local-first development.
 
 ### 1. HOSH - Privacy Browser
@@ -78,14 +69,14 @@ A browser extension built entirely using PAIKE that helps users manage their dig
 
 ### 2. NeuralNotes
 A local-first note-taking app that uses AI to automatically categorize and cross-link your thoughts as you write them.
-            `
-        },
-        "deploying-your-first-app": {
-            title: "Deploying Your First App",
-            date: "Feb 5, 2026",
-            category: "Tutorial",
-            icon: "🚢",
-            content: `
+        `
+    },
+    "deploying-your-first-app": {
+        title: "Deploying Your First App",
+        date: "Feb 5, 2026",
+        category: "Tutorial",
+        icon: "🚢",
+        content: `
 You've built your masterpiece locally—now it's time to share it with the world. Codiner makes deployment a breeze.
 
 ### Step 1: Production Build
@@ -93,14 +84,14 @@ Run 'npm run build' to generate an optimized version of your app. Codiner automa
 
 ### Step 2: Choose Your Platform
 Whether it's Vercel, Netlify, or custom Docker, Codiner provides one-click configuration for major providers.
-            `
-        },
-        "security-best-practices": {
-            title: "Security Best Practices",
-            date: "Feb 3, 2026",
-            category: "Security",
-            icon: "🛡️",
-            content: `
+        `
+    },
+    "security-best-practices": {
+        title: "Security Best Practices",
+        date: "Feb 3, 2026",
+        category: "Security",
+        icon: "🛡️",
+        content: `
 Security is our foundation. When building with AI, there are unique considerations you need to keep in mind to keep your data safe.
 
 ### 1. Local-First Advantage
@@ -108,14 +99,14 @@ The biggest advantage of Codiner is that your code remains on your machine. Howe
 
 ### 2. Environment Variables
 Never hardcode secrets. Use '.env' files and ensure they are added to your '.gitignore'.
-            `
-        },
-        "roadmap-2026": {
-            title: "Roadmap: What's Coming in 2026",
-            date: "Feb 1, 2026",
-            category: "Announcement",
-            icon: "🗓️",
-            content: `
+        `
+    },
+    "roadmap-2026": {
+        title: "Roadmap: What's Coming in 2026",
+        date: "Feb 1, 2026",
+        category: "Announcement",
+        icon: "🗓️",
+        content: `
 2026 is shaping up to be ambitious for Codiner. Here's what we're working on for the coming quarters.
 
 ### Q2: Forge Collaborative Edit
@@ -123,10 +114,18 @@ We're bringing real-time collaboration to the AI Foundry. All synchronization re
 
 ### Q3: Native Mobile Apps
 PAIKE will soon support React Native, allowing you to build iOS and Android apps with the same AI interface.
-            `
-        }
-    };
+        `
+    }
+};
 
+export async function generateStaticParams() {
+    return Object.keys(posts).map((slug) => ({
+        slug: slug,
+    }));
+}
+
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
     const post = posts[slug] || posts["v0-32-0-release"];
 
     return (
@@ -155,7 +154,7 @@ PAIKE will soon support React Native, allowing you to build iOS and Android apps
 
                 <div className="aspect-video w-full rounded-[3rem] bg-card border border-border mb-16 flex items-center justify-center text-9xl shadow-2xl overflow-hidden relative">
                     <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-50" />
-                    <span className="relative z-10 group-hover:scale-110 transition-transform duration-500">{post.icon}</span>
+                    <span className="relative z-10 hover:scale-110 transition-transform duration-500">{post.icon}</span>
                 </div>
 
                 <div className="prose prose-invert prose-lg max-w-none space-y-8 text-muted-foreground font-medium leading-relaxed">
