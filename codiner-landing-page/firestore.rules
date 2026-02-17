@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is the designated admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'setupg98@gmail.com' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // User profiles: Users can manage their own, admins can see all.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
+    }
+
+    // Support: Authenticated users can create, admins manage all.
+    match /support/{ticketId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Notifications: Public read, admin write.
+    match /notifications/{notificationId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
