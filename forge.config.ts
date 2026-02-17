@@ -137,6 +137,7 @@ const config: ForgeConfig = {
         teamId: process.env.APPLE_TEAM_ID!,
       },
     asar: true,
+    executableName: "codiner",
     ignore,
     extraResource: ["node_modules/dugite/git"],
     // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
