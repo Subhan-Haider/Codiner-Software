@@ -7,6 +7,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Android APK
@@ -30,7 +33,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps
-        # Using --legacy-peer-deps because sometimes electron projects have peer dep conflicts
 
       - name: Build Web Assets
         run: npm run build:mobile
@@ -49,5 +51,35 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: codiner-android-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Get Version from package.json
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ steps.version.outputs.VERSION }}-${{ github.run_number }}
+          name: "🤖 Codiner Android v${{ steps.version.outputs.VERSION }} (Build #${{ github.run_number }})"
+          body: |
+            ## 📱 Codiner Android APK
+
+            **Version:** ${{ steps.version.outputs.VERSION }}
+            **Build:** #${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+
+            ### 📥 How to Install
+            1. Download `codiner-android.apk` below
+            2. Transfer to your Android phone
+            3. Enable **"Install from unknown sources"** in Settings
+            4. Tap the APK to install
+
+            > ⚠️ This is a debug build. Backend features require the desktop app.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          draft: false
+          prerelease: true
+          make_latest: false
