@@ -15,36 +15,57 @@ export function AutoUpdateSwitch() {
   const currentVersion = useAppVersion();
 
   const [isChecking, setIsChecking] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState<any>(null);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
-  const [downloadPath, setDownloadPath] = useState<string | null>(null);
 
   useEffect(() => {
     const ipc = IpcClient.getInstance();
 
-    const unsubsProgress = ipc.onUpdateProgress((percent) => {
-      setDownloadProgress(percent);
-    });
+    // Listen for auto-updater events
+    const unsubscribe = ipc.onAutoUpdaterEvent((event) => {
+      switch (event.event) {
+        case "update-available":
+          toast.info(`New version ${event.data.version} available!`, {
+            description: "Update will download in the background.",
+          });
+          break;
 
-    const unsubsDone = ipc.onUpdateDone((path) => {
-      setDownloadPath(path);
-      setDownloadProgress(100);
-      toast.success("Download complete!", {
-        description: "You can now install the update from your downloads folder.",
-        action: {
-          label: "Install Now",
-          onClick: () => {
-            ipc.showItemInFolder(path);
+        case "download-progress":
+          setDownloadProgress(event.data.percent);
+          break;
+
+        case "update-downloaded":
+          setDownloadProgress(100);
+          toast.success("Update downloaded!", {
+            description: "Restart to install the update.",
+            action: {
+              label: "Restart Now",
+              onClick: async () => {
+                await ipc.invoke("auto-updater:quit-and-install");
+              },
+            },
+          });
+          break;
+
+        case "update-not-available":
+          if (isChecking) {
+            toast.success("You're up to date!", {
+              description: `Codiner ${currentVersion} is the latest version.`,
+            });
           }
-        }
-      });
+          break;
+
+        case "update-error":
+          toast.error("Update check failed", {
+            description: event.data?.message || "An error occurred while checking for updates.",
+          });
+          break;
+      }
     });
 
     return () => {
-      unsubsProgress();
-      unsubsDone();
+      unsubscribe();
     };
-  }, []);
+  }, [isChecking, currentVersion]);
 
   if (!settings) {
     return null;
@@ -53,41 +74,16 @@ export function AutoUpdateSwitch() {
   const handleCheckNow = async () => {
     try {
       setIsChecking(true);
-      const latest = await IpcClient.getInstance().getLatestRelease();
-      const latestVersion = latest.tag_name.replace("v", "");
-
-      if (latestVersion !== currentVersion) {
-        setUpdateAvailable(latest);
-        toast.info(`New version ${latestVersion} available!`, {
-          description: "An optimization payload is ready for deployment.",
-        });
-      } else {
-        toast.success("System aggregate is optimal", {
-          description: "You are running the latest version of Codiner.",
-        });
-      }
+      // Use the new auto-updater IPC
+      await IpcClient.getInstance().invoke("auto-updater:check-for-updates");
     } catch (error) {
       console.error("Update check failed:", error);
-      // Only show error toast if this was a manual check (isChecking was set)
-      // This prevents annoying errors during development or when offline
       toast.error("Could not check for updates", {
         description: "Unable to reach update server. You can try again later or check manually on GitHub.",
         duration: 3000,
       });
     } finally {
       setIsChecking(false);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!updateAvailable) return;
-    try {
-      setDownloadProgress(0);
-      await IpcClient.getInstance().downloadUpdate(updateAvailable);
-    } catch (error) {
-      console.error("Download failed:", error);
-      toast.error("Download failed");
-      setDownloadProgress(null);
     }
   };
 
@@ -108,7 +104,7 @@ export function AutoUpdateSwitch() {
       </div>
 
       <div className="w-full space-y-4">
-        {!updateAvailable && !downloadProgress && (
+        {!downloadProgress && (
           <Button
             variant="outline"
             size="sm"
@@ -117,55 +113,56 @@ export function AutoUpdateSwitch() {
             className="w-full rounded-2xl h-12 font-black uppercase tracking-widest text-[11px] bg-white/50 dark:bg-black/20 hover:bg-primary hover:text-white transition-all duration-500 border-primary/20 shadow-lg hover:shadow-primary/20"
           >
             <RefreshCw className={cn("h-4 w-4 mr-2", isChecking && "animate-spin")} />
-            {isChecking ? "Synchronizing..." : "Check for Updates"}
+            {isChecking ? "Checking..." : "Check for Updates"}
           </Button>
         )}
 
-        {updateAvailable && !downloadProgress && (
-          <div className="glass-card p-6 rounded-[2rem] border-primary/20 bg-primary/5 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-500">
-            <div className="flex items-center gap-3">
-              <Download className="h-5 w-5 text-primary animate-bounce" />
-              <span className="font-black text-sm uppercase tracking-tighter">New Version Detected</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">
-              Version {updateAvailable.tag_name} is ready for architectural sync.
-            </p>
-            <Button
-              onClick={handleDownload}
-              className="w-full rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20"
-            >
-              Begin Download
-            </Button>
-          </div>
-        )}
-
-        {downloadProgress !== null && (
+        {downloadProgress !== null && downloadProgress < 100 && (
           <div className="w-full space-y-4 animate-in fade-in duration-500">
             <div className="flex justify-between items-end mb-1">
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">
-                {downloadProgress < 100 ? "Syncing Payload..." : "Sync Complete"}
+                Downloading Update...
               </span>
-              <span className="text-xs font-mono font-black">{downloadProgress}%</span>
+              <span className="text-xs font-mono font-black">{Math.round(downloadProgress)}%</span>
             </div>
             <Progress value={downloadProgress} className="h-3 shadow-inner" />
+          </div>
+        )}
 
-            {downloadProgress === 100 && downloadPath && (
-              <Button
-                variant="default"
-                onClick={() => IpcClient.getInstance().showItemInFolder(downloadPath)}
-                className="w-full rounded-xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Open Installer
-              </Button>
-            )}
+        {downloadProgress === 100 && (
+          <div className="glass-card p-6 rounded-[2rem] border-primary/20 bg-primary/5 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-500">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 animate-bounce" />
+              <span className="font-black text-sm uppercase tracking-tighter">Update Ready</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">
+              Restart Codiner to complete the installation
+            </p>
+            <Button
+              onClick={async () => {
+                await IpcClient.getInstance().invoke("auto-updater:quit-and-install");
+              }}
+              className="w-full rounded-xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Restart Now
+            </Button>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-2 opacity-40">
-        <div className="h-1 w-1 rounded-full bg-primary" />
-        <span className="text-[8px] font-black uppercase tracking-[0.2em]">Manual Install Protocol Enabled</span>
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2 opacity-40">
+          <div className="h-1 w-1 rounded-full bg-primary" />
+          <span className="text-[8px] font-black uppercase tracking-[0.2em]">Auto-Update Cloud Sync</span>
+        </div>
+
+        <button
+          onClick={() => IpcClient.getInstance().invoke("open-external-url", "https://github.com/Subhan-Haider/Codiner-Software/releases")}
+          className="text-[9px] text-muted-foreground hover:text-primary underline decoration-dotted underline-offset-4 transition-colors font-medium tracking-wide"
+        >
+          Check Releases Manually
+        </button>
       </div>
     </div>
   );

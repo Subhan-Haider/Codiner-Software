@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useTheme } from "../contexts/ThemeContext";
+import { Outlet, useMatches } from "@tanstack/react-router";
 import { ProviderSettingsGrid } from "@/components/ProviderSettings";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { IpcClient } from "@/ipc/ipc_client";
@@ -11,6 +11,7 @@ import { ThinkingBudgetSelector } from "@/components/ThinkingBudgetSelector";
 import { useSettings } from "@/hooks/useSettings";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   ArrowLeft,
   Monitor,
@@ -40,6 +41,10 @@ import {
   Smartphone,
   Type,
   Code,
+  Sun,
+  Moon,
+  LifeBuoy,
+  Mail,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GitHubIntegration } from "@/components/GitHubIntegration";
@@ -74,13 +79,19 @@ export default function SettingsPage() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const appVersion = useAppVersion();
+  const matches = useMatches();
+  const isNested = matches.length > 0 && matches[matches.length - 1].routeId !== "/settings";
 
   const handleResetEverything = async () => {
     setIsResetting(true);
     try {
       const ipcClient = IpcClient.getInstance();
       await ipcClient.resetAll();
-      showSuccess("Successfully reset everything. Restart the application.");
+      localStorage.clear();
+      showSuccess("Successfully reset everything. Relaunching...");
+      setTimeout(async () => {
+        await ipcClient.restartCodiner();
+      }, 2000);
     } catch (error) {
       console.error("Error resetting:", error);
       showError(
@@ -91,6 +102,8 @@ export default function SettingsPage() {
       setIsResetDialogOpen(false);
     }
   };
+
+
 
   const tabs = [
     { id: "general", label: "General", icon: Settings, component: () => <GeneralSettings appVersion={appVersion} /> },
@@ -222,11 +235,13 @@ export default function SettingsPage() {
       </header>
 
       <div className="max-w-4xl mx-0">
-        <ActiveComponent />
+        <Outlet />
+        {!isNested && <ActiveComponent />}
       </div>
 
       <ConfirmationDialog
         isOpen={isResetDialogOpen}
+        isLoading={isResetting}
         title="Critical System Reset"
         message="Are you sure you want to proceed? Every single application, chat message, and configured setting will be permanently deleted from this machine."
         confirmText="Yes, Destroy Everything"
@@ -344,8 +359,8 @@ function VisualMechanics() {
       <Section title="Luminary Preferences" icon={Monitor}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            { id: "light", icon: SunIcon, label: "Luminary" },
-            { id: "dark", icon: MoonIcon, label: "Eclipse" },
+            { id: "light", icon: Sun, label: "Luminary" },
+            { id: "dark", icon: Moon, label: "Eclipse" },
             { id: "system", icon: Monitor, label: "Adaptive" },
           ].map((t) => {
             const Icon = t.icon;
@@ -709,6 +724,42 @@ function SupportSection() {
               Deep-dive into the official core documentation and architectural patterns.
             </p>
           </a>
+
+          <a
+            href="https://www.lootops.me/support"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex flex-col p-8 rounded-[2.5rem] bg-emerald-500/[0.03] border border-emerald-500/10 hover:border-emerald-500/30 hover:bg-emerald-500/[0.06] transition-all shadow-xl overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.1] transition-all duration-700 group-hover:scale-150 group-hover:rotate-12">
+              <LifeBuoy size={120} />
+            </div>
+            <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500 w-fit mb-6 group-hover:scale-110 transition-transform">
+              <LifeBuoy size={24} />
+            </div>
+            <h4 className="text-xl font-black mb-2 group-hover:text-emerald-500 transition-colors">LootOps Support</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed italic">
+              Get specialized assistance for LootOps integrations and services.
+            </p>
+          </a>
+
+          <a
+            href="https://www.blizflow.online/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex flex-col p-8 rounded-[2.5rem] bg-rose-500/[0.03] border border-rose-500/10 hover:border-rose-500/30 hover:bg-rose-500/[0.06] transition-all shadow-xl overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.1] transition-all duration-700 group-hover:scale-150 group-hover:rotate-12">
+              <Mail size={120} />
+            </div>
+            <div className="p-4 rounded-2xl bg-rose-500/10 text-rose-500 w-fit mb-6 group-hover:scale-110 transition-transform">
+              <Mail size={24} />
+            </div>
+            <h4 className="text-xl font-black mb-2 group-hover:text-rose-500 transition-colors">BlizFlow Contact</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed italic">
+              Reach out to the BlizFlow team for direct inquiries and partnership opportunities.
+            </p>
+          </a>
         </div>
       </Section>
     </div>
@@ -740,6 +791,7 @@ function LabsSettings() {
     { key: "enableGpuAcceleration", label: "Hardware Acceleration", description: "Harness local silicon for accelerated inference." },
     { key: "enablePrivacyMode", label: "Data Obfuscation", description: "Automatic zero-visibility masking for sensitive tokens." },
     { key: "enableZenMode", label: "Cognitive Silence", description: "Zero-distraction isolation for deep architecture focus." },
+    { key: "isTestMode", label: "Persistent Test Mode", description: "Force the application into E2E testing state. Stays active across restarts." },
   ];
 
   return (
@@ -762,28 +814,48 @@ function LabsSettings() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {featureFlags.map((feature) => (
-          <div
-            key={feature.key}
-            className="group flex flex-col justify-between p-8 rounded-[2.5rem] border border-primary/5 bg-card/40 hover:border-primary/30 hover:bg-card hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500"
-          >
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center justify-between">
-                <Label className="text-xl font-black tracking-tight group-hover:text-primary transition-colors cursor-pointer" onClick={() => toggleExperiment(feature.key as any)}>{feature.label}</Label>
-                <Switch
-                  checked={!!experiments[feature.key as keyof typeof experiments]}
-                  onCheckedChange={() => toggleExperiment(feature.key as any)}
-                />
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed italic opacity-80">{feature.description}</p>
-            </div>
+        {featureFlags.map((feature) => {
+          const isExperiment = feature.key !== "isTestMode";
+          const isActive = isExperiment
+            ? !!experiments[feature.key as keyof typeof experiments]
+            : !!settings?.isTestMode;
 
-            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
-              <div className={cn("h-1.5 w-1.5 rounded-full", !!experiments[feature.key as keyof typeof experiments] ? "bg-primary animate-pulse" : "bg-muted")} />
-              {!!experiments[feature.key as keyof typeof experiments] ? "Active Module" : "Dormant"}
+          const handleToggle = () => {
+            if (isExperiment) {
+              toggleExperiment(feature.key as any);
+            } else {
+              updateSettings({ isTestMode: !settings?.isTestMode });
+            }
+          };
+
+          return (
+            <div
+              key={feature.key}
+              className="group flex flex-col justify-between p-8 rounded-[2.5rem] border border-primary/5 bg-card/40 hover:border-primary/30 hover:bg-card hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500"
+            >
+              <div className="space-y-3 mb-8">
+                <div className="flex items-center justify-between">
+                  <Label
+                    className="text-xl font-black tracking-tight group-hover:text-primary transition-colors cursor-pointer"
+                    onClick={handleToggle}
+                  >
+                    {feature.label}
+                  </Label>
+                  <Switch
+                    checked={isActive}
+                    onCheckedChange={handleToggle}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed italic opacity-80">{feature.description}</p>
+              </div>
+
+              <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                <div className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-primary animate-pulse" : "bg-muted")} />
+                {isActive ? "Active Module" : "Dormant"}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

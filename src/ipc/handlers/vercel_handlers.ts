@@ -17,6 +17,8 @@ import {
   SaveVercelAccessTokenParams,
   VercelDeployment,
   VercelProject,
+  GetVercelDeploymentLogsParams,
+  VercelBuildLogs,
 } from "../ipc_types";
 import { ConnectToExistingVercelProjectParams } from "../ipc_types";
 import { GetVercelDeploymentsParams } from "../ipc_types";
@@ -525,6 +527,41 @@ export function registerVercelHandlers() {
   handle("vercel:get-deployments", handleGetVercelDeployments);
   handle("vercel:disconnect", handleDisconnectVercelProject);
   handle("vercel:deploy", handleDeployToVercel);
+  handle("vercel:get-deployment-logs", handleGetVercelDeploymentLogs);
+}
+
+// --- Vercel Get Deployment Logs Handler ---
+
+async function handleGetVercelDeploymentLogs(
+  event: IpcMainInvokeEvent,
+  { deploymentId }: GetVercelDeploymentLogsParams
+): Promise<VercelBuildLogs> {
+  const settings = readSettings();
+  const accessToken = settings.vercelAccessToken?.value;
+  if (!accessToken) {
+    throw new Error("Not authenticated with Vercel.");
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.vercel.com/v2/deployments/${deploymentId}/events?direction=backward`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch logs: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { events: data as any[] };
+  } catch (error: any) {
+    logger.error("Failed to fetch Vercel logs:", error);
+    throw new Error(error.message || "Failed to fetch logs");
+  }
 }
 
 // --- Vercel File System Deployment (No GitHub) ---

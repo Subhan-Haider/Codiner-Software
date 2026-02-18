@@ -189,9 +189,40 @@ export async function getModelClient(
         );
       }
     }
-    // If no models have API keys, throw an error
+    // Final fallback: try to use local Ollama if no cloud provider API keys are found
+    try {
+      const ollamaUrl = getOllamaApiUrl();
+      // Use a short timeout for the fallback check to avoid hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+      const response = await fetch(`${ollamaUrl}/api/tags`, {
+        signal: controller.signal,
+      }).catch(() => null);
+
+      clearTimeout(timeoutId);
+
+      if (response && response.ok) {
+        const data = (await response.json()) as { models: any[] };
+        if (data.models && data.models.length > 0) {
+          // Use the first available Ollama model
+          const modelName = data.models[0].name;
+          logger.info(
+            `No cloud API keys found for 'auto' provider. Falling back to local Ollama model: ${modelName}`,
+          );
+          return await getModelClient(
+            { provider: "ollama", name: modelName },
+            settings,
+          );
+        }
+      }
+    } catch (ollamaError) {
+      logger.debug("Ollama fallback check failed:", ollamaError);
+    }
+
+    // If no models have API keys and Ollama is not available, throw an error
     throw new Error(
-      "No API keys available for any model supported by the 'auto' provider.",
+      "No API keys available for any model supported by the 'auto' provider. Please add an API key in Settings or ensure Ollama is running locally with at least one model installed.",
     );
   }
   return getRegularModelClient(model, settings, providerConfig);

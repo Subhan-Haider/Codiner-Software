@@ -26,6 +26,7 @@ export function escapeXmlContent(str: string): string {
 export interface AgentContext {
   event: IpcMainInvokeEvent;
   appPath: string;
+  appId: number;
   chatId: number;
   supabaseProjectId: string | null;
   supabaseOrganizationSlug: string | null;

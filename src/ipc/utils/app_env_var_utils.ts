@@ -113,11 +113,16 @@ export function parseEnvFile(content: string): EnvVar[] {
   const lines = content.split("\n");
 
   for (const line of lines) {
-    const trimmedLine = line.trim();
+    let trimmedLine = line.trim();
 
     // Skip empty lines and comments
     if (!trimmedLine || trimmedLine.startsWith("#")) {
       continue;
+    }
+
+    // Handle "export KEY=VALUE" format
+    if (trimmedLine.startsWith("export ")) {
+      trimmedLine = trimmedLine.substring(7).trim();
     }
 
     // Parse key=value pairs
@@ -159,7 +164,11 @@ export function parseEnvFile(content: string): EnvVar[] {
 }
 
 // Helper function to serialize environment variables to .env.local format
-export function serializeEnvFile(envVars: EnvVar[]): string {
+export function serializeEnvFile(
+  envVars: EnvVar[],
+  options: { useExport?: boolean } = {},
+): string {
+  const { useExport = false } = options;
   return envVars
     .map(({ key, value }) => {
       // Add quotes if value contains spaces or special characters
@@ -167,7 +176,8 @@ export function serializeEnvFile(envVars: EnvVar[]): string {
       const quotedValue = needsQuotes
         ? `"${value.replace(/"/g, '\\"')}"`
         : value;
-      return `${key}=${quotedValue}`;
+      const prefix = useExport ? "export " : "";
+      return `${prefix}${key}=${quotedValue}`;
     })
     .join("\n");
 }

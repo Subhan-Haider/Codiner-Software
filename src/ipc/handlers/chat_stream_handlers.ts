@@ -44,7 +44,12 @@ import * as path from "path";
 import * as os from "os";
 import * as crypto from "crypto";
 import { readFile, writeFile, unlink } from "fs/promises";
-import { getMaxTokens, getTemperature } from "../utils/token_utils";
+import {
+  getContextWindow,
+  estimateTokens,
+  getMaxTokens,
+  getTemperature,
+} from "../utils/token_utils";
 import { MAX_CHAT_TURNS_IN_CONTEXT } from "@/constants/settings_constants";
 import { validateChatContext } from "../utils/context_paths_utils";
 import { getProviderOptions, getAiHeaders } from "../utils/provider_options";
@@ -675,7 +680,7 @@ ${componentSnippet}
         // print out the codiner-write tags.
         // Usually, AI models will want to use the image as reference to generate code (e.g. UI mockups) anyways, so
         // it's not that critical to include the image analysis instructions.
-        if (hasUploadedAttachments) {
+        if (hasUploadedAttachments && settings.selectedChatMode !== "local-agent") {
           systemPrompt += `
   
 When files are attached to this conversation, upload them to the codebase using this exact format:
@@ -710,6 +715,14 @@ This conversation includes one or more image attachments. When the user uploads 
 The current app corresponds to Firebase Project ID: ${updatedChat.app.firebaseProjectId}.
 When you need to deploy, update rules, or manage Firebase services, you can use the \`firebase-command\` tool in Agent mode. If you are in Build mode, you should modify the relevant configuration files (e.g., firebase.json, firestore.rules, storage.rules) and then remind the user they can deploy or manage their Firebase project via the Firebase Integration Dialog.
 `;
+        }
+
+        if (settings.selectedChatMode === "local-agent") {
+          await handleLocalAgentStream(event, req, abortController, {
+            placeholderMessageId: placeholderAssistantMessage.id,
+            systemPrompt,
+          });
+          return req.chatId;
         }
 
         const codebasePrefix: any[] = isEngineEnabled
@@ -830,6 +843,51 @@ When you need to deploy, update rules, or manage Firebase services, you can use 
           systemPromptOverride?: string;
           codinerDisableFiles?: boolean;
         }) => {
+          // Context Window Management: Ensure message history fits within the available context
+          const contextWindow = await getContextWindow();
+          const maxOutputTokens =
+            (await getMaxTokens(settings.selectedModel)) || 4096;
+          const systemTokens = estimateTokens(systemPromptOverride);
+
+          // Reserve space for response and a safety buffer (3000 tokens)
+          const availableTokens =
+            contextWindow - maxOutputTokens - systemTokens - 3000;
+
+          const truncatedMessages: ModelMessage[] = [];
+          let currentTokens = 0;
+
+          // Always iterate from newest to oldest to preserve the most recent context
+          for (let i = chatMessages.length - 1; i >= 0; i--) {
+            const msg = chatMessages[i];
+            let tokens = 0;
+
+            if (typeof msg.content === "string") {
+              tokens = estimateTokens(msg.content);
+            } else if (Array.isArray(msg.content)) {
+              for (const part of msg.content) {
+                if (part.type === "text") {
+                  tokens += estimateTokens(part.text);
+                } else if (part.type === "image") {
+                  // Rough token estimation for images
+                  tokens += 1000;
+                }
+              }
+            }
+
+            // Stop if adding this message would exceed the available tokens
+            if (currentTokens + tokens > availableTokens) {
+              if (truncatedMessages.length === 0) {
+                logger.warn(
+                  "Message history truncation: single most recent message too large for context window",
+                );
+              }
+              break;
+            }
+
+            truncatedMessages.unshift(msg);
+            currentTokens += tokens;
+          }
+
           if (isEngineEnabled) {
             logger.log(
               "sending AI request to engine with request id:",
@@ -842,7 +900,7 @@ When you need to deploy, update rules, or manage Firebase services, you can use 
           if (isDeepContextEnabled) {
             versionedFiles = await getVersionedFiles({
               files,
-              chatMessages,
+              chatMessages: truncatedMessages,
               appPath,
             });
           }
@@ -873,7 +931,7 @@ When you need to deploy, update rules, or manage Firebase services, you can use 
             providerOptions,
             system: systemPromptOverride,
             tools,
-            messages: chatMessages.filter((m: any) => m.content),
+            messages: truncatedMessages.filter((m: any) => m.content),
             onFinish: (response) => {
               const totalTokens = response.usage?.totalTokens;
 
@@ -1452,15 +1510,15 @@ ${problemReport.problems
               chatId: req.chatId,
               error: `Sorry, there was an error applying the AI's changes: ${status.error}`,
             });
+          } else {
+            // Signal that the stream has completed
+            safeSend(event.sender, "chat:response:end", {
+              chatId: req.chatId,
+              updatedFiles: status.updatedFiles ?? false,
+              extraFiles: status.extraFiles,
+              extraFilesError: status.extraFilesError,
+            } satisfies ChatResponseEnd);
           }
-
-          // Signal that the stream has completed
-          safeSend(event.sender, "chat:response:end", {
-            chatId: req.chatId,
-            updatedFiles: status.updatedFiles ?? false,
-            extraFiles: status.extraFiles,
-            extraFilesError: status.extraFilesError,
-          } satisfies ChatResponseEnd);
         } else {
           safeSend(event.sender, "chat:response:end", {
             chatId: req.chatId,

@@ -21,19 +21,23 @@ export function useParseRouter(appId: number | null) {
     refreshApp,
   } = useLoadApp(appId);
 
+  // Detect Next.js app by presence of next.config.* in file list
+  const isNextApp = useMemo(() => {
+    if (!app?.files) return false;
+    return app.files.some((f) => f.toLowerCase().includes("next.config"));
+  }, [app?.files]);
+
+  // Only load App.tsx if we've confirmed it's not a Next.js app
+  // If app is not loaded yet, we pass null to avoid premature 404s
+  const routerFilePath = app && !isNextApp ? "src/App.tsx" : null;
+
   // Load router related file to extract routes for non-Next apps
   const {
     content: routerContent,
     loading: routerFileLoading,
     error: routerFileError,
     refreshFile,
-  } = useLoadAppFile(appId, "src/App.tsx");
-
-  // Detect Next.js app by presence of next.config.* in file list
-  const isNextApp = useMemo(() => {
-    if (!app?.files) return false;
-    return app.files.some((f) => f.toLowerCase().includes("next.config"));
-  }, [app?.files]);
+  } = useLoadAppFile(appId, routerFilePath);
 
   // Parse routes either from Next.js file-based routing or from router file
   useEffect(() => {
@@ -41,11 +45,11 @@ export function useParseRouter(appId: number | null) {
       path === "/"
         ? "Home"
         : path
-            .split("/")
-            .filter((segment) => segment && !segment.startsWith(":"))
-            .pop()
-            ?.replace(/[-_]/g, " ")
-            .replace(/^\w/, (c) => c.toUpperCase()) || path;
+          .split("/")
+          .filter((segment) => segment && !segment.startsWith(":"))
+          .pop()
+          ?.replace(/[-_]/g, " ")
+          .replace(/^\w/, (c) => c.toUpperCase()) || path;
 
     const setFromNextFiles = (files: string[]) => {
       const nextRoutes = new Set<string>();

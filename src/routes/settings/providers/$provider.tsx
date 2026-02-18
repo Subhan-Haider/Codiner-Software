@@ -1,19 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
 import { ProviderSettingsPage } from "@/components/settings/ProviderSettingsPage";
-import { rootRoute } from "@/routes/root";
-
-interface ProviderSettingsParams {
-  provider: string;
-}
+import { settingsRoute } from "../../settings";
 
 export const providerSettingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/settings/providers/$provider",
-  params: {
-    parse: (params: { provider: string }): ProviderSettingsParams => ({
-      provider: params.provider,
-    }),
-  },
+  getParentRoute: () => settingsRoute,
+  path: "providers/$provider",
   component: function ProviderSettingsRouteComponent() {
     const { provider } = providerSettingsRoute.useParams();
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { formatDistanceToNow } from "date-fns";
-import { PlusCircle, MoreVertical, Trash2, Edit3, Search } from "lucide-react";
+import { Edit3, MessageSquare, MoreVertical, Plus, Search, Trash2 } from "lucide-react";
 import { useAtom } from "jotai";
 import { selectedChatIdAtom } from "@/atoms/chatAtoms";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
@@ -29,6 +29,7 @@ import { DeleteChatDialog } from "@/components/chat/DeleteChatDialog";
 
 import { ChatSearchDialog } from "./ChatSearchDialog";
 import { useSelectChat } from "@/hooks/useSelectChat";
+import { cn } from "@/lib/utils";
 
 export function ChatList({ show }: { show?: boolean }) {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ export function ChatList({ show }: { show?: boolean }) {
     }
   }, [isChatRoute, routerState.location.search, setSelectedChatId]);
 
+
   if (!show) {
     return;
   }
@@ -98,7 +100,7 @@ export function ChatList({ show }: { show?: boolean }) {
         await invalidateChats();
       } catch (error) {
         // DO A TOAST
-        showError(`Failed to create new chat: ${(error as any).toString()}`);
+        showError(`Failed to create new chat: ${(error as any).toString()} `);
       }
     } else {
       // If no app is selected, navigate to home page
@@ -120,7 +122,7 @@ export function ChatList({ show }: { show?: boolean }) {
       // Refresh the chat list
       await invalidateChats();
     } catch (error) {
-      showError(`Failed to delete chat: ${(error as any).toString()}`);
+      showError(`Failed to delete chat: ${(error as any).toString()} `);
     }
   };
 
@@ -153,16 +155,23 @@ export function ChatList({ show }: { show?: boolean }) {
     }
   };
 
+
+
   return (
     <>
       <SidebarGroup
-        className="h-[calc(100vh-112px)] overflow-hidden flex flex-col py-4"
+        className="h-[calc(100vh-112px)] overflow-hidden flex flex-col pt-0 pb-2"
         data-testid="chat-list-container"
       >
         <SidebarGroupContent className="flex-1 flex flex-col overflow-hidden">
           {/* Header Section */}
-          <div className="flex items-center justify-between px-4 py-2 mb-2 shrink-0">
-            <h2 className="text-sm font-semibold text-foreground tracking-tight">Chats</h2>
+          <div className="flex items-center justify-between px-4 py-1 mb-0 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                <MessageSquare className="h-4 w-4" />
+              </div>
+              <div className="text-xs font-bold text-foreground tracking-wider truncate whitespace-nowrap">CHATS</div>
+            </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
@@ -179,9 +188,10 @@ export function ChatList({ show }: { show?: boolean }) {
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 onClick={handleNewChat}
+                data-testid="new-chat-button"
                 title="New Chat"
               >
-                <PlusCircle size={16} />
+                <Plus size={16} />
               </Button>
             </div>
           </div>
@@ -200,22 +210,21 @@ export function ChatList({ show }: { show?: boolean }) {
               <SidebarMenu className="space-y-0.5">
                 {chats.map((chat) => (
                   <SidebarMenuItem key={chat.id} className="mb-0.5 group/item">
-                    <div className={`
-                            flex w-full items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200 relative
-                            ${selectedChatId === chat.id
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
-                      }
-                        `}
+                    <div className={cn(
+                      "flex w-full items-center gap-2 p-2.5 rounded-xl cursor-pointer transition-all duration-200 relative select-none",
+                      selectedChatId === chat.id
+                        ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border border-transparent"
+                    )}
                       onClick={() => handleChatClick({ chatId: chat.id, appId: chat.appId })}
                     >
                       {/* Chat Icon/Status Indicator? Optional, maybe just text for chats to keep it dense */}
 
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <span className="text-sm font-medium truncate leading-none mb-1">
-                          {chat.title || "New Chat"}
+                      <div className="flex flex-col flex-1 min-w-0 gap-0.5">
+                        <span className="text-sm font-semibold break-words leading-tight text-foreground">
+                          {chat.title || "New Session"}
                         </span>
-                        <span className="text-[10px] text-muted-foreground/70 truncate">
+                        <span className="text-xs text-muted-foreground/70 font-medium">
                           {formatDistanceToNow(new Date(chat.createdAt), {
                             addSuffix: true,
                           })}
@@ -223,11 +232,10 @@ export function ChatList({ show }: { show?: boolean }) {
                       </div>
 
                       {/* Options Menu - Visible on hover or selected */}
-                      <div className={`
-                            absolute right-1 top-1/2 -translate-y-1/2
-                            ${selectedChatId === chat.id ? "opacity-100" : "opacity-0 group-hover/item:opacity-100"}
-                            transition-opacity duration-200
-                        `}>
+                      <div className={cn(
+                        "absolute right-2 top-1/2 -translate-y-1/2 transition-opacity duration-200",
+                        selectedChatId === chat.id ? "opacity-100" : "opacity-0 group-hover/item:opacity-100"
+                      )}>
                         <DropdownMenu
                           modal={false}
                           onOpenChange={(open) => setIsDropdownOpen(open)}

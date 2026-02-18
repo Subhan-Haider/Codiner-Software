@@ -39,6 +39,7 @@ import { registerAiTestHandlers } from "./handlers/ai_test_handler";
 import { registerPaikeHandlers } from "./handlers/paike-handlers";
 import { registerNotificationHandlers } from "./handlers/notification_handlers";
 import { registerOllamaManagementHandlers } from "./handlers/ollama_management_handler";
+import { registerAutoUpdaterHandlers } from "./handlers/auto_updater_handlers";
 
 export function registerIpcHandlers() {
   // Register all IPC handlers by category
@@ -83,4 +84,5 @@ export function registerIpcHandlers() {
   registerPaikeHandlers();
   registerNotificationHandlers();
   registerOllamaManagementHandlers();
+  registerAutoUpdaterHandlers();
 }

@@ -81,7 +81,11 @@ export async function isGitStatusClean({
     const isClean = result.stdout.trim().length === 0;
     return isClean;
   } else {
-    const statusMatrix = await git.statusMatrix({ fs, dir: path });
+    const statusMatrix = await git.statusMatrix({
+      fs,
+      dir: path,
+      filter: (f) => !f.includes("node_modules"),
+    });
     return statusMatrix.every(
       (row) => row[1] === 1 && row[2] === 1 && row[3] === 1,
     );
@@ -198,6 +202,7 @@ export async function gitStageToRevert({
       fs,
       dir: path,
       ref: targetOid,
+      filter: (f) => !f.includes("node_modules"),
     });
 
     // Process each file to revert to the state in previousVersionId
@@ -326,7 +331,11 @@ export async function getGitUncommittedFiles({
       .filter((line) => line.trim() !== "")
       .map((line) => line.slice(3).trim());
   } else {
-    const statusMatrix = await git.statusMatrix({ fs, dir: path });
+    const statusMatrix = await git.statusMatrix({
+      fs,
+      dir: path,
+      filter: (f) => !f.includes("node_modules"),
+    });
     return statusMatrix
       .filter((row) => row[1] !== 1 || row[2] !== 1 || row[3] !== 1)
       .map((row) => row[0]);
@@ -461,9 +470,9 @@ export async function gitClone({
       url: cleanUrl,
       onAuth: accessToken
         ? () => ({
-            username: accessToken,
-            password: "x-oauth-basic",
-          })
+          username: accessToken,
+          password: "x-oauth-basic",
+        })
         : undefined,
       singleBranch,
       depth: depth ?? undefined,

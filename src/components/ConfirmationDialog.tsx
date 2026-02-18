@@ -7,6 +7,7 @@ interface ConfirmationDialogProps {
   confirmText?: string;
   cancelText?: string;
   confirmButtonClass?: string;
+  isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -18,6 +19,7 @@ export default function ConfirmationDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
   confirmButtonClass = "bg-red-600 hover:bg-red-700 focus:ring-red-500",
+  isLoading = false,
   onConfirm,
   onCancel,
 }: ConfirmationDialogProps) {
@@ -64,10 +66,16 @@ export default function ConfirmationDialog({
           <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
             <button
               type="button"
-              className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm ${confirmButtonClass}`}
+              className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm ${confirmButtonClass} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={onConfirm}
+              disabled={isLoading}
             >
-              {confirmText}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </div>
+              ) : confirmText}
             </button>
             <button
               type="button"

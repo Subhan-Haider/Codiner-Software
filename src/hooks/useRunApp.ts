@@ -49,13 +49,7 @@ export function useRunApp() {
           originalUrl: originalUrl!,
         });
 
-        // Add Notification
-        addNotification({
-          type: "success",
-          title: "App Ready",
-          message: `Your app is now running at ${proxyUrl}`,
-          metadata: { appId: output.appId, url: proxyUrl }
-        });
+
 
         // Proactively check if the app root is returning a 404
         IpcClient.getInstance()

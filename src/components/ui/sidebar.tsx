@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
-import { Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "22rem";
-const SIDEBAR_WIDTH_ICON = "4.5rem"; // Slightly narrower icon rail
+const SIDEBAR_WIDTH_ICON = "72px"; // Matches the hardcoded icon rail width
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
@@ -165,7 +165,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+          "bg-sidebar text-sidebar-foreground flex h-full w-[var(--sidebar-width)] flex-col",
           className,
         )}
         {...props}
@@ -177,39 +177,42 @@ function Sidebar({
 
   return (
     <div
-      className="group peer text-sidebar-foreground block"
+      className={cn("group/sidebar peer text-sidebar-foreground block", className)}
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      {...props}
     >
       {/* This is what handles the sidebar gap */}
       <div
         data-slot="sidebar-gap"
         className={cn(
-          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          "relative h-full shrink-0 bg-transparent transition-[width] duration-300 ease-in-out",
           "group-data-[collapsible=offcanvas]:w-0",
+          "group-data-[side=left]:w-[var(--sidebar-width)]",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
             ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
+            : "group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]",
+          "group-data-[resizing=true]/sidebar:transition-none"
         )}
       />
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 flex h-svh w-(--sidebar-width) transition-[left,right,width,transform] duration-200 ease-linear",
+          "fixed inset-y-0 z-10 flex h-svh w-[var(--sidebar-width)] transition-[left,right,width,transform] duration-300 ease-in-out",
           side === "left"
             ? "left-0 translate-x-0 group-data-[collapsible=offcanvas]:translate-x-[-100%]"
             : "right-0 translate-x-0 group-data-[collapsible=offcanvas]:translate-x-[100%]",
           // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
+            : "group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]",
+          "group-data-[resizing=true]/sidebar:transition-none",
           className,
         )}
-        {...props}
       >
         <div
           data-sidebar="sidebar"
@@ -227,26 +230,36 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
+
+  const button = (
+    <Button
+      data-sidebar="trigger"
+      data-slot="sidebar-trigger"
+      variant="ghost"
+      className={cn("cursor-pointer hover:bg-sidebar h-10 w-10 rounded-xl group", props.className)}
+      onClick={(event) => {
+        onClick?.(event);
+        toggleSidebar();
+      }}
+      {...props}
+    >
+      <div className="flex items-center justify-center w-5 h-5 border-[1.5px] border-current rounded-[4px] relative bg-transparent overflow-hidden">
+        <div className="absolute left-[30%] top-0 bottom-0 w-[1.5px] bg-current/20" />
+        {state === "expanded" ? (
+          <ChevronLeft className="size-3.5 translate-x-0.5" strokeWidth={2.5} />
+        ) : (
+          <ChevronRight className="size-3.5 -translate-x-0.5" strokeWidth={2.5} />
+        )}
+      </div>
+      <span className="sr-only">Toggle Menu</span>
+    </Button>
+  );
+
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          data-sidebar="trigger"
-          data-slot="sidebar-trigger"
-          variant="ghost"
-          className={cn("cursor-pointer ml-1 hover:bg-sidebar h-16 w-16", props.className)}
-          onClick={(event) => {
-            onClick?.(event);
-            toggleSidebar();
-          }}
-          {...props}
-        >
-          <Menu className="size-8" />
-          <span className="sr-only">Toggle Menu</span>
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent side="right" align="center">
         Toggle Menu
       </TooltipContent>

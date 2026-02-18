@@ -11,6 +11,7 @@ import {
 } from "./main/settings";
 import { handleCodinerProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
+import { initializeAutoUpdater } from "./main/auto_updater";
 import { BackupManager } from "./backup_manager";
 import { getDatabasePath, initializeDatabase } from "./db";
 import { UserSettings } from "./lib/schemas";
@@ -105,6 +106,26 @@ export async function onReady() {
 
   // Start performance monitoring
   startPerformanceMonitoring();
+
+  // Initialize Auto-Updater for production
+  if (app.isPackaged && settings.enableAutoUpdate !== false) {
+    // Initialize our custom auto-updater
+    // Note: mainWindow will be null here, but we'll pass it after window creation
+    initializeAutoUpdater(null);
+  }
+
+  // Global Error Handling for Main Process
+  process.on("uncaughtException", (error) => {
+    logger.error("Uncaught Exception in Main Process:", error);
+    dialog.showErrorBox(
+      "Critical Error",
+      `An unexpected error occurred: ${error.message}\n\nPlease restart the application.`,
+    );
+  });
+
+  process.on("unhandledRejection", (reason) => {
+    logger.error("Unhandled Rejection in Main Process:", reason);
+  });
 
   await onFirstRunMaybe(settings);
   createWindow();
@@ -206,6 +227,14 @@ const createWindow = () => {
     });
   }
 
+  // Initialize auto-updater with main window after it's created
+  if (app.isPackaged) {
+    const settings = readSettings();
+    if (settings.enableAutoUpdate !== false) {
+      initializeAutoUpdater(mainWindow);
+    }
+  }
+
   // Enable native context menu on right-click
   mainWindow.webContents.on("context-menu", (event, params) => {
     // Prevent any default behavior and show our own menu
@@ -264,6 +293,31 @@ const createWindow = () => {
 
     const menu = Menu.buildFromTemplate(template);
     menu.popup({ window: mainWindow! });
+  });
+
+  // Handle external links and window opening
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // If the URL is external, open it in the default browser
+    if (url.startsWith("http:") || url.startsWith("https:")) {
+      import("electron").then(({ shell }) => {
+        shell.openExternal(url);
+      });
+      return { action: "deny" };
+    }
+    return { action: "allow" };
+  });
+
+  // Prevent navigation to external sites within the app window
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    const parsedUrl = new URL(url);
+    const rootUrl = new URL(MAIN_WINDOW_VITE_DEV_SERVER_URL || "file://");
+
+    if (parsedUrl.host !== rootUrl.host && (url.startsWith("http:") || url.startsWith("https:"))) {
+      event.preventDefault();
+      import("electron").then(({ shell }) => {
+        shell.openExternal(url);
+      });
+    }
   });
 };
 

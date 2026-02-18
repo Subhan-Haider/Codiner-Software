@@ -356,7 +356,7 @@ export const UserSettingsSchema = z.object({
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
 export function isCodinerProEnabled(settings: UserSettings): boolean {
-  return settings.enableCodinerPro === true && hasCodinerProKey(settings);
+  return settings.enableCodinerPro ?? false;
 }
 
 export function hasCodinerProKey(settings: UserSettings): boolean {

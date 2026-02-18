@@ -54,10 +54,10 @@ export function RecentProjects({ apps }: { apps: App[] }) {
                         </div>
 
                         <div className="relative flex-1 min-w-0">
-                            <h4 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                            <h4 className="font-bold text-foreground break-words group-hover:text-primary transition-colors">
                                 {app.name}
                             </h4>
-                            <p className="text-xs text-muted-foreground truncate opacity-70">
+                            <p className="text-xs text-muted-foreground break-words opacity-70">
                                 {app.path}
                             </p>
                         </div>

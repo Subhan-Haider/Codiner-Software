@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai";
 import { appUrlAtom } from "@/atoms/appAtoms";
 import { useEffect, useState } from "react";
 import { Activity, RefreshCw, Zap, TrendingUp, Clock } from "lucide-react";
+import { IpcClient } from "@/ipc/ipc_client";
 
 interface PerformanceMetrics {
     loadTime: number;
@@ -22,20 +23,17 @@ export const PerformanceMetrics = () => {
 
         try {
             const startTime = performance.now();
-            const response = await fetch(appUrl);
+            const content = await IpcClient.getInstance().fetchAppUrl(appUrl);
             const endTime = performance.now();
             const loadTime = endTime - startTime;
 
-            // Get resource timing if available
-            const resourceEntries = performance.getEntriesByType("resource");
-            const totalSize = resourceEntries.reduce((acc: number, entry: any) => {
-                return acc + (entry.transferSize || 0);
-            }, 0);
+            // Simplified metrics due to IPC limitations
+            const totalSize = content.length;
 
             setMetrics({
                 loadTime: Math.round(loadTime),
-                domContentLoaded: Math.round(loadTime * 0.8), // Approximation
-                resourceCount: resourceEntries.length,
+                domContentLoaded: Math.round(loadTime * 0.5), // Approximation
+                resourceCount: 1,
                 totalSize: Math.round(totalSize / 1024), // Convert to KB
                 timestamp: Date.now(),
             });

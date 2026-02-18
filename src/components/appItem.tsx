@@ -52,11 +52,11 @@ export function AppItem({
         </div>
 
         {/* Text Details */}
-        <div className="flex flex-col flex-1 min-w-0">
-          <span className="text-sm font-medium truncate leading-none mb-1">
+        <div className="flex flex-col flex-1 min-w-0 gap-0.5">
+          <span className="text-sm font-semibold break-words leading-tight text-foreground">
             {app.name}
           </span>
-          <span className="text-[10px] text-muted-foreground/70 truncate">
+          <span className="text-xs text-muted-foreground/70 font-medium">
             {formatDistanceToNow(new Date(app.createdAt), { addSuffix: true })}
           </span>
         </div>

@@ -170,20 +170,9 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const { addNotification } = useNotifications();
 
-  useEffect(() => {
-    const sessionKey = "codiner-welcome-shown";
-    if (!sessionStorage.getItem(sessionKey)) {
-      addNotification({
-        type: "system",
-        title: "Welcome to Codiner",
-        message: "Your Personal AI Knowledge Engine and Notification System are ready.",
-        metadata: { version: "0.32.0" }
-      });
-      sessionStorage.setItem(sessionKey, "true");
-    }
-  }, [addNotification]);
+
+
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 

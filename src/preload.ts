@@ -73,6 +73,7 @@ const validInvokeChannels = [
   "vercel:get-deployments",
   "vercel:disconnect",
   "vercel:deploy",
+  "vercel:get-deployment-logs",
   "get-app-version",
   "reload-env-path",
   "get-proposal",
@@ -140,7 +141,20 @@ const validInvokeChannels = [
   "add-to-favorite",
   "github:clone-repo-from-url",
   "get-latest-security-review",
+  "app:fetch-url",
+  "app:run-security-audit",
+  "app:get-analytics",
   "ai:test-connectivity",
+  // Firebase
+  "firebase:is-installed",
+  "firebase:get-auth-state",
+  "firebase:login",
+  "firebase:logout",
+  "firebase:deploy",
+  // Auto-updater
+  "auto-updater:check-for-updates",
+  "auto-updater:download-update",
+  "auto-updater:quit-and-install",
   // Test-only channels
   // These should ALWAYS be guarded with IS_TEST_BUILD in the main process.
   // We can't detect with IS_TEST_BUILD in the preload script because
@@ -176,6 +190,18 @@ const validInvokeChannels = [
   "notification:mark-all-as-read",
   "notification:delete",
   "notification:clear-all",
+  // Ollama
+  "ollama:check-installed",
+  "ollama:check-running",
+  "ollama:start-service",
+  "ollama:get-installed-models",
+  "ollama:install-model",
+  "ollama:delete-model",
+  "ollama:get-system-ram",
+  "ollama:get-recommended-models",
+  "ollama:install-model-pack",
+  "ollama:choose-model-for-task",
+  "ollama:get-model-health",
 ];
 
 // Add valid receive channels
@@ -189,6 +215,7 @@ const validReceiveChannels = [
   "github:flow-error",
   "deep-link-received",
   "force-close-detected",
+  "auto-updater-event",
   // Help bot
   "help:chat:response:chunk",
   "help:chat:response:end",
@@ -201,6 +228,8 @@ const validReceiveChannels = [
   "telemetry:event",
   "update-progress",
   "update-done",
+  // Ollama
+  "ollama:install-progress",
 ] as const;
 
 type ValidInvokeChannel = (typeof validInvokeChannels)[number];

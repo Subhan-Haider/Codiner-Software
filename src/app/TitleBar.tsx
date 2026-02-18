@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ActionHeader } from "@/components/preview_panel/ActionHeader";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+
 
 export const TitleBar = () => {
   const [selectedAppId] = useAtom(selectedAppIdAtom);
@@ -99,11 +99,6 @@ export const TitleBar = () => {
             <ActionHeader />
           </div>
         )}
-
-        {/* Notification Center */}
-        <div className="no-app-region-drag ml-2 flex items-center gap-2">
-          <NotificationCenter />
-        </div>
 
         {showWindowControls && <WindowsControls />}
       </div>

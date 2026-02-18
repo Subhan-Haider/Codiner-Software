@@ -16,6 +16,8 @@ import { listFilesTool } from "./tools/list_files";
 import { getDatabaseSchemaTool } from "./tools/get_database_schema";
 import { setChatSummaryTool } from "./tools/set_chat_summary";
 import { firebaseCommandTool } from "./tools/firebase_command";
+import { spawnSubAgentTool } from "./tools/spawn_sub_agent";
+import { aggregateAiTool } from "./tools/aggregate_ai";
 import {
   escapeXmlAttr,
   escapeXmlContent,
@@ -36,6 +38,8 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   getDatabaseSchemaTool,
   setChatSummaryTool,
   firebaseCommandTool,
+  spawnSubAgentTool,
+  aggregateAiTool,
 ];
 // ============================================================================
 // Agent Tool Name Type (derived from TOOL_DEFINITIONS)

@@ -102,3 +102,13 @@ sqlite.db
 userData/
 .env.local
 .idea/
+
+# Problematic files
+ts.error*
+
+# Large auto-generated directories
+liberty-final/
+liberty-sync/
+liberty-temp/
+lib-assets/
+lib-rem/

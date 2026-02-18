@@ -9,11 +9,12 @@ import {
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAtom } from "jotai";
 import { dropdownOpenAtom } from "@/atoms/uiAtoms";
 import { useSettings } from "@/hooks/useSettings";
 import { cn } from "@/lib/utils";
+import { GripVertical, ChevronLeft, ChevronRight, ArrowLeftRight, MoveHorizontal } from "lucide-react";
 
 import {
   Sidebar,
@@ -24,8 +25,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ChatList } from "./ChatList";
 import { AppList } from "./AppList";
@@ -33,6 +32,7 @@ import { HelpDialog } from "./HelpDialog"; // Import the new dialog
 import { SettingsList } from "./SettingsList";
 import { LabsList } from "./LabsList";
 import { HubList } from "./HubList";
+import { LibraryList } from "./LibraryList";
 // @ts-ignore
 import logo from "../../assets/logo.png";
 
@@ -88,6 +88,44 @@ export function AppSidebar({ className }: { className?: string }) {
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false); // State for dialog
   const [isDropdownOpen] = useAtom(dropdownOpenAtom);
 
+  const [width, setWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = e.clientX;
+      if (newWidth > 280 && newWidth < 600) {
+        setWidth(newWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.body.classList.add('resizing');
+      window.addEventListener("mousemove", resize);
+      window.addEventListener("mouseup", stopResizing);
+    } else {
+      document.body.classList.remove('resizing');
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    }
+    return () => {
+      document.body.classList.remove('resizing');
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+
   const { settings } = useSettings();
   const isHoverEnabled = settings?.enableSidebarHover ?? true;
 
@@ -118,37 +156,53 @@ export function AppSidebar({ className }: { className?: string }) {
 
 
   let selectedItem: string | null = null;
-  if (hoverState === "start-hover:app") {
-    selectedItem = "Apps";
-  } else if (hoverState === "start-hover:chat") {
-    selectedItem = "Chat";
-  } else if (hoverState === "start-hover:settings") {
-    selectedItem = "Settings";
-  } else if (hoverState === "start-hover:library") {
-    selectedItem = "Library";
-  } else if (hoverState === "start-hover:hub") {
-    selectedItem = "Hub";
-  } else if (hoverState === "start-hover:labs") {
-    selectedItem = "Labs";
+  if (hoverState.startsWith("start-hover:")) {
+    const hoverItem = hoverState.split(":")[1];
+    // Map hover state to selectedItem
+    const hoverMap: Record<string, string> = {
+      app: "Apps",
+      chat: "Chat",
+      settings: "Settings",
+      library: "Library",
+      hub: "Hub",
+      labs: "Labs",
+    };
+    selectedItem = hoverMap[hoverItem] || null;
   } else if (state === "expanded") {
-    if (isAppRoute) {
+    // Determine selected item based on current route if not hovering
+    if (pathname === "/" || pathname.startsWith("/app-details")) {
       selectedItem = "Apps";
-    } else if (isChatRoute) {
+    } else if (pathname.startsWith("/chat")) {
       selectedItem = "Chat";
-    } else if (isSettingsRoute) {
+    } else if (pathname.startsWith("/settings")) {
       selectedItem = "Settings";
+    } else if (pathname.startsWith("/library")) {
+      selectedItem = "Library";
+    } else if (pathname.startsWith("/hub")) {
+      selectedItem = "Hub";
+    } else if (pathname.startsWith("/labs")) {
+      selectedItem = "Labs";
     }
   }
 
   return (
     <Sidebar
       collapsible="icon"
+      data-resizing={isResizing}
       onMouseLeave={() => {
         if (!isDropdownOpen) {
           setHoverState("clear-hover");
         }
       }}
-      className={cn("border-r border-border", className)}
+      className={cn(
+        "border-r border-border h-full",
+        !isResizing && "transition-all duration-300",
+        className
+      )}
+      style={{
+        "--sidebar-width": `${width}px`,
+        width: state === "expanded" ? `${width}px` : "var(--sidebar-width-icon)",
+      } as React.CSSProperties}
     >
       <SidebarContent className="overflow-hidden">
         {/* Main Flex Container */}
@@ -156,25 +210,46 @@ export function AppSidebar({ className }: { className?: string }) {
 
           {/* Left Column: Icon Rail */}
           {/* Added pt-12 to account for window drag region */}
-          <div className="flex flex-col items-center border-r border-border/50 bg-secondary/20 w-[72px] pt-2 pb-4 gap-2 h-full z-20">
-            <SidebarTrigger className="mb-4 h-10 w-10" />
+          <div className="flex flex-col items-center border-r border-border/50 bg-secondary/20 w-[72px] pt-0 pb-4 gap-2 h-full z-20">
             <AppIcons onHoverChange={setHoverState} />
           </div>
 
           {/* Right Column: Content List */}
           {/* Hidden when collapsed to prevent crushing */}
           <div className={`
-                flex-1 min-w-0 bg-background transition-all duration-300 ease-in-out pt-2
-                ${state === "collapsed" ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"}
+                min-w-0 bg-background transition-all duration-300 ease-in-out pt-0
+                ${state === "collapsed" ? "w-0 min-w-0 flex-none opacity-0 overflow-hidden pointer-events-none" : "flex-1 min-w-0 w-auto opacity-100"}
             `}>
             <div className="h-full w-full px-1">
               <AppList show={selectedItem === "Apps"} />
               <ChatList show={selectedItem === "Chat"} />
+              <LibraryList show={selectedItem === "Library"} />
               <SettingsList show={selectedItem === "Settings"} />
               <LabsList show={selectedItem === "Labs"} />
               <HubList show={selectedItem === "Hub"} />
             </div>
           </div>
+
+          {/* Resize Handle */}
+          {state === "expanded" && (
+            <div
+              onMouseDown={startResizing}
+              className={cn(
+                "absolute -right-1.5 top-0 w-3 h-full cursor-col-resize z-[100] group",
+                isResizing && "bg-transparent"
+              )}
+            >
+              {/* The visual line is removed for a cleaner look, the handle remains functional */}
+
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100">
+                <div className="bg-primary text-primary-foreground p-1 px-2.5 rounded-full shadow-xl border-2 border-background flex items-center justify-center gap-1 min-w-10 h-8">
+                  <div className="w-0 h-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-current" />
+                  <div className="w-2.5 h-0.5 bg-current rounded-full" />
+                  <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-current" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </SidebarContent>
 
@@ -188,6 +263,8 @@ function AppIcons({
 }: {
   onHoverChange: (state: HoverState) => void;
 }) {
+  const { toggleSidebar, state } = useSidebar();
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
 
@@ -236,12 +313,13 @@ function AppIcons({
             );
           })}
 
-          {/* Help Button moved here to be part of the rail flow */}
-          <div className="mt-auto pt-4 border-t w-8 border-border/50" />
+          {/* Help and Toggle Button moved here to be part of the bottom rail flow */}
+          <div className="mt-auto pt-4 border-t w-8 border-border/50 mb-2" />
+
+
           <SidebarMenuItem>
             <HelpButton />
           </SidebarMenuItem>
-
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

@@ -27,20 +27,16 @@ const DEFAULT_SETTINGS: UserSettings = {
   telemetryUserId: uuidv4(),
   hasRunBefore: false,
   hasCompletedOnboarding: false,
-  experiments: {},
-  enableProLazyEditsMode: true,
-  enableProSmartFilesContextMode: true,
-  selectedChatMode: "build",
-  enableAutoFixProblems: false,
   enableAutoUpdate: true,
   releaseChannel: "stable",
   selectedTemplateId: DEFAULT_TEMPLATE_ID,
-  isRunning: false,
-  lastKnownPerformance: undefined,
   userName: "Architect",
   customSystemPrompt: "",
   enableHaptics: true,
   appFontSize: "normal",
+  enableGlassmorphism: true,
+  isRunning: false,
+  lastKnownPerformance: undefined,
 };
 
 const SETTINGS_FILE = "user-settings.json";

@@ -123,259 +123,29 @@ export async function handleLocalAgentStream(
 
   const appPath = getCodinerAppPath(chat.app.path);
 
-  // Generate request ID
-
   // Send initial message update
   safeSend(event.sender, "chat:response:chunk", {
     chatId: req.chatId,
     messages: chat.messages,
   });
 
-  let fullResponse = "";
-  let streamingPreview = ""; // Temporary preview for current tool, not persisted
-
   try {
-    // Get model client
-    const { modelClient } = await getModelClient(
-      settings.selectedModel,
-      settings,
-    );
-
-    // Build tool execute context
-    const ctx: AgentContext = {
-      event,
-      appPath,
+    const manager = AgentManager.getInstance();
+    const agent = await manager.createAgent({
       chatId: chat.id,
-      supabaseProjectId: (chat.app as any).supabaseProjectId,
-      supabaseOrganizationSlug: (chat.app as any).supabaseOrganizationSlug,
-      messageId: placeholderMessageId,
-      isSharedModulesChanged: false,
-      onXmlStream: (accumulatedXml: string) => {
-        // Stream accumulated XML to UI without persisting
-        streamingPreview = accumulatedXml;
-        sendResponseChunk(
-          event,
-          req.chatId,
-          chat,
-          fullResponse + streamingPreview,
-        );
-      },
-      onXmlComplete: (finalXml: string) => {
-        // Write final XML to DB and UI
-        fullResponse += finalXml + "\n";
-        streamingPreview = ""; // Clear preview
-        updateResponseInDb(placeholderMessageId, fullResponse);
-        sendResponseChunk(event, req.chatId, chat, fullResponse);
-      },
-      requireConsent: async (params: {
-        toolName: string;
-        toolDescription?: string | null;
-        inputPreview?: string | null;
-      }) => {
-        return requireAgentToolConsent(event, {
-          chatId: chat.id,
-          toolName: params.toolName as AgentToolName,
-          toolDescription: params.toolDescription,
-          inputPreview: params.inputPreview,
-        });
-      },
-    };
+      appId: chat.app.id,
+      appPath,
+      systemPrompt,
+      placeholderMessageId,
+    }, abortController, event);
 
-    // Build tool set (agent tools + MCP tools)
-    const agentTools = buildAgentToolSet(ctx);
-    const mcpTools = await getMcpTools(event, ctx);
-    const allTools: ToolSet = { ...agentTools, ...mcpTools };
+    const ctx = agent.getContext();
+    const mcpTools = await manager.getMcpTools(event, ctx);
 
-    // Prepare message history with graceful fallback
-    const messageHistory: ModelMessage[] = chat.messages
-      .filter((msg) => msg.content || msg.aiMessagesJson)
-      .flatMap((msg) => parseAiMessagesJson(msg));
+    await agent.run(mcpTools);
 
-    // Stream the response
-    const streamResult = streamText({
-      model: modelClient.model,
-      headers: getAiHeaders({
-        builtinProviderId: modelClient.builtinProviderId,
-      }),
-      providerOptions: getProviderOptions({
-        codinerAppId: chat.app.id,
-        codinerDisableFiles: true, // Local agent uses tools, not file injection
-        files: [],
-        mentionedAppsCodebases: [],
-        builtinProviderId: modelClient.builtinProviderId,
-        settings,
-      }),
-      maxOutputTokens: await getMaxTokens(settings.selectedModel),
-      temperature: await getTemperature(settings.selectedModel),
-      maxRetries: 2,
-      system: systemPrompt,
-      messages: messageHistory,
-      tools: allTools,
-      stopWhen: stepCountIs(25), // Allow multiple tool call rounds
-      abortSignal: abortController.signal,
-      onFinish: async (response) => {
-        const totalTokens = response.usage?.totalTokens;
-        const inputTokens = response.usage?.inputTokens;
-        const cachedInputTokens = response.usage?.cachedInputTokens;
-        logger.log(
-          "Total tokens used:",
-          totalTokens,
-          "Input tokens:",
-          inputTokens,
-          "Cached input tokens:",
-          cachedInputTokens,
-          "Cache hit ratio:",
-          cachedInputTokens ? (cachedInputTokens ?? 0) / (inputTokens ?? 0) : 0,
-        );
-        if (typeof totalTokens === "number") {
-          await db
-            .update(messages)
-            .set({ maxTokensUsed: totalTokens })
-            .where(eq(messages.id, placeholderMessageId))
-            .catch((err) => logger.error("Failed to save token count", err));
-        }
-      },
-      onError: (error: any) => {
-        const errorMessage = error?.error?.message || JSON.stringify(error);
-        logger.error("Local agent stream error:", errorMessage);
-        safeSend(event.sender, "chat:response:error", {
-          chatId: req.chatId,
-          error: `AI error: ${errorMessage}`,
-        });
-      },
-    });
-
-    // Process the stream
-    let inThinkingBlock = false;
-
-    for await (const part of streamResult.fullStream) {
-      if (abortController.signal.aborted) {
-        logger.log(`Stream aborted for chat ${req.chatId}`);
-        // Clean up pending consent requests to prevent stale UI banners
-        clearPendingConsentsForChat(req.chatId);
-        break;
-      }
-
-      let chunk = "";
-
-      // Handle thinking block transitions
-      if (
-        inThinkingBlock &&
-        !["reasoning-delta", "reasoning-end", "reasoning-start"].includes(
-          part.type,
-        )
-      ) {
-        chunk = "</think>\n";
-        inThinkingBlock = false;
-      }
-
-      switch (part.type) {
-        case "text-delta":
-          chunk += part.text;
-          break;
-
-        case "reasoning-start":
-          if (!inThinkingBlock) {
-            chunk = "<think>";
-            inThinkingBlock = true;
-          }
-          break;
-
-        case "reasoning-delta":
-          if (!inThinkingBlock) {
-            chunk = "<think>";
-            inThinkingBlock = true;
-          }
-          chunk += part.text;
-          break;
-
-        case "reasoning-end":
-          if (inThinkingBlock) {
-            chunk = "</think>\n";
-            inThinkingBlock = false;
-          }
-          break;
-
-        case "tool-input-start": {
-          // Initialize streaming state for this tool call
-          getOrCreateStreamingEntry(part.id, part.toolName);
-          break;
-        }
-
-        case "tool-input-delta": {
-          // Accumulate args and stream XML preview
-          const entry = getOrCreateStreamingEntry(part.id);
-          if (entry) {
-            entry.argsAccumulated += part.delta;
-            const toolDef = findToolDefinition(entry.toolName);
-            if (toolDef?.buildXml) {
-              const argsPartial = parsePartialJson(entry.argsAccumulated);
-              const xml = toolDef.buildXml(argsPartial, false);
-              if (xml) {
-                ctx.onXmlStream(xml);
-              }
-            }
-          }
-          break;
-        }
-
-        case "tool-input-end": {
-          // Build final XML and persist
-          const entry = getOrCreateStreamingEntry(part.id);
-          if (entry) {
-            const toolDef = findToolDefinition(entry.toolName);
-            if (toolDef?.buildXml) {
-              const argsPartial = parsePartialJson(entry.argsAccumulated);
-              const xml = toolDef.buildXml(argsPartial, true);
-              if (xml) {
-                ctx.onXmlComplete(xml);
-              }
-            }
-          }
-          cleanupStreamingEntry(part.id);
-          break;
-        }
-
-        case "tool-call":
-          // Tool execution happens via execute callbacks
-          break;
-
-        case "tool-result":
-          // Tool results are already handled by the execute callback
-          break;
-      }
-
-      if (chunk) {
-        fullResponse += chunk;
-        await updateResponseInDb(placeholderMessageId, fullResponse);
-        sendResponseChunk(event, req.chatId, chat, fullResponse);
-      }
-    }
-
-    // Close thinking block if still open
-    if (inThinkingBlock) {
-      fullResponse += "</think>\n";
-      await updateResponseInDb(placeholderMessageId, fullResponse);
-    }
-
-    // Save the AI SDK messages for multi-turn tool call preservation
-    try {
-      const response = await streamResult.response;
-      const aiMessagesJson = getAiMessagesJsonIfWithinLimit(response.messages);
-      if (aiMessagesJson) {
-        await db
-          .update(messages)
-          .set({ aiMessagesJson })
-          .where(eq(messages.id, placeholderMessageId));
-      }
-    } catch (err) {
-      logger.warn("Failed to save AI messages JSON:", err);
-    }
-
-    // Deploy all Supabase functions if shared modules changed
+    // After agent completes, run final processors
     await deployAllFunctionsIfNeeded(ctx);
-
-    // Commit all changes
     const commitResult = await commitAllChanges(ctx, ctx.chatSummary);
 
     if (commitResult.commitHash) {
@@ -397,18 +167,17 @@ export async function handleLocalAgentStream(
       updatedFiles: true,
     } satisfies ChatResponseEnd);
 
-    return;
   } catch (error) {
-    // Clean up any pending consent requests for this chat to prevent
-    // stale UI banners and orphaned promises
     clearPendingConsentsForChat(req.chatId);
 
     if (abortController.signal.aborted) {
-      // Handle cancellation
-      if (fullResponse) {
+      const currentMsg = await db.query.messages.findFirst({
+        where: eq(messages.id, placeholderMessageId)
+      });
+      if (currentMsg?.content) {
         await db
           .update(messages)
-          .set({ content: `${fullResponse}\n\n[Response cancelled by user]` })
+          .set({ content: `${currentMsg.content}\n\n[Response cancelled by user]` })
           .where(eq(messages.id, placeholderMessageId));
       }
       return;
@@ -419,7 +188,8 @@ export async function handleLocalAgentStream(
       chatId: req.chatId,
       error: `Error: ${error}`,
     });
-    return;
+  } finally {
+    AgentManager.getInstance().clearAgents(req.chatId);
   }
 }
 

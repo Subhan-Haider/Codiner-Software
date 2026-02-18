@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Globe } from "lucide-react";
+import { Globe, FileText, Wrench } from "lucide-react";
 import { IpcClient } from "@/ipc/ipc_client";
 import { useSettings } from "@/hooks/useSettings";
 import { useLoadApp } from "@/hooks/useLoadApp";
@@ -12,7 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {} from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { App } from "@/ipc/ipc_types";
@@ -57,9 +64,71 @@ function ConnectedVercelConnector({
     disconnectError,
   } = useVercelDeployments(appId);
 
+  const { navigate } = useRouter();
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [deploymentLogs, setDeploymentLogs] = useState<string>("");
+  const [selectedDeploymentId, setSelectedDeploymentId] = useState<string | null>(null);
+
   const handleDisconnectProject = async () => {
     await disconnectProject();
     refreshApp();
+  };
+
+  const fetchLogs = async (deploymentId: string) => {
+    setLogsLoading(true);
+    setDeploymentLogs("");
+    setSelectedDeploymentId(deploymentId);
+    setLogsOpen(true);
+    try {
+      const logs = await IpcClient.getInstance().getVercelDeploymentLogs({
+        deploymentId,
+        appId,
+      });
+      const logText = logs.events
+        ? logs.events.map((e) => `[${new Date(e.payload.date).toLocaleTimeString()}] ${e.payload.text}`).join("\n")
+        : "No logs found.";
+      setDeploymentLogs(logText);
+    } catch (err: any) {
+      setDeploymentLogs(`Failed to fetch logs: ${err.message}`);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  const handleFixWithAI = async (deploymentId: string) => {
+    try {
+      // 1. Fetch logs first
+      const logs = await IpcClient.getInstance().getVercelDeploymentLogs({
+        deploymentId,
+        appId,
+      });
+      const logText = logs.events
+        ? logs.events.map((e) => `[${new Date(e.payload.date).toLocaleTimeString()}] ${e.payload.text}`).join("\n")
+        : "No logs found.";
+
+      // 2. Create new chat
+      const chatId = await IpcClient.getInstance().createChat(appId);
+
+      // 3. Send prompt with logs
+      const prompt = `I am getting a Vercel deployment error. Here are the build logs:\n\n\`\`\`\n${logText.slice(-8000)}\n\`\`\`\n\nPlease analyze the error and fix it.`;
+
+      // 4. Navigate to chat
+      // @ts-ignore
+      navigate({ to: "/chat", search: { chatId } });
+
+      // 5. Stream the message
+      IpcClient.getInstance().streamMessage(prompt, {
+        chatId,
+        redo: false,
+        onUpdate: () => { },
+        onEnd: () => { },
+        onError: (err) => { console.error("Auto-fix stream error:", err); }
+      });
+
+    } catch (err: any) {
+      alert(`Failed to start AI fix: ${err.message}`);
+    }
   };
 
   return (
@@ -161,13 +230,14 @@ function ConnectedVercelConnector({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        deployment.readyState === "READY"
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${deployment.readyState === "READY"
                           ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
-                          : deployment.readyState === "BUILDING"
+                          : deployment.readyState === "BUILDING" || deployment.readyState === "INITIALIZING"
                             ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                      }`}
+                            : deployment.readyState === "ERROR" || deployment.readyState === "CANCELED"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                        }`}
                     >
                       {deployment.readyState}
                     </span>
@@ -175,20 +245,44 @@ function ConnectedVercelConnector({
                       {new Date(deployment.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault();
-                      IpcClient.getInstance().openExternalUrl(
-                        `https://${deployment.url}`,
-                      );
-                    }}
-                    className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400 text-sm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Globe className="h-4 w-4 inline mr-1" />
-                    View
-                  </a>
+                  <div className="flex items-center gap-2">
+                    {deployment.readyState === "ERROR" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10"
+                        onClick={() => handleFixWithAI(deployment.uid)}
+                        title="Fix with AI"
+                      >
+                        <Wrench className="h-3.5 w-3.5 mr-1" />
+                        Fix
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2"
+                      onClick={() => fetchLogs(deployment.uid)}
+                      title="View Logs"
+                    >
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      Logs
+                    </Button>
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        IpcClient.getInstance().openExternalUrl(
+                          `https://${deployment.url}`,
+                        );
+                      }}
+                      className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400 text-sm flex items-center h-7 px-2"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Globe className="h-3.5 w-3.5 mr-1" />
+                      View
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -198,6 +292,23 @@ function ConnectedVercelConnector({
       {disconnectError && (
         <p className="text-red-600 mt-2">{disconnectError}</p>
       )}
+
+      <Dialog open={logsOpen} onOpenChange={setLogsOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Deployment Logs</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="flex-1 w-full rounded-md border p-4 bg-zinc-950 font-mono text-xs text-zinc-300 h-[500px]">
+            {logsLoading ? (
+              <div className="flex items-center justify-center h-full">
+                Loading logs...
+              </div>
+            ) : (
+              <pre className="whitespace-pre-wrap">{deploymentLogs}</pre>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -353,7 +464,7 @@ function UnconnectedVercelConnector({
     } catch (err: any) {
       setCreateProjectError(
         err.message ||
-          `Failed to ${projectSetupMode === "create" ? "create" : "connect to"} project.`,
+        `Failed to ${projectSetupMode === "create" ? "create" : "connect to"} project.`,
       );
     } finally {
       setIsCreatingProject(false);
@@ -493,11 +604,10 @@ function UnconnectedVercelConnector({
               <Button
                 type="button"
                 variant={projectSetupMode === "create" ? "default" : "ghost"}
-                className={`flex-1 rounded-none rounded-l-md border-0 ${
-                  projectSetupMode === "create"
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`flex-1 rounded-none rounded-l-md border-0 ${projectSetupMode === "create"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => {
                   setProjectSetupMode("create");
                   setCreateProjectError(null);
@@ -509,11 +619,10 @@ function UnconnectedVercelConnector({
               <Button
                 type="button"
                 variant={projectSetupMode === "existing" ? "default" : "ghost"}
-                className={`flex-1 rounded-none rounded-r-md border-0 border-l border-gray-200 dark:border-gray-700 ${
-                  projectSetupMode === "existing"
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`flex-1 rounded-none rounded-r-md border-0 border-l border-gray-200 dark:border-gray-700 ${projectSetupMode === "existing"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => {
                   setProjectSetupMode("existing");
                   setCreateProjectError(null);

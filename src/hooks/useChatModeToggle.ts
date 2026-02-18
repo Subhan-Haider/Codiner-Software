@@ -25,8 +25,8 @@ export function useChatModeToggle() {
     if (!settings || !settings.selectedChatMode) return;
 
     const currentMode = settings.selectedChatMode;
-    const modes = ChatModeSchema.options;
-    const currentIndex = modes.indexOf(settings.selectedChatMode);
+    const modes = ["build", "ask", "agent", "local-agent"] as const;
+    const currentIndex = modes.indexOf(settings.selectedChatMode as any);
     const newMode = modes[(currentIndex + 1) % modes.length];
 
     updateSettings({ selectedChatMode: newMode });

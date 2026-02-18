@@ -352,10 +352,20 @@ export interface EnvVar {
 export interface SetAppEnvVarsParams {
   appId: number;
   envVars: EnvVar[];
+  fileName?: string;
 }
 
 export interface GetAppEnvVarsParams {
   appId: number;
+  fileName?: string;
+}
+
+export interface DiscoverAppEnvVarsParams {
+  appId: number;
+}
+
+export interface DiscoverAppEnvVarsResult {
+  discoveredKeys: string[];
 }
 
 export interface ConnectToExistingVercelProjectParams {
@@ -406,6 +416,22 @@ export interface VercelProject {
 
 export interface DeployToVercelParams {
   appId: number;
+}
+
+export interface GetVercelDeploymentLogsParams {
+  deploymentId: string;
+  appId: number;
+}
+
+export interface VercelBuildLogs {
+  events: Array<{
+    type: string;
+    payload: {
+      text: string;
+      date: number;
+      id: string;
+    };
+  }>;
 }
 
 export interface UpdateChatParams {

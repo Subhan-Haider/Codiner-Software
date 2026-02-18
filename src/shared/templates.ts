@@ -39,7 +39,7 @@ export const localTemplatesData: Template[] = [
     description: "Uses Next.js, React.js, Shadcn, Tailwind and TypeScript.",
     imageUrl:
       "https://github.com/user-attachments/assets/96258e4f-abce-4910-a62a-a9dff77965f2",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: true,
   },
   {
@@ -48,7 +48,7 @@ export const localTemplatesData: Template[] = [
     description: "Ultimate E-commerce foundation with Neon DB, Payload CMS, and high-conversion UI layouts.",
     imageUrl:
       "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: true,
     isExperimental: true,
     requiresNeon: false,
@@ -60,7 +60,7 @@ export const localTemplatesData: Template[] = [
       "An Expo SDK 53 + expo-router v5 starter that runs on iOS/Android and the browser via react-native-web",
     imageUrl:
       "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: false,
   },
   {
@@ -70,7 +70,7 @@ export const localTemplatesData: Template[] = [
       "Enterprise-grade Dockerized Next.js stack with persistent dynamic storage, built-in CORS proxy, and automated CI/CD readiness.",
     imageUrl:
       "https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: false,
   },
   {
@@ -80,7 +80,7 @@ export const localTemplatesData: Template[] = [
       "A minimal, production-ready Vue 3 starter template with TypeScript, Vite, and Tailwind CSS v3.",
     imageUrl:
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: false,
   },
   {
@@ -98,7 +98,7 @@ export const localTemplatesData: Template[] = [
       "Professional Chrome Extension boilerplate with HMR and multi-page support. Note: Build browser tools in record time (external testing required).",
     imageUrl:
       "https://images.unsplash.com/photo-1451187530221-893073e7a701?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: false,
   },
   {
@@ -108,7 +108,7 @@ export const localTemplatesData: Template[] = [
       "Modern template using react-router v7 with file based routing from fs-routes and prismaORM for database management. Uses tailwind css, and shadcn/ui",
     imageUrl:
       "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=800",
-    githubUrl: "https://github.com/Subhan-Haider/Codiner-Software",
+    githubUrl: "https://github.com/Subhan-Haider/Codiner-Template",
     isOfficial: false,
   },
   {

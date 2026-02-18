@@ -162,9 +162,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <div className="flex-1 flex overflow-hidden w-full h-full relative">
                 {/* Sidebar */}
                 {!isOnboarding && (
-                  <div className="mt-11 h-[calc(100vh-44px)]">
-                    <AppSidebar className="!top-[44px] !h-[calc(100vh-44px)]" />
-                  </div>
+                  <AppSidebar className="mt-14 h-[calc(100vh-44px)] !top-[-8px] !max-h-[calc(100vh-44px)]" />
                 )}
 
                 {/* Main content */}

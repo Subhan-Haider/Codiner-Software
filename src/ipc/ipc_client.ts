@@ -41,8 +41,11 @@ import type {
   AppUpgrade,
   ProblemReport,
   EditAppFileReturnType,
+  EnvVar,
   GetAppEnvVarsParams,
   SetAppEnvVarsParams,
+  DiscoverAppEnvVarsParams,
+  DiscoverAppEnvVarsResult,
   ConnectToExistingVercelProjectParams,
   IsVercelProjectAvailableResponse,
   CreateVercelProjectParams,
@@ -57,6 +60,8 @@ import type {
   UpdateChatParams,
   FileAttachment,
   CreateNeonProjectParams,
+  GetVercelDeploymentLogsParams,
+  VercelBuildLogs,
   NeonProject,
   GetNeonProjectParams,
   GetNeonProjectResponse,
@@ -203,11 +208,8 @@ export class IpcClient {
         console.debug("chat:response:end");
         this.chatStreams.delete(chatId);
       } else {
-        console.error(
-          new Error(
-            `[IPC] No callbacks found for chat ${chatId} on stream end`,
-          ),
-        );
+        // This is normal if the stream was already closed via error or cancellation
+        console.debug(`[IPC] No callbacks found for chat ${chatId} on stream end (already closed)`);
       }
       // Notify global handlers (used for cleanup like clearing pending consents)
       for (const handler of this.globalChatStreamEndHandlers) {
@@ -229,10 +231,8 @@ export class IpcClient {
           callbacks.onError(error);
           this.chatStreams.delete(chatId);
         } else {
-          console.warn(
-            `[IPC] No callbacks found for chat ${chatId} on error`,
-            this.chatStreams,
-          );
+          // This is normal if the stream was already closed
+          console.debug(`[IPC] No callbacks found for chat ${chatId} on error (already closed)`);
         }
         // Notify global handlers (used for cleanup like clearing pending consents)
         for (const handler of this.globalChatStreamEndHandlers) {
@@ -353,6 +353,10 @@ export class IpcClient {
 
   public async setAppEnvVars(params: SetAppEnvVarsParams): Promise<void> {
     return this.ipcRenderer.invoke("set-app-env-vars", params);
+  }
+
+  public async discoverAppEnvVars(params: DiscoverAppEnvVarsParams): Promise<DiscoverAppEnvVarsResult> {
+    return this.ipcRenderer.invoke("discover-app-env-vars", params);
   }
 
   public async getChat(chatId: number): Promise<Chat> {
@@ -1497,6 +1501,12 @@ export class IpcClient {
     return this.ipcRenderer.invoke("firebase:logout");
   }
 
+  public async getVercelDeploymentLogs(
+    params: GetVercelDeploymentLogsParams,
+  ): Promise<VercelBuildLogs> {
+    return this.ipcRenderer.invoke("vercel:get-deployment-logs", params);
+  }
+
   public async aiTestConnectivity(providerId?: string): Promise<{ success: boolean; message: string; latency?: number; capabilities?: string[] }> {
     return this.ipcRenderer.invoke("ai:test-connectivity", providerId);
   }
@@ -1524,5 +1534,19 @@ export class IpcClient {
 
   public onOllamaInstallProgress(callback: (data: { model: string; progress: string }) => void) {
     return (this.ipcRenderer as any).on("ollama:install-progress", (data: any) => callback(data));
+  }
+
+  // Generic invoke method for any IPC channel
+  public async invoke(channel: string, ...args: any[]): Promise<any> {
+    return this.ipcRenderer.invoke(channel, ...args);
+  }
+
+  // Auto-updater event listener
+  public onAutoUpdaterEvent(callback: (event: { event: string; data?: any }) => void) {
+    const handler = (data: any) => callback(data);
+    this.ipcRenderer.on("auto-updater-event", handler);
+    return () => {
+      this.ipcRenderer.removeListener("auto-updater-event", handler);
+    };
   }
 }

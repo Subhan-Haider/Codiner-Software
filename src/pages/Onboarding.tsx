@@ -13,13 +13,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Rocket, Globe, Shield, Puzzle } from "lucide-react";
+import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Rocket, Shield, Puzzle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STAGES = [
     "Welcome",
-    "Language",
     "Terms",
     "Features",
     "Installation",
@@ -37,7 +36,7 @@ const LANGUAGES = [
 
 const FEATURES = [
     { id: "core", name: "Core App", description: "The essential Codiner experience", required: true },
-    { id: "auto-updates", name: "Auto Updates", description: "Keep your app up to date automatically", required: false, default: true },
+    { id: "auto-updates", name: "Auto Updates", description: "Automatically download and install updates on restart", required: false, default: true },
     { id: "cloud-sync", name: "Cloud Sync", description: "Sync your projects across devices", required: false, default: true },
     { id: "dev-tools", name: "Developer Tools", description: "Advanced debugging and performance metrics", required: false, default: false },
 ];
@@ -85,18 +84,19 @@ export default function Onboarding() {
 
     // Installation simulation
     useEffect(() => {
-        if (currentStep === 4) {
+        if (currentStep === 3) {
             const interval = setInterval(() => {
                 setInstallProgress(prev => {
                     if (prev >= 100) {
                         clearInterval(interval);
-                        setTimeout(() => setCurrentStep(5), 500);
+                        setTimeout(() => setCurrentStep(4), 500);
                         return 100;
                     }
                     const next = prev + Math.random() * 15;
 
                     if (next > 70) setInstallStatus("Finalizing setup...");
                     else if (next > 30) setInstallStatus("Installing components...");
+
 
                     return Math.min(next, 100);
                 });
@@ -143,53 +143,42 @@ export default function Onboarding() {
                                             <p className="text-xl text-muted-foreground font-medium italic">Build the future, faster.</p>
                                         </div>
                                         <p className="text-lg text-foreground/80">Welcome! Let's get everything ready for your first project.</p>
+
+                                        <div className="bg-muted/30 border border-border/50 rounded-xl p-4 text-sm text-muted-foreground">
+                                            <p className="mb-2">
+                                                <strong className="text-foreground">Open Source:</strong> Install from{" "}
+                                                <a
+                                                    href="https://github.com/Subhan-Haider/Codiner-Software"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline font-medium"
+                                                >
+                                                    GitHub
+                                                </a>
+                                            </p>
+                                            <p>
+                                                <strong className="text-foreground">Need Help?</strong> File issues or contribute on our{" "}
+                                                <a
+                                                    href="https://github.com/Subhan-Haider/Codiner-Software/issues"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline font-medium"
+                                                >
+                                                    GitHub repository
+                                                </a>
+                                            </p>
+                                        </div>
+
                                         <Button size="lg" onClick={handleNext} className="px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-primary/20 transition-all">
                                             Get Started <ChevronRight className="ml-2" />
                                         </Button>
                                     </div>
                                 )}
 
-                                {/* Step 2: Language */}
+
+
+                                {/* Step 2: Terms */}
                                 {currentStep === 1 && (
-                                    <div className="space-y-6 py-4">
-                                        <div className="flex items-center space-x-3 mb-2">
-                                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                <Globe size={24} />
-                                            </div>
-                                            <h2 className="text-2xl font-bold">Preferred Language</h2>
-                                        </div>
-                                        <p className="text-muted-foreground">Select your primary language for the interface and documentation.</p>
-
-                                        <div className="grid grid-cols-2 gap-3 mt-4">
-                                            {LANGUAGES.map((lang) => (
-                                                <div
-                                                    key={lang.code}
-                                                    onClick={() => setLanguage(lang.code)}
-                                                    className={cn(
-                                                        "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all",
-                                                        language === lang.code
-                                                            ? "border-primary bg-primary/5 shadow-sm"
-                                                            : "border-border hover:border-border/80 hover:bg-muted/50"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center space-x-3">
-                                                        <span className="text-2xl">{lang.flag}</span>
-                                                        <span className="font-medium">{lang.name}</span>
-                                                    </div>
-                                                    {language === lang.code && <CheckCircle2 size={20} className="text-primary" />}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        <div className="pt-6 flex justify-end space-x-3">
-                                            <Button variant="ghost" onClick={handleBack}>Back</Button>
-                                            <Button onClick={handleNext} className="rounded-lg px-6">Continue <ChevronRight className="ml-1" size={18} /></Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Step 3: Terms */}
-                                {currentStep === 2 && (
                                     <div className="space-y-6 py-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -230,8 +219,8 @@ export default function Onboarding() {
                                     </div>
                                 )}
 
-                                {/* Step 4: Features */}
-                                {currentStep === 3 && (
+                                {/* Step 3: Features */}
+                                {currentStep === 2 && (
                                     <div className="space-y-6 py-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -285,8 +274,8 @@ export default function Onboarding() {
                                     </div>
                                 )}
 
-                                {/* Step 5: Installation */}
-                                {currentStep === 4 && (
+                                {/* Step 4: Installation */}
+                                {currentStep === 3 && (
                                     <div className="text-center py-12 space-y-8">
                                         <div className="space-y-3">
                                             <h2 className="text-2xl font-bold">Setting up Codiner</h2>
@@ -310,8 +299,8 @@ export default function Onboarding() {
                                     </div>
                                 )}
 
-                                {/* Step 6: Ready */}
-                                {currentStep === 5 && (
+                                {/* Step 5: Ready */}
+                                {currentStep === 4 && (
                                     <div className="text-center py-8 space-y-8">
                                         <div className="flex justify-center">
                                             <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner">

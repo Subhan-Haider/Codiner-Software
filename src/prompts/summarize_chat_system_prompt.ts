@@ -33,7 +33,7 @@ Your task is to analyze the conversation and provide:
 - \`file2.py\` - Description of changes
 
 <codiner-chat-summary>
-[Your concise summary here - less than a sentence, more than a few words]
+[Your tiny summary here - 3-5 words only]
 </codiner-chat-summary>
 
 **Reminder:**
