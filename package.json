@@ -39,7 +39,7 @@
     "pre:e2e": "cross-env E2E_TEST_BUILD=true npm run package",
     "e2e": "playwright test",
     "e2e:shard": "playwright test --shard",
-    "build:mobile": "vite build -c vite.renderer.config.mts --base ./ --outDir dist"
+    "build:mobile": "vite build -c vite.mobile.config.mts"
   },
   "keywords": [],
   "author": {
