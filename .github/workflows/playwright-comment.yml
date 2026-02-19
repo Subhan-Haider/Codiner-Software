@@ -77,7 +77,7 @@ jobs:
 
       - name: Download Playwright HTML report
         if: ${{ steps.pr.outputs.number != '' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: html-report--attempt-${{ github.event.workflow_run.run_attempt }}
           path: playwright-report
@@ -87,7 +87,7 @@ jobs:
 
       - name: Download blob reports
         if: ${{ steps.pr.outputs.number != '' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: all-blob-reports
           pattern: blob-report-*
