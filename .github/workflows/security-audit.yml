@@ -3,12 +3,12 @@ name: Security Audit
 on:
   schedule:
     # Run every day at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'package.json'
-      - 'package-lock.json'
+      - "package.json"
+      - "package-lock.json"
   workflow_dispatch:
 
 permissions:
@@ -19,42 +19,42 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: package.json
           cache: npm
-      
+
       - name: Run npm audit
         id: audit
         run: |
           # Run audit and save results
           npm audit --json > audit.json || true
-          
+
           # Check if there are vulnerabilities
           VULN_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities | .info + .low + .moderate + .high + .critical')
           echo "vuln_count=$VULN_COUNT" >> $GITHUB_OUTPUT
-          
+
           # Extract severity counts
           INFO_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities.info')
           LOW_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities.low')
           MODERATE_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities.moderate')
           HIGH_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities.high')
           CRITICAL_COUNT=$(cat audit.json | jq -r '.metadata.vulnerabilities.critical')
-          
+
           echo "info=$INFO_COUNT" >> $GITHUB_OUTPUT
           echo "low=$LOW_COUNT" >> $GITHUB_OUTPUT
           echo "moderate=$MODERATE_COUNT" >> $GITHUB_OUTPUT
           echo "high=$HIGH_COUNT" >> $GITHUB_OUTPUT
           echo "critical=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
-          
+
           echo "Found $VULN_COUNT total vulnerabilities"
-      
+
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.audit.outputs.vuln_count != '0'
         uses: actions/github-script@v7
@@ -69,19 +69,19 @@ jobs:
           script: |
             const fs = require('fs');
             const audit = JSON.parse(fs.readFileSync('audit.json', 'utf8'));
-            
+
             let comment = `## 🔒 Security Audit Results\n\n`;
-            
+
             const info = parseInt(process.env.INFO);
             const low = parseInt(process.env.LOW);
             const moderate = parseInt(process.env.MODERATE);
             const high = parseInt(process.env.HIGH);
             const critical = parseInt(process.env.CRITICAL);
-            
+
             if (critical > 0 || high > 0) {
               comment += `⚠️ **Action Required**: This PR introduces dependencies with security vulnerabilities.\n\n`;
             }
-            
+
             comment += `| Severity | Count |\n`;
             comment += `|----------|-------|\n`;
             if (critical > 0) comment += `| 🔴 Critical | ${critical} |\n`;
@@ -89,9 +89,9 @@ jobs:
             if (moderate > 0) comment += `| 🟡 Moderate | ${moderate} |\n`;
             if (low > 0) comment += `| 🟢 Low | ${low} |\n`;
             if (info > 0) comment += `| ℹ️ Info | ${info} |\n`;
-            
+
             comment += `\n**Total vulnerabilities**: ${process.env.VULN_COUNT}\n\n`;
-            
+
             // Add some vulnerability details if available
             if (audit.vulnerabilities) {
               const vulns = Object.entries(audit.vulnerabilities).slice(0, 5);
@@ -107,7 +107,7 @@ jobs:
                 }
               }
             }
-            
+
             comment += `\n<details>\n`;
             comment += `<summary>How to fix</summary>\n\n`;
             comment += `Run \`npm audit fix\` to automatically fix vulnerabilities where possible.\n\n`;
@@ -116,19 +116,19 @@ jobs:
             comment += `2. Update affected packages to secure versions\n`;
             comment += `3. Test thoroughly after updates\n`;
             comment += `</details>\n`;
-            
+
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && 
               comment.body.includes('Security Audit Results')
             );
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -144,7 +144,7 @@ jobs:
                 body: comment
               });
             }
-      
+
       - name: Create issue for scheduled audit
         if: github.event_name == 'schedule' && steps.audit.outputs.vuln_count != '0'
         uses: actions/github-script@v7
@@ -159,23 +159,23 @@ jobs:
           script: |
             const fs = require('fs');
             const audit = JSON.parse(fs.readFileSync('audit.json', 'utf8'));
-            
+
             const critical = parseInt(process.env.CRITICAL);
             const high = parseInt(process.env.HIGH);
-            
+
             // Only create issue if there are high or critical vulnerabilities
             if (critical === 0 && high === 0) {
               console.log('No critical or high vulnerabilities, skipping issue creation');
               return;
             }
-            
+
             let body = `## 🔒 Security Vulnerabilities Detected\n\n`;
             body += `The automated security audit has found vulnerabilities in dependencies:\n\n`;
             body += `| Severity | Count |\n`;
             body += `|----------|-------|\n`;
             if (critical > 0) body += `| 🔴 Critical | ${critical} |\n`;
             if (high > 0) body += `| 🟠 High | ${high} |\n`;
-            
+
             if (audit.vulnerabilities) {
               const vulns = Object.entries(audit.vulnerabilities)
                 .filter(([_, details]) => {
@@ -196,14 +196,14 @@ jobs:
                 }
               }
             }
-            
+
             body += `\n### Action Items:\n\n`;
             body += `1. Review vulnerabilities with \`npm audit\`\n`;
             body += `2. Run \`npm audit fix\` to auto-fix where possible\n`;
             body += `3. Manually update packages that can't be auto-fixed\n`;
             body += `4. Test thoroughly after updates\n\n`;
             body += `_This issue was automatically generated by the Security Audit workflow._`;
-            
+
             // Check if similar issue already exists
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -212,11 +212,11 @@ jobs:
               labels: 'security,automated',
               per_page: 10
             });
-            
+
             const existingIssue = issues.find(issue => 
               issue.title.includes('Security Vulnerabilities Detected')
             );
-            
+
             if (existingIssue) {
               await github.rest.issues.update({
                 owner: context.repo.owner,

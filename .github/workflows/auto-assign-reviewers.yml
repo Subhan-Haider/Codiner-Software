@@ -12,23 +12,23 @@ jobs:
   assign-reviewers:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Assign reviewers based on changed files
         uses: actions/github-script@v7
         with:
           script: |
             const pr = context.payload.pull_request;
-            
+
             // Don't assign if PR author is a bot or if reviewers already assigned
             if (pr.user.type === 'Bot' || pr.requested_reviewers?.length > 0) {
               console.log('Skipping: PR is from a bot or already has reviewers');
               return;
             }
-            
+
             // Get PR files
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
@@ -36,9 +36,9 @@ jobs:
               pull_number: pr.number,
               per_page: 100
             });
-            
+
             const changedPaths = files.map(f => f.filename);
-            
+
             // Define code owners (customize based on your team)
             const codeOwners = {
               'frontend': {
@@ -62,7 +62,7 @@ jobs:
                 reviewers: [] // Add GitHub usernames here
               }
             };
-            
+
             // Determine which areas are affected
             const affectedAreas = new Set();
             for (const [area, config] of Object.entries(codeOwners)) {
@@ -74,15 +74,15 @@ jobs:
                 config.reviewers.forEach(r => affectedAreas.add(r));
               }
             }
-            
+
             // Get potential reviewers (filter to only GitHub usernames)
             const reviewers = [...affectedAreas].filter(item => 
               !['frontend', 'backend', 'database', 'workflows', 'testing'].includes(item)
             );
-            
+
             // Filter out PR author
             const filteredReviewers = reviewers.filter(r => r !== pr.user.login);
-            
+
             if (filteredReviewers.length > 0) {
               await github.rest.pulls.requestReviewers({
                 owner: context.repo.owner,

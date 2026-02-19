@@ -18,7 +18,7 @@ jobs:
         uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      
+
       - name: Enable auto-merge for Dependabot PRs
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' || 
@@ -27,7 +27,7 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Approve patch and minor updates
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' || 

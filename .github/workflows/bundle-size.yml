@@ -2,12 +2,12 @@ name: Bundle Size Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.*.config.mts'
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.*.config.mts"
 
 permissions:
   contents: read
@@ -16,22 +16,22 @@ permissions:
 jobs:
   check-bundle-size:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: package.json
           cache: npm
-      
+
       - name: Install dependencies
         run: npm ci --no-audit --no-fund --progress=false
-      
+
       - name: Build PR version
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
@@ -43,17 +43,17 @@ jobs:
           # Save detailed size breakdown
           du -ah out > pr-size-details.txt
           head -50 pr-size-details.txt
-      
+
       - name: Save PR build artifacts
         run: |
           mkdir -p /tmp/pr-build
           cp -r out /tmp/pr-build/
           cp pr-size-details.txt /tmp/pr-build/
-      
+
       - name: Checkout base branch
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
-      
+
       - name: Build base version
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
@@ -65,7 +65,7 @@ jobs:
           echo "BASE_SIZE=$BASE_SIZE" >> $GITHUB_ENV
           du -ah out > base-size-details.txt
           head -50 base-size-details.txt
-      
+
       - name: Compare sizes and comment
         uses: actions/github-script@v7
         env:
@@ -75,35 +75,35 @@ jobs:
           script: |
             const prSize = process.env.PR_SIZE;
             const baseSize = process.env.BASE_SIZE;
-            
+
             const comment = `## 📦 Bundle Size Report
-            
+
             | Version | Size |
             |---------|------|
             | Base (${context.payload.pull_request.base.sha.substring(0, 7)}) | ${baseSize} |
             | PR (${context.payload.pull_request.head.sha.substring(0, 7)}) | ${prSize} |
-            
+
             > Note: This is the total packaged application size. Small increases are normal with new features.
-            
+
             <details>
             <summary>View size details</summary>
-            
+
             Run \`du -ah out\` locally to see detailed breakdown.
             </details>
             `;
-            
+
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && 
               comment.body.includes('Bundle Size Report')
             );
-            
+
             if (botComment) {
               // Update existing comment
               await github.rest.issues.updateComment({

@@ -11,7 +11,7 @@ permissions:
 jobs:
   label-issue:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Label issue based on content
         uses: actions/github-script@v7
@@ -21,9 +21,9 @@ jobs:
             const title = issue.title.toLowerCase();
             const body = (issue.body || '').toLowerCase();
             const content = `${title} ${body}`;
-            
+
             const labels = [];
-            
+
             // Bug detection
             if (
               content.includes('bug') || 
@@ -36,7 +36,7 @@ jobs:
             ) {
               labels.push('bug');
             }
-            
+
             // Feature request detection
             if (
               content.includes('feature') || 
@@ -47,7 +47,7 @@ jobs:
             ) {
               labels.push('enhancement');
             }
-            
+
             // Documentation detection
             if (
               content.includes('documentation') || 
@@ -57,7 +57,7 @@ jobs:
             ) {
               labels.push('documentation');
             }
-            
+
             // Question detection
             if (
               content.includes('question') || 
@@ -68,7 +68,7 @@ jobs:
             ) {
               labels.push('question');
             }
-            
+
             // Performance detection
             if (
               content.includes('performance') || 
@@ -78,7 +78,7 @@ jobs:
             ) {
               labels.push('performance');
             }
-            
+
             // Security detection
             if (
               content.includes('security') || 
@@ -88,7 +88,7 @@ jobs:
             ) {
               labels.push('security');
             }
-            
+
             // Platform-specific labels
             if (content.includes('windows')) {
               labels.push('windows');
@@ -102,7 +102,7 @@ jobs:
             if (content.includes('android')) {
               labels.push('android');
             }
-            
+
             // Component-specific labels
             if (
               content.includes('ui') || 
@@ -112,7 +112,7 @@ jobs:
             ) {
               labels.push('frontend');
             }
-            
+
             if (
               content.includes('api') || 
               content.includes('backend') || 
@@ -120,7 +120,7 @@ jobs:
             ) {
               labels.push('backend');
             }
-            
+
             if (
               content.includes('database') || 
               content.includes('sqlite') || 
@@ -128,7 +128,7 @@ jobs:
             ) {
               labels.push('database');
             }
-            
+
             if (
               content.includes('ai') || 
               content.includes('llm') || 
@@ -139,7 +139,7 @@ jobs:
             ) {
               labels.push('ai');
             }
-            
+
             // Add labels if any were detected
             if (labels.length > 0) {
               await github.rest.issues.addLabels({
@@ -152,7 +152,7 @@ jobs:
             } else {
               console.log('No automatic labels matched');
             }
-            
+
             // Add needs-triage label for all new issues
             await github.rest.issues.addLabels({
               owner: context.repo.owner,

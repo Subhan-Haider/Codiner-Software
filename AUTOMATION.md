@@ -17,8 +17,10 @@ This document describes all the automated workflows and processes in the Codiner
 ## Continuous Integration
 
 ### CI Workflow (`ci.yml`)
+
 **Trigger:** Push to main, Pull requests
 **Actions:**
+
 - Runs on Windows and macOS with 4 parallel shards
 - Presubmit checks (lint, format) - macOS only
 - TypeScript type checking - macOS only
@@ -27,16 +29,20 @@ This document describes all the automated workflows and processes in the Codiner
 - Merges test reports and uploads artifacts
 
 ### Build All Platforms (`build-all.yml`)
+
 **Trigger:** Push to main, Tagged releases, Manual
 **Actions:**
+
 - Builds for Windows, macOS, and Ubuntu
 - Creates distributable packages (.exe, .dmg, .deb, etc.)
 - Uploads build artifacts
 - Creates GitHub releases for tags
 
 ### Android Build (`android.yml`)
+
 **Trigger:** Push to main, Pull requests, Manual
 **Actions:**
+
 - Builds mobile web assets
 - Syncs with Capacitor
 - Builds Android APK
@@ -47,16 +53,20 @@ This document describes all the automated workflows and processes in the Codiner
 ## Release Automation
 
 ### Release Workflow (`release.yml`)
-**Trigger:** Git tags (v*)
+
+**Trigger:** Git tags (v\*)
 **Actions:**
+
 - Builds for all platforms and architectures
 - Signs and notarizes macOS builds
 - Creates GitHub release with all artifacts
 - Generates release notes
 
 ### Changelog Generation (`changelog.yml`) 🆕
+
 **Trigger:** Published releases, Manual
 **Actions:**
+
 - Automatically categorizes commits (features, fixes, docs, chores)
 - Updates CHANGELOG.md file
 - Enhances GitHub release notes
@@ -67,23 +77,29 @@ This document describes all the automated workflows and processes in the Codiner
 ## Dependency Management
 
 ### Dependabot (`dependabot.yml`)
+
 **Trigger:** Weekly schedule
 **Actions:**
+
 - Checks for npm package updates
 - Checks for GitHub Actions updates
 - Opens PRs for dependency updates (max 10 at a time)
 - Groups dependencies together
 
 ### Dependabot Auto-Merge (`dependabot-auto-merge.yml`) 🆕
+
 **Trigger:** Dependabot PRs opened/synchronized
 **Actions:**
+
 - Automatically approves patch and minor version updates
 - Enables auto-merge for safe updates
 - Major versions require manual review
 
 ### Auto-Update Check (`auto-update-check.yml`) 🆕
+
 **Trigger:** Weekly on Mondays, Manual
 **Actions:**
+
 - Scans for outdated packages
 - Categorizes updates by severity (critical, major, minor)
 - Creates/updates tracking issue with update summary
@@ -94,15 +110,19 @@ This document describes all the automated workflows and processes in the Codiner
 ## Security Automation
 
 ### CodeQL Analysis (`codeql.yml`)
+
 **Trigger:** Push to main, Pull requests, Weekly on Fridays
 **Actions:**
+
 - Scans JavaScript/TypeScript code for security vulnerabilities
 - Reports findings to GitHub Security tab
 - Helps prevent common security issues
 
 ### Security Audit (`security-audit.yml`) 🆕
+
 **Trigger:** Daily at 2 AM UTC, Dependency changes in PRs, Manual
 **Actions:**
+
 - Runs `npm audit` to find vulnerabilities
 - Comments on PRs with vulnerability details
 - Creates issues for critical/high severity vulnerabilities
@@ -113,8 +133,10 @@ This document describes all the automated workflows and processes in the Codiner
 ## PR Management
 
 ### PR Labeler (`labeler.yml`)
+
 **Trigger:** Pull requests opened/synchronized
 **Actions:**
+
 - Automatically labels PRs based on changed files:
   - `frontend` - src/renderer changes
   - `backend` - src/main, src/ipc changes
@@ -128,24 +150,30 @@ This document describes all the automated workflows and processes in the Codiner
   - `security` - Security-related changes
 
 ### PR Size Labeler (`pr-size-labeler.yml`) 🆕
+
 **Trigger:** Pull requests opened/synchronized/reopened
 **Actions:**
+
 - Calculates total lines changed
 - Adds size label (XS, S, M, L, XL)
 - Comments on very large PRs (1000+ lines)
 - Encourages breaking up large changes
 
 ### PR Title Linter (`pr-title-lint.yml`) 🆕
+
 **Trigger:** Pull requests opened/edited
 **Actions:**
+
 - Validates PR titles follow Conventional Commits format
 - Comments with guidance if title doesn't match
 - Removes comment when title is corrected
 - Helps maintain clean commit history
 
 ### PR Status Manager (`pr-status.yml`) 🆕
+
 **Trigger:** PR opened/ready for review, Reviews submitted
 **Actions:**
+
 - Manages status labels:
   - `work-in-progress` - Draft PRs
   - `needs-review` - Ready for review
@@ -154,29 +182,37 @@ This document describes all the automated workflows and processes in the Codiner
 - Automatically updates based on review state
 
 ### Merge Conflict Checker (`check-conflicts.yml`) 🆕
+
 **Trigger:** Pull requests opened/synchronized
 **Actions:**
+
 - Checks for merge conflicts
 - Adds `merge-conflict` label
 - Comments with resolution instructions
 - Removes label when conflicts are resolved
 
 ### Auto Assign Reviewers (`auto-assign-reviewers.yml`) 🆕
+
 **Trigger:** Pull requests opened/ready for review
 **Actions:**
+
 - Assigns reviewers based on changed files
 - Uses code ownership patterns
 - Skips bot PRs and already-assigned PRs
 
 ### Claude PR Review (`claude-pr-review.yml`)
+
 **Trigger:** Pull requests
 **Actions:**
+
 - AI-powered code review using Claude
 - Provides intelligent feedback on changes
 
 ### Playwright Comment (`playwright-comment.yml`)
+
 **Trigger:** CI workflow completion
 **Actions:**
+
 - Posts E2E test results as PR comment
 - Links to detailed HTML report
 - Shows pass/fail summary
@@ -186,15 +222,19 @@ This document describes all the automated workflows and processes in the Codiner
 ## Issue Management
 
 ### Issue Triage (`triage-issues.yml`)
+
 **Trigger:** New issues opened
 **Actions:**
+
 - AI-powered issue classification
 - Adds relevant labels
 - Routes to appropriate team members
 
 ### Auto Label Issues (`auto-label-issues.yml`) 🆕
+
 **Trigger:** New issues opened
 **Actions:**
+
 - Analyzes issue title and body
 - Automatically adds relevant labels:
   - `bug`, `enhancement`, `question`, `documentation`
@@ -204,39 +244,49 @@ This document describes all the automated workflows and processes in the Codiner
 - Adds `needs-triage` label to all new issues
 
 ### Duplicate Issue Detection (`duplicate-issues.yml`)
+
 **Trigger:** New issues opened
 **Actions:**
+
 - AI-powered duplicate detection using Claude
 - Comments on potential duplicates with confidence ratings
 - Helps reduce duplicate issues
 
 ### Stale Issues/PRs (`stale.yml`)
+
 **Trigger:** Daily at 1:30 AM UTC
 **Actions:**
+
 - Marks issues stale after 30 days of inactivity
 - Marks PRs stale after 45 days of inactivity
 - Closes stale items after additional waiting period
 - Helps maintain clean issue tracker
 
 ### Lock Resolved Issues (`lock-issues.yml`) 🆕
+
 **Trigger:** Daily at 3 AM UTC, Manual
 **Actions:**
+
 - Locks issues inactive for 60 days after closure
 - Locks PRs inactive for 60 days after closure
 - Prevents necroposting on resolved issues
 - Encourages opening new issues for related problems
 
 ### Auto Close Linked Issues (`auto-close-issues.yml`) 🆕
+
 **Trigger:** PRs merged
 **Actions:**
+
 - Detects issue references (fixes #123, closes #123, resolves #123)
 - Automatically closes linked issues
 - Adds comment linking to the PR
 - Keeps issue tracker up to date
 
 ### Welcome First-Time Contributors (`welcome.yml`) 🆕
+
 **Trigger:** First issue or PR from a user
 **Actions:**
+
 - Welcomes new contributors
 - Provides guidance on what to expect
 - Links to contribution guidelines
@@ -247,16 +297,20 @@ This document describes all the automated workflows and processes in the Codiner
 ## Quality Assurance
 
 ### Template Validation (`template-validation.yml`)
+
 **Trigger:** Changes to community-templates/
 **Actions:**
+
 - Validates template structure
 - Checks for required files
 - Verifies package.json syntax
 - Updates template count in README
 
 ### Performance Monitoring (`performance.yml`) 🆕
+
 **Trigger:** PRs with code changes, Push to main, Manual
 **Actions:**
+
 - Measures type checking time
 - Measures test execution time
 - Measures build time
@@ -265,16 +319,20 @@ This document describes all the automated workflows and processes in the Codiner
 - Saves metrics as artifacts for trending
 
 ### Bundle Size Check (`bundle-size.yml`) 🆕
+
 **Trigger:** PRs with code/config changes
 **Actions:**
+
 - Builds PR and base versions
 - Compares packaged application sizes
 - Comments size comparison on PR
 - Helps catch unexpected size increases
 
 ### Documentation Links (`check-links.yml`) 🆕
+
 **Trigger:** Weekly on Sundays, PRs with doc changes, Manual
 **Actions:**
+
 - Checks all markdown files for broken links
 - Comments on PRs with broken links
 - Creates issues for scheduled checks
@@ -285,8 +343,10 @@ This document describes all the automated workflows and processes in the Codiner
 ## Pre-commit Automation
 
 ### Husky Pre-commit Hook
+
 **Trigger:** Every git commit
 **Actions:**
+
 - Runs `lint-staged` on staged files
 - Lints changed JavaScript/TypeScript files with oxlint
 - Formats changed files with Prettier
@@ -338,9 +398,9 @@ const codeOwners = {
 Edit `.github/workflows/stale.yml`:
 
 ```yaml
-days-before-stale: 30        # Change issue stale threshold
-days-before-pr-stale: 45     # Change PR stale threshold
-days-before-close: 5         # Days before closing after stale
+days-before-stale: 30 # Change issue stale threshold
+days-before-pr-stale: 45 # Change PR stale threshold
+days-before-close: 5 # Days before closing after stale
 ```
 
 ### Adjusting PR Size Thresholds
@@ -349,9 +409,9 @@ Edit `.github/workflows/pr-size-labeler.yml`:
 
 ```javascript
 if (totalChanges < 10) {
-  sizeLabel = 'size/XS';
+  sizeLabel = "size/XS";
 } else if (totalChanges < 50) {
-  sizeLabel = 'size/S';
+  sizeLabel = "size/S";
 }
 // ... adjust as needed
 ```
@@ -361,9 +421,11 @@ if (totalChanges < 10) {
 ## Monitoring Automation
 
 ### View Workflow Runs
+
 Visit: `https://github.com/Subhan-Haider/Codiner-Software/actions`
 
 ### Check Scheduled Workflows
+
 - Security audits: Daily at 2 AM UTC
 - Update checks: Mondays at 9 AM UTC
 - Link checks: Sundays at 4 AM UTC
@@ -371,7 +433,9 @@ Visit: `https://github.com/Subhan-Haider/Codiner-Software/actions`
 - Lock issues: Daily at 3 AM UTC
 
 ### Workflow Artifacts
+
 Many workflows save artifacts for 30 days:
+
 - Performance metrics
 - Bundle size reports
 - Test reports
@@ -382,16 +446,19 @@ Many workflows save artifacts for 30 days:
 ## Troubleshooting
 
 ### Workflow Failing?
+
 1. Check the Actions tab for detailed logs
 2. Review the specific workflow file in `.github/workflows/`
 3. Ensure required secrets are configured (if applicable)
 
 ### Auto-merge Not Working?
+
 1. Verify branch protection rules allow auto-merge
 2. Check that required status checks are passing
 3. Ensure Dependabot has necessary permissions
 
 ### Labels Not Applying?
+
 1. Verify the label exists in repository settings
 2. Check the labeler configuration in `.github/labeler.yml`
 3. Review workflow permissions
@@ -418,4 +485,4 @@ When adding new workflows:
 
 ---
 
-*Last updated: 2026-02-19*
+_Last updated: 2026-02-19_

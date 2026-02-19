@@ -11,14 +11,14 @@ permissions:
 jobs:
   label-pr-size:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Check PR size and label
         uses: actions/github-script@v7
         with:
           script: |
             const pr = context.payload.pull_request;
-            
+
             // Get PR files
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
@@ -26,12 +26,12 @@ jobs:
               pull_number: pr.number,
               per_page: 100
             });
-            
+
             // Calculate total changes
             const totalChanges = files.reduce((sum, file) => 
               sum + file.additions + file.deletions, 0
             );
-            
+
             // Determine size label
             let sizeLabel = '';
             if (totalChanges < 10) {
@@ -45,16 +45,16 @@ jobs:
             } else {
               sizeLabel = 'size/XL';
             }
-            
+
             // Get current labels
             const currentLabels = pr.labels.map(label => label.name);
-            
+
             // Remove old size labels
             const sizeLabels = ['size/XS', 'size/S', 'size/M', 'size/L', 'size/XL'];
             const labelsToRemove = currentLabels.filter(label => 
               sizeLabels.includes(label) && label !== sizeLabel
             );
-            
+
             for (const label of labelsToRemove) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
@@ -65,7 +65,7 @@ jobs:
                 // Ignore errors if label doesn't exist
               });
             }
-            
+
             // Add new size label if not already present
             if (!currentLabels.includes(sizeLabel)) {
               await github.rest.issues.addLabels({
@@ -75,7 +75,7 @@ jobs:
                 labels: [sizeLabel]
               });
             }
-            
+
             // Add helpful comment on very large PRs
             if (totalChanges >= 1000) {
               const comment = `## 📏 Large Pull Request Detected
