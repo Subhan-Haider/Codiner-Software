@@ -303,7 +303,7 @@ export function generateDockerCompose(info: ProjectInfo): string {
       - "${info.port}:${info.port}"
     environment:
       - NODE_ENV=production
-      ${info.hasEnvFile ? "- DATABASE_URL=\${DATABASE_URL}" : ""}
+      ${info.hasEnvFile ? "- DATABASE_URL=${DATABASE_URL}" : ""}
     ${info.hasDatabase ? `depends_on:
       - ${info.databaseType}` : ""}
     restart: unless-stopped
