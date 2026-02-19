@@ -1,0 +1,151 @@
+name: Performance Monitoring
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'vite.*.config.mts'
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  performance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund --progress=false
+      
+      - name: Run type checking with timing
+        id: typecheck
+        run: |
+          START_TIME=$(date +%s)
+          npm run ts || echo "Type checking failed"
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "Type checking took ${DURATION}s"
+      
+      - name: Run tests with timing
+        id: tests
+        run: |
+          START_TIME=$(date +%s)
+          npm run test || echo "Tests failed"
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "Tests took ${DURATION}s"
+      
+      - name: Build with timing
+        id: build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: |
+          START_TIME=$(date +%s)
+          npm run package
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "Build took ${DURATION}s"
+          
+          # Calculate build output size
+          BUILD_SIZE=$(du -sh out 2>/dev/null | cut -f1 || echo "N/A")
+          echo "size=$BUILD_SIZE" >> $GITHUB_OUTPUT
+      
+      - name: Save performance metrics
+        run: |
+          mkdir -p performance-metrics
+          cat > performance-metrics/metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "typecheck_duration": ${{ steps.typecheck.outputs.duration }},
+            "test_duration": ${{ steps.tests.outputs.duration }},
+            "build_duration": ${{ steps.build.outputs.duration }},
+            "build_size": "${{ steps.build.outputs.size }}"
+          }
+          EOF
+          cat performance-metrics/metrics.json
+      
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: performance-metrics/
+          retention-days: 30
+      
+      - name: Comment performance results on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          TYPECHECK_TIME: ${{ steps.typecheck.outputs.duration }}
+          TEST_TIME: ${{ steps.tests.outputs.duration }}
+          BUILD_TIME: ${{ steps.build.outputs.duration }}
+          BUILD_SIZE: ${{ steps.build.outputs.size }}
+        with:
+          script: |
+            const comment = `## ⚡ Performance Metrics
+            
+            | Metric | Value |
+            |--------|-------|
+            | 🔍 Type Checking | ${process.env.TYPECHECK_TIME}s |
+            | 🧪 Unit Tests | ${process.env.TEST_TIME}s |
+            | 🏗️ Build Time | ${process.env.BUILD_TIME}s |
+            | 📦 Build Size | ${process.env.BUILD_SIZE} |
+            
+            <details>
+            <summary>About these metrics</summary>
+            
+            These metrics help track the performance impact of changes:
+            - **Type Checking**: Time to validate TypeScript types
+            - **Unit Tests**: Time to run all unit tests
+            - **Build Time**: Time to package the application
+            - **Build Size**: Total size of the packaged application
+            
+            Significant increases may indicate performance regressions.
+            </details>
+            `;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Performance Metrics')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
