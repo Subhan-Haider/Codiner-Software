@@ -26,4 +26,34 @@ documentation:
 # Add 'dependencies' label to any changes in lock files
 dependencies:
   - changed-files:
-    - any-glob-to-any-file: ['package-lock.json']
+    - any-glob-to-any-file: ['package-lock.json', 'package.json']
+
+# Add 'database' label to any changes in database files
+database:
+  - changed-files:
+    - any-glob-to-any-file: ['drizzle/**/*', 'src/db/**/*', '**/*.sql']
+
+# Add 'testing' label to any changes in test files
+testing:
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', 'e2e-tests/**/*', 'vitest.config.ts', 'playwright.config.ts']
+
+# Add 'configuration' label to any changes in config files
+configuration:
+  - changed-files:
+    - any-glob-to-any-file: ['*.config.*', '*.json', '.eslintrc.*', '.prettierrc*', 'tsconfig.*.json']
+
+# Add 'mobile' label to any changes in mobile/android
+mobile:
+  - changed-files:
+    - any-glob-to-any-file: ['android/**/*', 'capacitor.config.ts', '*.mobile.*']
+
+# Add 'templates' label to any changes in templates
+templates:
+  - changed-files:
+    - any-glob-to-any-file: ['community-templates/**/*', 'advanced-templates/**/*']
+
+# Add 'security' label to any changes in security-related files
+security:
+  - changed-files:
+    - any-glob-to-any-file: ['SECURITY.md', '.github/workflows/codeql.yml', '.github/workflows/security*.yml']

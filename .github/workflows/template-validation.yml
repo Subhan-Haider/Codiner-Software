@@ -2,13 +2,13 @@ name: Template Validation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'community-templates/**'
+      - "community-templates/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'community-templates/**'
+      - "community-templates/**"
 
 jobs:
   validate-templates:
@@ -16,72 +16,73 @@ jobs:
 
     strategy:
       matrix:
-        template: [
-          'react-official',
-          'nextjs-official',
-          'vue-ts-vite-tailwind',
-          'sveltekit-ts-tailwind',
-          'express-api-ts'
-        ]
+        template:
+          [
+            "react-official",
+            "nextjs-official",
+            "vue-ts-vite-tailwind",
+            "sveltekit-ts-tailwind",
+            "express-api-ts",
+          ]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
 
-    - name: Validate ${{ matrix.template }}
-      run: |
-        echo "🔍 Validating template: ${{ matrix.template }}"
-        cd community-templates/${{ matrix.template }}
+      - name: Validate ${{ matrix.template }}
+        run: |
+          echo "🔍 Validating template: ${{ matrix.template }}"
+          cd community-templates/${{ matrix.template }}
 
-        # Check if package.json exists
-        if [ ! -f "package.json" ]; then
-          echo "❌ package.json not found"
-          exit 1
-        fi
+          # Check if package.json exists
+          if [ ! -f "package.json" ]; then
+            echo "❌ package.json not found"
+            exit 1
+          fi
 
-        # Validate package.json syntax
-        if ! npm install --dry-run > /dev/null 2>&1; then
-          echo "❌ Invalid package.json"
-          exit 1
-        fi
+          # Validate package.json syntax
+          if ! npm install --dry-run > /dev/null 2>&1; then
+            echo "❌ Invalid package.json"
+            exit 1
+          fi
 
-        # Check if README.md exists
-        if [ ! -f "README.md" ]; then
-          echo "⚠️  README.md not found"
-        else
-          echo "✅ README.md found"
-        fi
+          # Check if README.md exists
+          if [ ! -f "README.md" ]; then
+            echo "⚠️  README.md not found"
+          else
+            echo "✅ README.md found"
+          fi
 
-        echo "✅ Template ${{ matrix.template }} validation passed"
+          echo "✅ Template ${{ matrix.template }} validation passed"
 
   update-readme:
     runs-on: ubuntu-latest
     needs: validate-templates
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Count templates
-      id: count
-      run: |
-        TEMPLATE_COUNT=$(find community-templates -maxdepth 1 -type d | wc -l)
-        TEMPLATE_COUNT=$((TEMPLATE_COUNT - 1)) # Subtract 1 for the directory itself
-        echo "count=$TEMPLATE_COUNT" >> $GITHUB_OUTPUT
+      - name: Count templates
+        id: count
+        run: |
+          TEMPLATE_COUNT=$(find community-templates -maxdepth 1 -type d | wc -l)
+          TEMPLATE_COUNT=$((TEMPLATE_COUNT - 1)) # Subtract 1 for the directory itself
+          echo "count=$TEMPLATE_COUNT" >> $GITHUB_OUTPUT
 
-    - name: Update template count in README
-      run: |
-        sed -i "s/badge\/templates-[0-9]*\+-/badge\/templates-${{ steps.count.outputs.count }}+/" README.md
+      - name: Update template count in README
+        run: |
+          sed -i "s/badge\/templates-[0-9]*\+-/badge\/templates-${{ steps.count.outputs.count }}+/" README.md
 
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add README.md
-        git diff --quiet && git diff --staged --quiet || git commit -m "Update template count to ${{ steps.count.outputs.count }}"
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update template count to ${{ steps.count.outputs.count }}"

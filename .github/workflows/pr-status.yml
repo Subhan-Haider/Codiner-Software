@@ -1,0 +1,97 @@
+name: PR Status Manager
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, review_requested]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  manage-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Manage PR status labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Get current labels
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number
+            });
+
+            const currentLabels = labels.map(l => l.name);
+
+            // Define status labels
+            const statusLabels = ['needs-review', 'changes-requested', 'approved', 'work-in-progress'];
+
+            // Remove all status labels first
+            for (const label of statusLabels) {
+              if (currentLabels.includes(label)) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  name: label
+                }).catch(() => {
+                  // Ignore if label doesn't exist
+                });
+              }
+            }
+
+            // Determine new status
+            let newLabel = null;
+
+            if (pr.draft) {
+              newLabel = 'work-in-progress';
+            } else if (context.eventName === 'pull_request_review') {
+              const review = context.payload.review;
+              if (review.state === 'changes_requested') {
+                newLabel = 'changes-requested';
+              } else if (review.state === 'approved') {
+                // Check if all reviews are approved
+                const { data: reviews } = await github.rest.pulls.listReviews({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number
+                });
+                
+                // Get the latest review from each reviewer
+                const latestReviews = {};
+                reviews.forEach(r => {
+                  latestReviews[r.user.login] = r.state;
+                });
+                
+                const hasChangesRequested = Object.values(latestReviews).includes('CHANGES_REQUESTED');
+                const hasApproval = Object.values(latestReviews).includes('APPROVED');
+                
+                if (hasChangesRequested) {
+                  newLabel = 'changes-requested';
+                } else if (hasApproval) {
+                  newLabel = 'approved';
+                } else {
+                  newLabel = 'needs-review';
+                }
+              }
+            } else if (context.payload.action === 'ready_for_review' || context.payload.action === 'opened') {
+              newLabel = 'needs-review';
+            }
+
+            // Add the appropriate label
+            if (newLabel) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: [newLabel]
+              });
+              console.log(`Added label: ${newLabel}`);
+            }

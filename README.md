@@ -5,13 +5,14 @@
 **The Free, Local-First, Open-Source AI Application Foundry**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/Subhan-Haider/Codiner-Software/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Subhan-Haider/Codiner-Software/actions/workflows/ci.yml)
 [![Electron](https://img.shields.io/badge/Electron-32.2.2-blue.svg?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green.svg?style=for-the-badge&logo=node.js)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
 *Build full-stack modern web applications in seconds using local AI, powerful templates, and real-time neural diagnostics.*
 
-[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🏙️ Liberty](https://github.com/Subhan-Haider/Codiner-Liberty)
+[🚀 Quick Start](#-quick-start) • [⚡ How it Works](#-how-it-works) • [🔒 Privacy](#-privacy--security-first) • [🏗️ Foundry](#-the-template-foundry) • [🧠 Pulse](#-neural-pulse-architecture) • [🤖 Automation](#-automation--cicd) • [🏙️ Liberty](https://github.com/Subhan-Haider/Codiner-Liberty)
 
 <img src="assets/promo-banner-new.svg" alt="Codiner Promo Banner" width="100%" style="border-radius: 10px; margin: 20px 0;" />
 
@@ -212,6 +213,23 @@ graph LR
     style Guard fill:#f0f7ff,stroke:#2563eb,stroke-width:2px
     style Final fill:#f0f7ff,stroke:#2563eb,stroke-width:2px
 ```
+
+---
+
+## 🤖 Automation & CI/CD
+
+Codiner uses extensive automation to ensure code quality and streamline development:
+
+- **🔄 Continuous Integration**: Automated testing on Windows and macOS with Playwright E2E tests
+- **📦 Dependency Management**: Automated updates with Dependabot and security audits
+- **🏷️ Smart PR Labeling**: Automatic categorization based on changed files and content
+- **🔒 Security Scanning**: CodeQL analysis and daily vulnerability audits
+- **📊 Performance Monitoring**: Track build times, test duration, and bundle sizes
+- **🎯 Quality Gates**: Pre-commit hooks, linting, and formatting checks
+- **📝 Changelog Generation**: Automated release notes and changelog updates
+- **👋 Contributor Management**: Welcome messages and first-time contributor support
+
+For complete automation details, see [AUTOMATION.md](AUTOMATION.md).
 
 ---
 
