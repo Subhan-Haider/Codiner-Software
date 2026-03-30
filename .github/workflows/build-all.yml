@@ -1,23 +1,23 @@
 name: Build All Platforms
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ main ]
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
-
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,11 +25,12 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install deps
-        run: npm install
+      - name: Install Dependencies
+        run: npm ci --no-audit --no-fund
 
-      - name: Build
+      - name: Build (make)
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -39,12 +40,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
-          path: out/make/
+          path: out/make/**/*
+          retention-days: 7
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
@@ -53,22 +54,22 @@ jobs:
         with:
           path: artifacts
 
-      - name: Prepare Assets
+      - name: Prepare Release Assets
         run: |
           mkdir release-assets
           # Windows
-          find artifacts/build-windows-latest -type f -name "*.exe" -exec cp {} release-assets/Codiner-Windows-Setup.exe \; || true
+          find artifacts/build-windows-latest -type f \( -name "*.exe" -o -name "*.msi" \) -exec cp {} release-assets/ \; || true
           # macOS
-          find artifacts/build-macos-latest -type f -name "*.dmg" -exec cp {} release-assets/Codiner-Mac-Universal.dmg \; || true
-          find artifacts/build-macos-latest -type f -name "*.zip" -exec cp {} release-assets/Codiner-Mac-Portable.zip \; || true
+          find artifacts/build-macos-latest -type f \( -name "*.dmg" -o -name "*.zip" \) -exec cp {} release-assets/ \; || true
           # Linux
-          find artifacts/build-ubuntu-latest -type f -name "*.deb" -exec cp {} release-assets/Codiner-Linux.deb \; || true
-          find artifacts/build-ubuntu-latest -type f -name "*.zip" -exec cp {} release-assets/Codiner-Linux-Portable.zip \; || true
+          find artifacts/build-ubuntu-latest -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.zip" \) -exec cp {} release-assets/ \; || true
+          echo "--- Release assets ---"
+          ls -lh release-assets/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Codiner Release ${{ github.ref_name }}"
+          name: "Codiner ${{ github.ref_name }}"
           files: release-assets/*
           draft: false
           prerelease: false

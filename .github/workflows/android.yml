@@ -1,11 +1,7 @@
 name: Build Android App
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch:  # Manual only — android/ native project must be initialized first
 
 permissions:
   contents: write
