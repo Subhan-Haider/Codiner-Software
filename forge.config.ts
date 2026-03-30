@@ -101,6 +101,18 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/graceful-fs")) {
     return false;
   }
+  if (file.startsWith("/node_modules/js-yaml")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/lazy-val")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/lodash.isequal")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/sax")) {
+    return false;
+  }
   if (file.startsWith("/node_modules/builder-util-runtime")) {
     return false;
   }
