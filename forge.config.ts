@@ -92,6 +92,15 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/fs-extra")) {
     return false;
   }
+  if (file.startsWith("/node_modules/universalify")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/jsonfile")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/graceful-fs")) {
+    return false;
+  }
   if (file.startsWith("/node_modules/builder-util-runtime")) {
     return false;
   }
