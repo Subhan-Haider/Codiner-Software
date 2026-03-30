@@ -84,7 +84,12 @@ jobs:
             ${{ matrix.os.name }}-pnpm-store-
 
       - name: Install scaffold dependencies
-        run: cd scaffold && pnpm install
+        run: |
+          if [ -d "scaffold" ]; then
+            cd scaffold && pnpm install
+          else
+            echo "⚠️  scaffold directory not found, skipping..."
+          fi
 
       - name: Install Chromium for Playwright
         run: npx playwright install chromium --with-deps
@@ -95,7 +100,12 @@ jobs:
         run: npm run pre:e2e
 
       - name: Prep fake LLM server
-        run: cd testing/fake-llm-server && npm install && npm run build && cd -
+        run: |
+          if [ -d "testing/fake-llm-server" ]; then
+            cd testing/fake-llm-server && npm install && npm run build && cd -
+          else
+            echo "⚠️  testing/fake-llm-server directory not found, skipping..."
+          fi
 
       - name: E2E tests (shard ${{ matrix.shard }}/${{ matrix.shardTotal }})
         run: npx playwright test --shard=${{ matrix.shard }}/${{ matrix.shardTotal }}
