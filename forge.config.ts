@@ -107,6 +107,12 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/semver")) {
     return false;
   }
+  if (file.startsWith("/node_modules/debug")) {
+    return false;
+  }
+  if (file.startsWith("/node_modules/ms")) {
+    return false;
+  }
   if (file.startsWith("/node_modules/electron-log")) {
     return false;
   }
