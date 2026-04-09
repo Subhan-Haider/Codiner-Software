@@ -42,7 +42,7 @@
     "tailwindcss-animate": "^1.0.7",
     "stripe": "^14.0.0",
     "@stripe/stripe-js": "^3.0.0",
-    "drizzle-orm": "^0.29.0",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.0",
     "@neondatabase/serverless": "^0.7.0",
     "zod": "^3.22.0",
