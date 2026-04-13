@@ -74,7 +74,7 @@ jobs:
           ls -lh release-assets/
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "Codiner v${{ steps.package-version.outputs.VERSION }}"
           tag_name: "v${{ steps.package-version.outputs.VERSION }}"
