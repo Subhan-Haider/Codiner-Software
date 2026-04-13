@@ -71,7 +71,7 @@ jobs:
           ls -lh release-assets/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "Codiner ${{ github.ref_name }}"
           files: release-assets/*
